@@ -1,5 +1,11 @@
 /* both works */
 
+h1 {
+    font-family: 'Acme', sans-serif;
+    font-size:8vh;
+    text-align: center;
+    color: rgb(1, 35, 78);
+}
 
 /* body {
     height: 100vh;
@@ -42,7 +48,7 @@ body {
     background-image: linear-gradient( 180deg, rgb(238, 168, 88) , white);
 }
 .outerBox{
-    position: relative;
+    position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%,-50%);
