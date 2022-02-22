@@ -1,4 +1,3 @@
-/* both works */
 
 h1 {
     font-family: 'Acme', sans-serif;
@@ -6,6 +5,9 @@ h1 {
     text-align: center;
     color: rgb(1, 35, 78);
 }
+
+/* both works : one uses flex box method for aligment 
+    another uses position-top/left-transform for alignment */
 
 /* body {
     height: 100vh;
