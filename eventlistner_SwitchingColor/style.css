@@ -1,0 +1,75 @@
+/* both works */
+
+
+/* body {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position:static;
+    background-image: linear-gradient( 180deg, rgb(238, 168, 88) , white);
+}
+.outerBox{
+    height: 40vh;
+    width: 40vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-image: radial-gradient(red, orange);
+
+}
+
+.middleBox{
+    height: 60%;
+    width: 60%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-image: radial-gradient(rgb(117, 110, 110), rgb(255, 253, 250));
+
+}
+
+.innerBox{
+    height: 60%;
+    width: 60%;
+    background-image: radial-gradient( rgb(72, 255, 0),rgb(0, 141, 47));
+
+} */
+
+body {
+    height: 100vh;
+    position:static;
+    background-image: linear-gradient( 180deg, rgb(238, 168, 88) , white);
+}
+.outerBox{
+    position: relative;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    height: 40vh;
+    width: 40vh;
+    background-image: radial-gradient(red, orange);
+
+}
+
+.middleBox{
+    height: 60%;
+    width: 60%;
+    position: relative;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    background-image: radial-gradient(rgb(117, 110, 110), rgb(255, 253, 250));
+
+}
+
+.innerBox{
+    height: 60%;
+    width: 60%;
+    position: relative;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    background-image: radial-gradient( rgb(72, 255, 0),rgb(0, 141, 47));
+
+}
