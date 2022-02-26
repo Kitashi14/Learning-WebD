@@ -8,8 +8,8 @@ body {
 #category{
     margin: auto;
     display: flex;
-    justify-content:space-evenly;
     flex-wrap: wrap;
+    justify-content: center;
     width: 90vw;
     padding: 2vw;
     border-radius: 30px;
@@ -39,3 +39,9 @@ body {
 
 }
 
+h1 {
+    font-family: 'Acme', sans-serif;
+    font-size:8vh;
+    text-align: center;
+    color: rgb(1, 35, 78);
+}
