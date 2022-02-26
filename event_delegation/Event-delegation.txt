@@ -5,3 +5,5 @@ It uses the event bubbling property of javascript.
 It helps in reducing the amount of code like eventlistner attached to each child elements.
     It usesd bubbling property to use only one
 eventlistner for all childs.
+
+In the example html file there is also an example of dataset. (IMPORTANT)

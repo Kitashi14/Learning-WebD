@@ -1,47 +1,57 @@
 body {
-    position:static;
-    background-image: linear-gradient(rgb(219, 149, 57), rgb(243, 231, 199));
-    background-attachment: fixed;
-    height: 100vh;
+  position: static;
+  background-image: linear-gradient(rgb(219, 149, 57), rgb(243, 231, 199));
+  background-attachment: fixed;
+  height: 100vh;
 }
 
-#category{
-    margin: auto;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    width: 90vw;
-    padding: 2vw;
-    border-radius: 30px;
-    border: 2px rgb(207, 72, 19) solid;
+#category {
+  margin: auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 90vw;
+  padding: 2vw;
+  border-radius: 30px;
+  border: 2px rgb(207, 72, 19) solid;
 }
 
-.item{
-    height: 40vh;
-    width: 30vh;
-    margin: 2vh;
-    background-image: linear-gradient( 90deg, rgb(182, 236, 169),rgb(140, 212, 111) );
-    border-radius: 30px;
-    border: 1px rgb(124, 206, 17) solid;
-    text-align: center;
-    line-height: 40vh;
-    font-family: 'Acme', sans-serif;
-    font-size: large;
-    color: rgb(0, 110, 255);    
+.item {
+  /* removing default list bullet-point style */
+  list-style: none;
+  height: 40vh;
+  width: 30vh;
+  margin: 2vh;
+  background-image: linear-gradient(
+    90deg,
+    rgb(182, 236, 169),
+    rgb(140, 212, 111)
+  );
+  border-radius: 30px;
+  border: 1px rgb(124, 206, 17) solid;
+  text-align: center;
+  line-height: 40vh;
+  font-family: "Acme", sans-serif;
+  font-size: large;
+  color: rgb(0, 110, 255);
 }
 
-.item:hover{
-    height: 42vh;
-    width: 32vh;
-    margin: 1vh;
-    cursor: pointer;
-    background-image: linear-gradient( 90deg, rgb(138, 243, 112),rgb(95, 214, 48) );
-
+.item:hover {
+  list-style: none;
+  height: 42vh;
+  width: 32vh;
+  margin: 1vh;
+  cursor: pointer;
+  background-image: linear-gradient(
+    90deg,
+    rgb(138, 243, 112),
+    rgb(95, 214, 48)
+  );
 }
 
 h1 {
-    font-family: 'Acme', sans-serif;
-    font-size:8vh;
-    text-align: center;
-    color: rgb(1, 35, 78);
+  font-family: "Acme", sans-serif;
+  font-size: 8vh;
+  text-align: center;
+  color: rgb(1, 35, 78);
 }
