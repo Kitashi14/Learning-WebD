@@ -80,3 +80,22 @@ button:focus{
     background-color: red;
 }
 
+.wave {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    overflow: hidden;
+    line-height: 0;
+}
+
+.wave svg {
+    position: relative;
+    display: block;
+    width: calc(104% + 1.3px);
+    height: 136px;
+}
+
+.wave .shape-fill {
+    fill: #271F1F;
+}
