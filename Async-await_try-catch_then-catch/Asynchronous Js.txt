@@ -1,0 +1,14 @@
+newword {
+    ECMAscripts
+    promises & mutationObserver
+    parsing
+    AST (Abstract Syntax Tree)
+    mark and sweep algorithm (used in garbage collector)
+    inlining 
+    copy elision
+    inline caching
+    cors
+    try/catch
+    then/catch
+    async/await
+}
