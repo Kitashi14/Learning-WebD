@@ -1,10 +1,17 @@
 const form = document.querySelector("#pdfForm");
 
+const input = document.querySelector("#pdfInput");
+
 const setUrl = async (file, fileName) => {
   const url = window.URL.createObjectURL(file);
   console.log(url);
   getDocument(url, fileName);
 };
+
+input.addEventListener("change", (e) => {
+
+  form.dispatchEvent(new Event("submit"));
+});
 
 form.addEventListener("submit", (e) => {
   e.preventDefault();
@@ -87,7 +94,8 @@ const showNextPage = () => {
 //Get Document
 
 const getDocument = (url, fileName) => {
-  if (url) {
+
+  try{
     document.querySelector(".heading").textContent = fileName;
     document.querySelector(".viewer").style.display = "contents";
     pdfjsLib.getDocument(url).promise.then((pdfDoc_) => {
@@ -100,7 +108,10 @@ const getDocument = (url, fileName) => {
 
       renderPage(pageNum);
     });
+  } catch(err){
+    console.log(err);
   }
+    
 };
 
 console.log("check 2");

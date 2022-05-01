@@ -18,6 +18,7 @@
 .logo{
     height: 10vh;
     width: 10vh;
+    margin-top: 0.5vh;
 
 
     background: url("./src/images/page_favicon.png");
@@ -53,6 +54,7 @@ header{
 }
 
 .title{
+    margin-top: -2vh;
     position:relative;
     font-family: 'Acme';
     font-style: normal;
