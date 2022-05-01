@@ -1,23 +1,47 @@
-import logo from './logo.svg';
-import './App.css';
+import { storage } from "./firebase";
+import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import { useState } from "react";
 
 function App() {
+  const [progress, setProgress] = useState(0);
+  const formhandler = (e) => {
+    e.preventDefault();
+    const file = e.target[0].files[0];
+    uploadFiles(file);
+  };
+
+  const uploadFiles = async (file) => {
+    if (!file) return;
+
+    try {
+      const storageRef = ref(storage, `/files/${file.name}`);
+
+      const uploadTask = uploadBytesResumable(storageRef, file);
+
+      console.log(uploadTask);
+
+      uploadTask.on("state_changed", (snapshot) => {
+        const prog = Math.round(
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+        );
+        setProgress(prog);
+      });
+
+      const url = await getDownloadURL(uploadTask.snapshot.ref);
+      console.log(url);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <form onSubmit={formhandler}>
+        <input type="file" className="input" required />
+        <button type="submit">Upload</button>
+      </form>
+      <hr />
+      <h1>Uploaded {progress} %</h1>
     </div>
   );
 }

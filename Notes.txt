@@ -1,6 +1,22 @@
 NEW KEYWORDS {
 
+    SOP {
+        same origin policy;
+        it allows scripts running on pages originating from the ‘same site’ to access each other’s DOM with no specific restrictions, but prevents access to the DOM on different sites;
 
+    }
+
+    blob {
+
+        A blob object is simply a collection of bytes that contains data stored in a file.
+    }
+    createObjectURL {
+        
+        static method creates a string containing a URL representing the object given in the parameter.
+
+        The URL lifetime is tied to the document in the window on which it was created. The new object URL represents the specified File object or Blob object.
+
+    }
 };
 
 
@@ -35,4 +51,9 @@ accessing local files through browser {
         This spins up a Node.js httpd which serves the files in your directory as static files accessible from http://localhost:8080
     }
 
+}
+
+cdnjs{
+
+    using this site to get different cdn links for different libraries and modules;
 }
