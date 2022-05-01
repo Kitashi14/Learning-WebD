@@ -10,24 +10,40 @@
       src="https://kit.fontawesome.com/af3ac35db7.js"
       crossorigin="anonymous"
     ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"
+      integrity="sha512-Qlv6VSKh1gDKGoJbnyA5RMXYcvnpIqhO++MhIM2fStMcGT9i2T//tSwYFlcyoRRDcDZ+TYHpH8azBBCyhpSeqw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
     <link rel="shortcut icon" href="./src/images/page_favicon.png" />
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
-    <div class="top-bar">
-      <button class="btn" id="prev-page">
-        <i class="fas fa-arrow-circle-left"></i> Prev Page
-      </button>
-      <button class="btn" id="next-page">
-        Next Page <i class="fas fa-arrow-circle-right"></i>
-      </button>
-      <span class="page-info">
-        Page <span id="page-num"></span> of <span id="page-count"></span>
-      </span>
+    <div class="formCard">
+      <form id="pdfForm">
+        <input type="file" required accept=".pdf"  />
+        <button type="submit">Open</button>
+      </form>
     </div>
+    <h1 class="heading">Choose a PDF</h1>
+    <hr />
+    <div class="viewer">
+      <div class="top-bar">
+        <button class="btn" id="prev-page">
+          <i class="fas fa-arrow-circle-left"></i> Prev Page
+        </button>
+        <button class="btn" id="next-page">
+          Next Page <i class="fas fa-arrow-circle-right"></i>
+        </button>
+        <span class="page-info">
+          Page <span id="page-num"></span> of <span id="page-count"></span>
+        </span>
+      </div>
 
-    <div style="display: flex; justify-content: center; align-items: center">
-      <canvas id="pdf-render"></canvas>
+      <div style="display: flex; justify-content: center; align-items: center">
+        <canvas id="pdf-render"></canvas>
+      </div>
     </div>
 
     <!-- Rememeber prepending indexing without dot in src only works with live server, not when you locally run a html file. For more refer to main folder notes -->

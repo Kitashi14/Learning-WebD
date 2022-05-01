@@ -1,4 +1,20 @@
-const url = "./../docs/pdf.pdf";
+const form = document.querySelector("#pdfForm");
+
+const setUrl = async (file, fileName) => {
+  const url = window.URL.createObjectURL(file);
+  console.log(url);
+  getDocument(url, fileName);
+};
+
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const file = e.target[0].files[0];
+  const fileName = file.name;
+  console.log(typeof fileName, fileName);
+  setUrl(file, fileName);
+});
+
+// const url = "./../docs/pdf.pdf";
 
 let pdfDoc = null,
   pageNum = 1;
@@ -69,16 +85,23 @@ const showNextPage = () => {
 };
 
 //Get Document
-pdfjsLib.getDocument(url).promise.then((pdfDoc_) => {
-  console.log(url);
-  console.log("check 1");
-  pdfDoc = pdfDoc_;
-  console.log(pdfDoc);
 
-  document.querySelector("#page-count").textContent = pdfDoc.numPages;
+const getDocument = (url, fileName) => {
+  if (url) {
+    document.querySelector(".heading").textContent = fileName;
+    document.querySelector(".viewer").style.display = "contents";
+    pdfjsLib.getDocument(url).promise.then((pdfDoc_) => {
+      console.log(url);
+      console.log("check 1");
+      pdfDoc = pdfDoc_;
+      console.log(pdfDoc);
 
-  renderPage(pageNum);
-});
+      document.querySelector("#page-count").textContent = pdfDoc.numPages;
+
+      renderPage(pageNum);
+    });
+  }
+};
 
 console.log("check 2");
 
