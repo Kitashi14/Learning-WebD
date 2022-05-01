@@ -1,0 +1,38 @@
+NEW KEYWORDS {
+
+
+};
+
+
+In src attribute of any element{
+
+    when using prepending slash without dot "/location"{
+
+        it will start fetching from root dir when html file opened locally on the browser.
+        it will start fetching from current dir when html file opened through a server. 
+    } 
+
+    when using prepending slash with= dot "./location"{
+
+        it will always start fetching from current dir.
+    }
+
+    reference link : https://css-tricks.com/quick-reminder-about-file-paths/
+
+}
+
+accessing local files through browser {
+
+    "Cross origin requests are only supported for HTTP"
+
+    when opening a html file locally in browser it will not allow access to local files;
+    open it using http-server to allow the access {
+
+        1. Install http-server by typing "npm install -g http-server"
+        2. Change into your working directory, where your "some.html" lives
+        3. Start your http server by issuing http-server -c-1
+
+        This spins up a Node.js httpd which serves the files in your directory as static files accessible from http://localhost:8080
+    }
+
+}
