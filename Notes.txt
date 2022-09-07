@@ -1,8 +1,14 @@
+// ALSO CHECK {
+
+    desktop/WebD/H36/notes.txt
+    desktop/WebD/React march/notes.txt
+}
+
 NEW KEYWORDS {
 
     SOP {
         same origin policy;
-        it allows scripts running on pages originating from the ‘same site’ to access each other’s DOM with no specific restrictions, but prevents access to the DOM on different sites;
+        it allows scripts running on pages originating from the  'same site' to access each other's DOM with no specific restrictions, but prevents access to the DOM on different sites;
 
     }
 
@@ -14,11 +20,39 @@ NEW KEYWORDS {
         
         static method creates a string containing a URL representing the object given in the parameter.
 
-        The URL lifetime is tied to the document in the window on which it was created. The new object URL represents the specified File object or Blob object.
+        The URL lifetime is tied to the document in the window on which it was created. The new object URL represents the 	specified File object or Blob object.
 
+    }
+
+    UML {
+
+        Unified modelling language;
+        a graphical modelling language in software engineering;
+        use case diagram is one of it;
     }
 };
 
+fetch api{
+
+    its an api used for sending http requests;
+    it supports both http and https protocol;
+
+    its a replacement for XMLHttpRequest(XHR) api which was used in AJAX;
+    fetch api uses promises for simplicity unlike XHR in which we have to use callback functions;
+}
+
+AJAX{
+
+    Asynchrounous Javascript and XML;   
+    not a programming language;
+
+    its a method used to update/change a part of the webpage without reloading the whole web page;
+    it exchange data from the web server bts and change the part of the webpage;
+
+    uses combination of: 
+        built-in XMLHttpRequest object;
+        Javascript and DOM module;
+}
 
 In src attribute of any element{
 
@@ -57,3 +91,67 @@ cdnjs{
 
     using this site to get different cdn links for different libraries and modules;
 }
+
+
+
+------------------------------------------------------------------------
+
+USE CASE DIAGRAM (USD){
+    
+    a part of UML;
+    4 elements of USD {
+
+        system{
+
+            it includes the use cases and the relationship between the use case and the actors;
+        }
+
+        actors{
+
+            they are outside of the system who interacts with the system;
+        }
+
+        use case{
+
+            these includes the different cases present in the system;
+
+            specialized use cases;
+            included use cases;
+            extend use cases;
+
+            extension points in use cases ==> creates extend use cases;
+
+        }
+
+        relationship {
+
+            types {
+
+                accociations{
+
+                    straight line between the actor and the base use case;
+                }
+                include{
+
+                    shows dependecies between the base use case and the included use case;
+
+                    happens everytime the base use case is executed;
+
+                    using dashed line pointing towards the included use case;
+                }
+                extend{
+
+                    happens sometime when base use case is executed;
+
+                    happens sometimes only;
+
+                    using dashed line pointing towards the base use case;
+                }
+                generalization;
+            }
+        }
+    }
+
+}
+
+--------------------------------------------------------------
