@@ -50,14 +50,14 @@
 //A-3 start -------------------------->
 // using fetch
 
-console.log("start");
+// console.log("start");
 
-fetch("https://jsonplaceholder.typicode.com/users")
-  .then((response) => response.json())
-  .then((data) => console.log(data))
-  .catch((err) => {
-    console.error(err);
-  });
+// fetch("https://jsonplaceholder.typicode.com/users")
+//   .then((response) => response.json())
+//   .then((data) => console.log(data))
+//   .catch((err) => {
+//     console.error(err);
+//   });
 
 // break
 
@@ -70,13 +70,19 @@ fetch("https://jsonplaceholder.typicode.com/users")
 
 //break
 
-// const f = async () => {
-//   const res = await fetch("https://jsonplaceholder.typicode.com/users");
-//   data = await res.json();
-//   console.log(data);
-// };
+const f = async () => {
+  const res = await fetch("http://localhost:4444/apiCall");
+  data = await res.json();
+  console.log(data);
+  return;
+};
 
-// f();
+const fun = async ()=>{
+  await f();
+  console.log("end");
+};
+
+fun();
 
 //break
 
@@ -90,5 +96,5 @@ fetch("https://jsonplaceholder.typicode.com/users")
 
 // f();
 
-console.log("end");
+// console.log("end");
 //A-3 end ---------------------------->
