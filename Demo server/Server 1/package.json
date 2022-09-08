@@ -1,0 +1,15 @@
+{
+  "name": "demo-server",
+  "version": "1.0.0",
+  "description": "node server for demo/test purpose",
+  "main": "server.js",
+  "scripts": {
+    "test": "nodemon server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.1",
+    "request": "^2.88.2"
+  }
+}
