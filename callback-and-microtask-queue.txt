@@ -1,0 +1,56 @@
+newword {
+    ECMAscripts
+    promises & mutationObserver
+    parsing
+    AST (Abstract Syntax Tree)
+    mark and sweep algorithm (used in garbage collector)
+    inlining 
+    copy elision
+    inline caching
+    cors
+    try/catch
+    then/catch
+    async/await
+}
+
+
+NEW KEYWORDS {
+
+    call stack;
+    global execution context (GEC);
+    function invocation;
+    JS Engine;
+
+    Web APi's {
+        these r not part of javaScript;
+
+        setTimeout();
+        DOM API's;
+        fetch();
+        local storage;
+        console;
+        location;
+    };
+
+    callback queue /task queue;
+    event loop;
+
+    microtask queue{
+
+        all the callback which comes from promises and mutationObserver will go to this;
+    }
+
+    starvation of callback queue;
+}
+
+Browser as a super power {
+    has everthing;
+    local storage;
+    timer;
+    access to various software and hardware;
+}
+
+
+
+call back queue has lesser priority than the microtask queue;
+callback queue and microtask queue are executed at the last when call stack is empty;

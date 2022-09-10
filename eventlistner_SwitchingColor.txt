@@ -1,0 +1,15 @@
+Event Bubbling and capturing are 2 ways of propagation in DOM TREE.
+
+Bubbling ={
+    it is the default case.
+    in this the propagation happens from child to parent
+}
+
+capturing = {
+    it is needed to be set to happen.
+    in this the propagation happens from the parent to child.
+    if all events are not set to capture mode in a 
+    nested tree then those set as capture will be executed first in the order of last generation to first generation
+}
+
+example code in eventlistner_SwitchingColor
