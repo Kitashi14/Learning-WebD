@@ -13,4 +13,7 @@ callback/promise{
             while using callback method we had to handle promise rejection err;
             while using promise method we had to provide a fake callback function to match the no. of arguments of the main function;
     }
+
+    we can make a callback support function to return a promise;
+    and a promise returning function to make a callback supporting function;
 }
