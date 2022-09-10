@@ -1,0 +1,16 @@
+callback{
+
+    while making a function to support callback one can use multiple parameters for callback;
+    but while using the function its not required match the numbers of arguments/parameters for the callback;
+    but had to match the num of parameters for main function;
+}
+
+callback/promise{
+
+    function are not made to support both callback and promise as they are not compatible with each other;
+    if made function to support both callback and promise then{
+
+            while using callback method we had to handle promise rejection err;
+            while using promise method we had to provide a fake callback function to match the no. of arguments of the main function;
+    }
+}
