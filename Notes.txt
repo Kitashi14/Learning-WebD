@@ -32,6 +32,82 @@ NEW KEYWORDS {
     }
 };
 
+HTML{
+
+    HyperText MarkUP language;
+    its the standard markup language for document designed to be displayed in a web browsers;
+
+    its standard is maintained and developed by WHATWG (Web Hypertext Application Technology Working Group);
+}
+
+Javascript{
+
+    javascript is a scripting language;
+    it uses an interpreter for converting high-level language into machine codes;
+
+    Javascript is the language used in WWW and by all browsers;
+    all different browsers have different JS engines for interpretting JS codes;
+    the core architecture Javascript is based on different version of ECMAScript(ES);
+
+    eg. JS ES1, ES5, ES6(supported by most browsers);
+}
+
+scripting vs programming language{
+
+    scripting language uses a interpreter(in a run-time environment) while programming language uses compiler;
+
+    for a scripting language there is no need to make an executable file unlike programming language;
+
+    a scripting language is a programming language(in the sense that it is also used to write programmes only);
+    a scripting language doesn't generally compiles the code rather interpret it;
+    a programming language compiles the whole code;
+
+    in scripting language interpreter is used which reads the code line by line;
+
+    in modern world differnce between the two is becoming blur with advancement of technology;
+
+    we can make an environment to compile a scripting language(making it a non-scripting language);
+    eg. google chrome V8 engine for JS;
+
+    we can also make an run-time environment to interpret a programming language (making it a scripting language);
+
+    eg. for scripting language : JS, python, php;
+    for programming language : c, cpp,
+}
+
+JS engines {
+
+    for running javascript we need an environment, these environment are found_in/called JS engine;
+    there are different version of javascript and these are to be supported by js engine for javascript to run correctly;
+
+    every browser have a JS engine in it;
+    eg. chakra (edge), v8 (chrome), spider monkey (firefox);
+
+    NOTE: most engine have interpreter designed to interpret the js but V8 compiles the js;
+}
+
+ECMAScript {
+
+    European Computer Manufacturers Association Script;
+
+    its a standard used for implementation of different scripting languages;
+    JS uses this standard;
+    it help to ensure that different browsers are interoperatable with each other as browsers use JS;
+
+    almost every every this standard is updated adding new features for the language;
+    different versions of ECMAScript: ES1, ES2, ES3, ES6, ES7;
+    https://www.w3schools.com/js/js_versions.asp
+
+}
+
+windows_object & Web APIs{
+
+    in browser there are many APIs used that are not part of javascript or say ECMAScript;
+    eg. DOM object, fetch, setTimer, XHR, etc;
+
+    these are part of the Web platform API defined by the standards of  WHATWG and W3C (World Wide Web Consortium);
+}
+
 fetch api{
 
     its an api used for sending http requests;
@@ -82,7 +158,7 @@ accessing local files through browser {
         2. Change into your working directory, where your "some.html" lives
         3. Start your http server by issuing http-server -c-1
 
-        This spins up a Node.js httpd which serves the files in your directory as static files accessible from http://localhost:8080
+        This spins up a Node.js http which serves the files in your directory as static files accessible from http://localhost:8080
     }
 
 }
