@@ -59,32 +59,40 @@
 //     console.error(err);
 //   });
 
+//   console.log("here");
+
 // break
 
+// console.log("start");
 // const res = fetch("https://jsonplaceholder.typicode.com/users")
 //   .then((response) => response.json())
 //   .then((data) => console.log(data))
 //   .catch((err) => console.log(err));
 
 // console.log(res);
+// console.log("here");
 
 //break
 
+console.log("start");
+
 const f = async () => {
-  const res = await fetch("http://localhost:4444/apiCall");
+  const res = await fetch("http://localhost:4002/apiCall");
   data = await res.json();
   console.log(data);
   return;
 };
 
-const fun = async ()=>{
+const fun = async () => {
   await f();
-  console.log("end");
+  console.log("here");
 };
 
 fun();
 
 //break
+
+// console.log("start");
 
 // const f = async () => {
 //   console.log("Fake Start");

@@ -2,26 +2,34 @@ const form = document.querySelector("#pdfForm");
 
 const input = document.querySelector("#pdfInput");
 
-const setUrl = async (file, fileName) => {
+const setUrl = (file, fileName) => {
   const url = window.URL.createObjectURL(file);
-  console.log(url);
+  // console.log(url);
   getDocument(url, fileName);
 };
 
 input.addEventListener("change", (e) => {
 
-  form.dispatchEvent(new Event("submit"));
-});
+  // form.dispatchEvent(new Event("submit"));
 
-form.addEventListener("submit", (e) => {
-  e.preventDefault();
-  const file = e.target[0].files[0];
+  const file = e.target.files[0];
+  console.log(e.target);
+  console.log(e.target.files);
+  console.log(file);
   const fileName = file.name;
-  console.log(typeof fileName, fileName);
   setUrl(file, fileName);
-});
+}); 
 
-// const url = "./../docs/pdf.pdf";
+// form.addEventListener("submit", (e) => {
+//   e.preventDefault();
+//   const file = e.target[0].files[0];
+//   console.log(e.target);
+//   console.log(file);
+//   const fileName = file.name;
+//   setUrl(file, fileName);
+// });
+
+const url = "./../docs/pdf.pdf";
 
 let pdfDoc = null,
   pageNum = 1;
@@ -53,7 +61,7 @@ const renderPage = (num) => {
 
       if (pageNumIsPending !== null) {
         renderPage(pageNumIsPending);
-        console.log("check 5");
+        // console.log("check 5");
         pageNumIsPending = null;
       }
     });
@@ -83,7 +91,7 @@ const showPrevPage = () => {
 
 // show next page
 const showNextPage = () => {
-  console.log("check 4");
+  // console.log("check 4");
   if (pageNum >= pdfDoc.numPages) {
     return;
   }
@@ -99,8 +107,8 @@ const getDocument = (url, fileName) => {
     document.querySelector(".heading").textContent = fileName;
     document.querySelector(".viewer").style.display = "contents";
     pdfjsLib.getDocument(url).promise.then((pdfDoc_) => {
-      console.log(url);
-      console.log("check 1");
+      // console.log(url);
+      // console.log("check 1");
       pdfDoc = pdfDoc_;
       console.log(pdfDoc);
 
@@ -114,10 +122,10 @@ const getDocument = (url, fileName) => {
     
 };
 
-console.log("check 2");
+// console.log("check 2");
 
 // Button Events
 document.querySelector("#prev-page").addEventListener("click", showPrevPage);
 document.querySelector("#next-page").addEventListener("click", showNextPage);
 
-console.log("check 3");
+// console.log("check 3");

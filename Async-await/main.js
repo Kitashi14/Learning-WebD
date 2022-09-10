@@ -92,7 +92,7 @@ const first = () => {
   return "One";
 };
 
-const second = () => {
+const second =() => {
   return new Promise((res, err) => {
     setTimeout(() => {
       res("Two");
