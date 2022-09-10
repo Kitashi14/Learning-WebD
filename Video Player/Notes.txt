@@ -1,0 +1,9 @@
+HTML5 is the version used in browsers;
+
+it doesn't supports mkv video files (neither does its previous versions);
+
+But chrome does supports some mkv video files and so does Brave;
+use type="video/mp4" for .mkv files too;
+
+remember that when using live server or any server u won't to able to access root dir(not allowed to access local files);
+for playing files either copy it in src folder or open the html file locally;

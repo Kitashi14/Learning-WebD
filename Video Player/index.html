@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Video Player</title>
+    <link rel="shorcut icon" href="./src/page_favicon.png" />
+  </head>
+  <body>
+    <div class="main_container">
+      <input id="videoInput" type="file" accept="video/*,video/x-matroska" />
+
+      <video id="videoSrc" width="1510px" height="650px" type="video/mp4" controls>
+      </video>
+    </div>
+
+    <script>
+      const input = document.querySelector("#videoInput");
+      const video = document.querySelector("#videoSrc");
+
+      const setVideoSrc = (url) => {
+        video.src = url;
+      };
+      const setUrl = (file) => {
+        const url = window.URL.createObjectURL(file);
+        console.log(url);
+        setVideoSrc(url);
+      };
+      input.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        // console.log(file);
+        console.log(file.name);
+        setUrl(file);
+      });
+    </script>
+  </body>
+</html>
