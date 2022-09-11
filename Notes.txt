@@ -19,8 +19,7 @@ NEW KEYWORDS {
     createObjectURL {
         
         static method creates a string containing a URL representing the object given in the parameter.
-
-        The URL lifetime is tied to the document in the window on which it was created. The new object URL represents the 	specified File object or Blob object.
+        The URL lifetime is tied to the document in the window on which it was created. The new object URL represents the specified File object or Blob object.
 
     }
 
@@ -128,6 +127,25 @@ AJAX{
     uses combination of: 
         built-in XMLHttpRequest object;
         Javascript and DOM module;
+}
+
+json{
+
+    its a standard for formatting document and used to communicate;
+    beside json xml format was used;
+
+    JSON.stringify(object);  //to convert a js object to json object
+    JSON.parse(jsonFile);   //to convert a json object to js object
+    jsonFile.json();        //to convert a json object to js object 
+}
+
+.json() vs JSON.parse(){
+
+    Body.json() is asynchronous and returns a Promise object that resolves to a JavaScript object;
+    JSON.parse() is synchronous can parse a string and change the resulting returned JavaScript object;
+
+    use .json() with promise returning function like fetch;
+    use JSON.parse() with callback supporting function like request, AJAX;
 }
 
 In src attribute of any element{
