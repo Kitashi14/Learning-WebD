@@ -9,7 +9,7 @@ request(`${url}/apiCall`, (err, res, body) => {
   console.log("sending get request with default method.....");
   if (err) console.log(err);
   else {
-    console.log(res.statusCode, res.statusMessage);
+    console.log(res.statusCode, res.statusMessage,"\n");
     if (res.statusCode < 205) {
       data = JSON.parse(body);
       console.log(data.response);
@@ -30,7 +30,7 @@ request(options, (err, res, body) => {
   console.log("\nsending get request with options method.....");
   if (err) console.log(err);
   else {
-    console.log(res.statusCode, res.statusMessage);
+    console.log(res.statusCode, res.statusMessage,"\n");
     if (res.statusCode < 205) {
       data = JSON.parse(body);
       console.log(data.response);
@@ -50,7 +50,7 @@ request.get(options, (err, res, body) => {
   console.log("\nsending get request with .get method.....");
   if (err) console.log(err);
   else {
-    console.log(res.statusCode, res.statusMessage);
+    console.log(res.statusCode, res.statusMessage,"\n");
     if (res.statusCode < 205) {
       data = JSON.parse(body);
       console.log(data.response);
@@ -64,7 +64,7 @@ request(`${url}/apiParamsCall/Keshav/16`, (err, res, body) => {
   console.log("\nsending get request with params.....");
   if (err) console.log(err);
   else {
-    console.log(res.statusCode, res.statusMessage);
+    console.log(res.statusCode, res.statusMessage,"\n");
     if (res.statusCode < 205) {
       data = JSON.parse(body);
       console.log(data.response);
@@ -81,7 +81,7 @@ let data = {
 };
 options = {
   url: `${url}/apiPostCall`,
-  form: data,
+  form: data
 };
 // options = {
 //   url: `${url}/apiPostCall`,
@@ -92,7 +92,7 @@ request.post(options, (err, res, body) => {
   console.log("\nsending post request with .post method.....");
   if (err) console.log(err);
   else {
-    console.log(res.statusCode, res.statusMessage);
+    console.log(res.statusCode, res.statusMessage,"\n");
     if (res.statusCode < 205) {
       data = JSON.parse(body);
       console.log(data.response);
