@@ -1,0 +1,80 @@
+NEW KEYWORDS{
+
+    ORM{
+        object relational mapping;
+
+        we generally use ORM tools to write sql codes in oops format;
+        we don't usually write raw sql codes;
+
+        eg. sequelize for javascript, sqlAlchemy for python, etc.
+    }
+}
+
+NOTES{
+
+    can use drawsql.app for making chart;
+}
+
+MySQL{
+
+    about{
+
+        relational database;
+        structured query language;
+        it helps in performing different operations on the relational data present in database;
+
+        sequel database;
+        requires a Schema which have proper rules defined for its data;
+        scaled vertically;
+        writing data is easy while fetching will take some time;
+
+        good for database with many relationships like shopping Carts, Contacts, Networks;
+
+        no duplicate data is present (bad practice) unlike in NoSQL databases;
+    }
+
+    authentication{
+
+        mysql v8 (the version installed in my pc) supports multiple authentication methods for accessing the db;
+        by default caching_sha2_password method is used in v8 (due to this sudden change many previous modules and tools are having problem in connecting to db);
+        earlier mysql_native_password was used (for f*cking 24 years);
+
+        //for changing the authentication method to previous on
+        //code in mysql interface
+        ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '<password>'; 
+    }
+    
+    Datatypes{
+
+        a coloumn of variable data have a datatype defined for it;
+        eg. int, float, varchar, text, datatime, etc.;
+    }
+    
+    Constraint{
+
+        a coloumn may have constraint defined for their data;
+        eg. unique, not null, primary key, enum, etc. 
+    }
+
+    other keywords{
+
+        create, table, select, where, etc;
+    }
+
+    codes{
+
+        //command line
+        mysql --version
+        mysql -u <username> -p      //then enter your password to access mysql cmd line interface
+
+        //inside mysql comand line interface
+        show databases;                     //using colon at the end is must
+        create database <db name>;
+        use <db name>;
+        show tables;
+        -- <comment>;    // we can use '-- ' to write comments in sql;
+
+
+    }
+}
+
