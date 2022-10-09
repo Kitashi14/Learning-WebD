@@ -54,26 +54,92 @@ MySQL{
 
         a coloumn may have constraint defined for their data;
         eg. unique, not null, primary key, enum, etc. 
+
+        VARCHAR(<max. number of characters to be used (max 255)>)        //when using varchar daty type we need to specify this
     }
 
     other keywords{
 
-        create, table, select, where, etc;
+        by convention we write keywords in UPPER CASE but its not compulsary;
+        eg. create, table, select, where, etc;
+        AUTO_INCREMENT -> used with id generally to automatically increment and give id no. to id field;
     }
 
     codes{
 
         //command line
+
         mysql --version
         mysql -u <username> -p      //then enter your password to access mysql cmd line interface
 
-        //inside mysql comand line interface
+
+
+
+        //inside mysql command line interface
+        //these are called statements
+
         show databases;                     //using colon at the end is must
         create database <db name>;
         use <db name>;
         show tables;
         -- <comment>;    // we can use '-- ' to write comments in sql;
 
+        CREATE TABLE <tabel name>(<variable1 name> <variable1 data type> <constraint11> <constraint1N>, <variableN> <variableN data type> <constraitN1> <constraintNN>);            //creating table with its schema
+
+        INSERT INTO <table name>(<varialbes to be inserted seperated by comma>) VALUES (<data seperated by comma and in the order variables was written previously in this command>);       //inserts one row of data in table 
+
+        SELECT * FROM <table name>;         //for reading all the data of a table
+
+        eg.
+        //for creating a table
+        CREATE TABLE Users(id INT PRIMARY KEY AUTO_INCREMENT, email VARCHAR(255) NOT NULL UNIQUE,bio TEXT, country VARCHAR(2));
+
+        //for inserting one row of data in table 
+        INSERT INTO Users (email, bio, country) VALUES ('abc@gmail.com', 'demo data', 'IN');
+
+        //for inserting multiple row of data in one go
+        INSERT INTO Users (email, bio, country) VALUES ('abcd@gmail.com', 'demo data2', 'IN'),('abcde@gmail.com', 'demo data3', 'IN'); 
+
+        //for reading data of the table
+        SELECT * FROM Users;
+
+        //see further examples in .sql file
+
+        
+
+
+        //inside vscode client to write with proper format
+        //we can write these object like statements in one line in mysql command line interface 
+        
+        
+        -- @block       // this helps in creating a block of code that can be run seperately (its a property of vscode client(sql tools) no mysql)
+
+        eg.
+        CREATE TABLE Users(
+            id INT PRIMARY KEY AUTO_INCREMENT, 
+            email VARCHAR(255) NOT NULL UNIQUE,
+            bio TEXT, 
+            country VARCHAR(2)
+        );
+
+        INSERT INTO Users (email, bio, country)         -- order of variables to insert is important 
+        VALUES (                                        -- not inserting id as we set it to auto-increment
+            'abc@gmail.com',
+            'just a demo data for helping the developer to understand this',
+            'IN'
+        );
+
+        INSERT INTO Users (email, bio, country)
+        VALUES (
+                "abcd@gmail.com",
+                "another demo data",
+                'IN'
+            ),
+            (
+                'abcde@gmail.com',
+                'one more',
+                'IN'
+            );
 
     }
 }
