@@ -167,16 +167,18 @@ In src attribute of any element{
 
 accessing local files through browser {
 
+    when using live server or any server u won't to able to access root dir(not allowed to access local files);
+    for using files either copy it in src folder or open the html file locally;
+
     "Cross origin requests are only supported for HTTP"
 
-    when opening a html file locally in browser it will not allow access to local files;
-    open it using http-server to allow the access {
+    open it using http-server {
 
         1. Install http-server by typing "npm install -g http-server"
         2. Change into your working directory, where your "some.html" lives
         3. Start your http server by issuing http-server -c-1
 
-        This spins up a Node.js http which serves the files in your directory as static files accessible from http://localhost:8080
+        This spins up a Node.js http which serves the files(js, css etc.) in your directory as static files accessible from http://localhost:8080
     }
 
 }
