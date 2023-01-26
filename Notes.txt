@@ -37,6 +37,36 @@ HTML{
     its the standard markup language for document designed to be displayed in a web browsers;
 
     its standard is maintained and developed by WHATWG (Web Hypertext Application Technology Working Group);
+
+    https://developer.mozilla.org/en-US/docs/Web/HTML
+}
+
+hypertext {
+
+    "Hypertext" refers to links that connect web pages to one another, either within a single website or between websites;
+    
+    Links are a fundamental aspect of the Web. By uploading content to the Internet and linking it to pages created by other people, you become an active participant in the World Wide Web.
+} 
+
+markup language{
+
+    A computer language that consists of easily understood keywords, names or tags;
+    
+    it helps to format the overall view of a page and the data it contains;
+     
+    Some examples of a markup language are BBC, HTML, SGML, and XML
+
+    md(markdown) is also a lightweight markup language that is used in readme files;
+}
+
+CSS {
+
+    Cascading Style Sheets (CSS) is a stylesheet language;
+    
+    it instructs the browser how we want our HTML to appear; 
+    it is used to describe the presentation of a markup language;
+    
+    it is not a programming language;
 }
 
 Javascript{
@@ -56,6 +86,7 @@ scripting vs programming language{
     scripting language uses a interpreter(in a run-time environment) while programming language uses compiler;
 
     for a scripting language there is no need to make an executable file unlike programming language;
+    normally for a scripting language shell is there to write line by line executable code;
 
     a scripting language is a programming language(in the sense that it is also used to write programmes only);
     a scripting language doesn't generally compiles the code rather interpret it;
@@ -64,7 +95,6 @@ scripting vs programming language{
     in scripting language interpreter is used which reads the code line by line;
 
     in modern world differnce between the two is becoming blur with advancement of technology;
-
     we can make an environment to compile a scripting language(making it a non-scripting language);
     eg. google chrome V8 engine for JS;
 
@@ -170,7 +200,7 @@ accessing local files through browser {
     when using live server or any server u won't to able to access root dir(not allowed to access local files);
     for using files either copy it in src folder or open the html file locally;
 
-    "Cross origin requests are only supported for HTTP"
+    "Cross origin requests are only supported for HTTP" that is no allowed locally, use live server or any server;
 
     open it using http-server {
 
