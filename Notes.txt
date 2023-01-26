@@ -129,6 +129,23 @@ ECMAScript {
 
 }
 
+javascript module{
+
+    a module is just a file containing code with the power to share its functionality with other modules;
+    
+    we use 'import' and 'export' to share the functionality of modules in vanilla JavaScript;
+    in nodejs we can use 'require' method to do the same as it supports CJS;
+
+    for using a js file as module we set attribute type="module" in script tag of html;
+
+    when a functionality of a module is used then that whole module/file is processed first from top to bottom then the part that was called for is interpreted;
+
+    we can't use module functionality when opening html file locally on a browser due to security issues, we have to use a server;
+    https://stackoverflow.com/questions/67230845/how-to-use-javascript-type-module-locally-in-browser#:~:text=So%20sadly%2C%20not%2C%20you%20can,js%20%26%20static%20directory%2C%20etc.
+
+    https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules#other_differences_between_modules_and_standard_scripts
+}
+
 windows_object & Web APIs{
 
     in browser there are many APIs used that are not part of javascript or say ECMAScript;
