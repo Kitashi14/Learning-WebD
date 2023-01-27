@@ -13,6 +13,7 @@ NEW KEYWORDS{
 NOTES{
 
     can use drawsql.app for making chart;
+    read this blog : https://xpromx.me/blog/database-table-and-column-naming-converntions
 }
 
 MySQL{
@@ -55,10 +56,10 @@ MySQL{
         a coloumn may have constraint defined for their data;
         eg. unique, not null, primary key, enum, etc. 
 
-        VARCHAR(<max. number of characters to be used (max 255)>)        //when using varchar daty type we need to specify this
+        VARCHAR(<max. number of characters to be used (max 255)>)        //when using varchar data type we need to specify this
     }
 
-    other keywords{
+    other key-points{
 
         by convention we write keywords in UPPER CASE but its not compulsary;
         eg. create, table, select, where, etc;
@@ -70,9 +71,9 @@ MySQL{
         //command line
 
         mysql --version
-        mysql -u <username> -p      //then enter your password to access mysql cmd line interface
+        mysql -u <username> -p      //then enter your password to access mysql cmd line interface (its a 4 digit password)
 
-
+        open services.msc for starting and stopping different services;
 
 
         //inside mysql command line interface
