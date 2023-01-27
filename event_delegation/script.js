@@ -15,11 +15,11 @@ const category = document.querySelector("#category");
 
 category.addEventListener("click", (e) => {
     console.log(e);
-  console.log(e.target);
+  console.log(e.target.tagName);
   if (e.target.tagName == "LI") {
     window.location.href = "/" + e.target.id;
   }
 });
 //T-2 ----------------end
 
-//here instead of writing events for multiple items we write for a single common parent element and use the concept of evneny delegation.
+//here instead of writing events for multiple items we write for a single common parent element and use the concept of event delegation.

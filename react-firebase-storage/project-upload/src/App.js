@@ -14,13 +14,16 @@ function App() {
     if (!file) return;
 
     try {
+
       const storageRef = ref(storage, `/files/${file.name}`);
+      console.log(file,storageRef);
 
       const uploadTask = uploadBytesResumable(storageRef, file);
 
       console.log(uploadTask);
 
       uploadTask.on("state_changed", (snapshot) => {
+        console.log(snapshot);
         const prog = Math.round(
           (snapshot.bytesTransferred / snapshot.totalBytes) * 100
         );
@@ -28,7 +31,7 @@ function App() {
       });
 
       const url = await getDownloadURL(uploadTask.snapshot.ref);
-      console.log(url);
+      console.log(url);  
     } catch (err) {
       console.log(err);
     }

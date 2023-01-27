@@ -1,9 +1,7 @@
+import DemoPage from "./components/DemoPage";
+
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">Hello Brother</header>
-    </div>
-  );
+  return <DemoPage />;
 }
 
 export default App;
