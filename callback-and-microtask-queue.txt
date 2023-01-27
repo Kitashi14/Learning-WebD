@@ -43,7 +43,7 @@ NEW KEYWORDS {
     starvation of callback queue;
 }
 
-Browser as a super power {
+Browser as a super collection {
     has everthing;
     local storage;
     timer;
