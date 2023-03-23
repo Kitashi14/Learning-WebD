@@ -1,3 +1,5 @@
+/** @format */
+
 const express = require("express");
 const app = express();
 const port = 4002;
@@ -14,11 +16,11 @@ app.use((req, res, next) => {
   next();
 });
 
-// for parsering json file of type application/json (eg. forms recieved during post request)
+// for parsering body with json formatted data
 const bodyParser = require("body-parser");
 app.use(bodyParser.json());
 
-// for forms with MIME type of application/x-www-form-urlencoded 
+// for parsering body with urlencoded data
 app.use(
   bodyParser.urlencoded({
     extended: true,
@@ -77,6 +79,40 @@ app.get("/apiParamsCall/:name/:age", (req, res) => {
     console.log("\n\n");
     res.status(201).json(response);
   }
+});
+
+//for testing different MIME type of body for different type of request
+
+app.get("/test", (req, res) => {
+  console.log("\n\nget request : ", "\n", req.body);
+  console.log("\nparams", req.params);
+  console.log("\nquery", req.query);
+  console.log("\nurl", req.url);
+  res.status(200);
+});
+
+app.get("/test/:name", (req, res) => {
+  console.log("\n\nget request : ", "\n", req.body);
+  console.log("\nparams", req.params);
+  console.log("\nquery", req.query);
+  console.log("\nurl", req.url);
+  res.status(200);
+});
+
+app.post("/test", (req, res) => {
+  console.log("\n\npost request : ", "\n", req.body);
+  console.log("\nparams", req.params);
+  console.log("\nquery", req.query);
+  console.log("\nurl", req.url);
+  res.status(200);
+});
+
+app.post("/test/:name", (req, res) => {
+  console.log("\n\npost request : ", "\n", req.body);
+  console.log("\nparams", req.params);
+  console.log("\nquery", req.query);
+  console.log("\nurl", req.url);
+  res.status(200);
 });
 
 app.listen(port, () => {
