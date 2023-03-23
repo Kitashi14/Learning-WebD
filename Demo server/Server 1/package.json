@@ -4,7 +4,7 @@
   "description": "node server for demo/test purpose",
   "main": "server.js",
   "scripts": {
-    "test": "nodemon server.js"
+    "start": "nodemon restApi.js"
   },
   "author": "",
   "license": "ISC",
