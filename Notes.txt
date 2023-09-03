@@ -123,7 +123,7 @@ ECMAScript {
     JS uses this standard;
     it help to ensure that different browsers are interoperatable with each other as browsers use JS;
 
-    almost every every this standard is updated adding new features for the language;
+    almost every year this standard is updated adding new features for the language;
     different versions of ECMAScript: ES1, ES2, ES3, ES6, ES7;
     https://www.w3schools.com/js/js_versions.asp
 

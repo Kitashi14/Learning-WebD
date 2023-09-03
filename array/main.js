@@ -10,7 +10,7 @@ const double = (element) => {
 
 console.log(arr.map(double));
 
-//Filter (returns true/false for each elements)
+//Filter (returns elements who returned true)
 //odd elements
 
 const issOdd = (element) => {

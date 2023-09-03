@@ -1,9 +1,11 @@
+/** @format */
+
 import { storage } from "./firebase";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { useState } from "react";
 
 function App() {
-  const [progress, setProgress] = useState(0);
+  const [progress, setProgress] = useState("status");
   const formhandler = (e) => {
     e.preventDefault();
     const file = e.target[0].files[0];
@@ -11,27 +13,27 @@ function App() {
   };
 
   const uploadFiles = async (file) => {
-    if (!file) return;
-
+    if (!file){ 
+      setProgress("No file found to upload")
+      return;
+    }
     try {
-
+      setProgress("Uploading...");
+      console.log(file);
       const storageRef = ref(storage, `/files/${file.name}`);
-      console.log(file,storageRef);
+      // https://console.firebase.google.com/project/test-1d748/storage/test-1d748.appspot.com/files/~2Ffiles 
+      console.log(storageRef);
 
-      const uploadTask = uploadBytesResumable(storageRef, file);
+      const uploadTask = await uploadBytesResumable(storageRef, file);
 
-      console.log(uploadTask);
+      console.log(uploadTask);  
 
-      uploadTask.on("state_changed", (snapshot) => {
-        console.log(snapshot);
-        const prog = Math.round(
-          (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-        );
-        setProgress(prog);
-      });
-
-      const url = await getDownloadURL(uploadTask.snapshot.ref);
-      console.log(url);  
+      const url = await getDownloadURL(uploadTask.ref);
+      console.log(url);
+      setProgress("Uploaded");  
+      setTimeout(()=>{
+        setProgress("status")
+      }, 3000);
     } catch (err) {
       console.log(err);
     }
@@ -44,7 +46,7 @@ function App() {
         <button type="submit">Upload</button>
       </form>
       <hr />
-      <h1>Uploaded {progress} %</h1>
+      <h1>{progress}</h1>
     </div>
   );
 }

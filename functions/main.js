@@ -95,6 +95,7 @@
 //B-3 start -------------------------->
 
 // const radius = [3, 45, 2, 25];
+// console.log(radius);
 
 // const calculate = (
 //   radius,
