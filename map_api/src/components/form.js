@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { toast } from "react-toastify";
-import Map from "./map";
+import MapDiv from "./map";
 
 const MapForm = () => {
   const [model, setModel] = useState(false);
@@ -13,7 +13,9 @@ const MapForm = () => {
   const openMap = () => {
     setModel(true);
   };
-  const closeMap = () => {
+  const closeMap = (lat,long) => {
+    latInputRef.current.value= lat;
+    longInputRef.current.value=long;
     setModel(false);
   };
 
@@ -102,7 +104,7 @@ const MapForm = () => {
           </div>
         </div>
       </div>
-      {model ? <Map closeMap={closeMap} /> : <></>}
+      {model ? <MapDiv closeMap={closeMap} /> : <></>}
     </>
   );
 };
