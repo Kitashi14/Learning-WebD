@@ -9,13 +9,23 @@ const MapForm = () => {
 
   const latInputRef = useRef();
   const longInputRef = useRef();
+  const [reloaded, setReloaded] = useState(false);
 
   const openMap = () => {
     setModel(true);
+    if (!reloaded) {
+      setTimeout(() => {
+        setModel(false);
+        setTimeout(() => {
+          setModel(true);
+        }, 10);
+      }, 10);
+      setReloaded(true);
+    }
   };
-  const closeMap = (lat,long) => {
-    latInputRef.current.value= lat;
-    longInputRef.current.value=long;
+  const closeMap = (lat, long) => {
+    latInputRef.current.value = lat;
+    longInputRef.current.value = long;
     setModel(false);
   };
 

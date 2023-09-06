@@ -16,10 +16,11 @@ const MapDiv = (props) => {
 
   const zoom_level = 10;
 
-  const [currentLocation, setCurrentLocation] = useState({
-    lat: 25.4964846804421,
-    long: 81.86880267764181,
+  const [currentMarkerLocation, setCurrentMarkerLocation] = useState({
+    lat: 28.6139,
+    long: 77.2090,
   });
+
   const [draggable, setDraggable] = useState(false);
 
   const markerIcon = new L.Icon({
@@ -29,26 +30,31 @@ const MapDiv = (props) => {
     popupAnchor: [0, -46],
   });
 
-  const findCurrentLocation = () => {
-    const onSuccess = (location) => {
-      setCurrentLocation({
-        lat: location.coords.latitude,
-        long: location.coords.longitude,
-      });
-      mapRef.current.flyTo(
-        [location.coords.latitude, location.coords.longitude],
-        18,
-        {
-          animate: true,
-        }
-      );
-    };
-
-    const onError = () => {
-      toast.error("Permission Denied");
-    };
+  const findCurrentLocation = async () => {
     setDraggable(false);
-    navigator.geolocation.getCurrentPosition(onSuccess, onError);
+    await toast.promise(new Promise((resolve,reject)=>{
+      navigator.geolocation.getCurrentPosition((location) => {
+        resolve();
+        setCurrentMarkerLocation({
+          lat: location.coords.latitude,
+          long: location.coords.longitude,
+        });
+        mapRef.current.flyTo(
+          [location.coords.latitude, location.coords.longitude],
+          18,
+          {
+            animate: true,
+          }
+        );
+      }, () => {
+        reject();
+      });
+    }),{
+      pending : "Locating...",
+      success : "Found",
+      error : "Permission Denied"
+    })
+    
   };
   const toggleDraggable = () => {
     setDraggable(!draggable);
@@ -58,38 +64,56 @@ const MapDiv = (props) => {
     () => ({
       dragend() {
         console.log(markerRef.current.getLatLng());
-        setCurrentLocation({
-          lat : markerRef.current.getLatLng().lat,
-          long : markerRef.current.getLatLng().lng
-        })
+        setCurrentMarkerLocation({
+          lat: markerRef.current.getLatLng().lat,
+          long: markerRef.current.getLatLng().lng,
+        });
       },
     }),
     []
   );
 
-  const closeMap  = ()=>{
+  const closeMap = (e) => {
+    if (e.target.id == "backDrop" || e.target.id == "selectCoord")
+      props.closeMap(currentMarkerLocation.lat, currentMarkerLocation.long);
+  };
 
-    props.closeMap(currentLocation.lat,currentLocation.long);
-  }
+  const goToMarker = () => {
+    mapRef.current.flyTo(
+      [markerRef.current.getLatLng().lat, markerRef.current.getLatLng().lng],
+      18,
+      {
+        animate: true,
+      }
+    );
+  };
 
   return (
     <>
-      <div className="w-screen h-screen backdrop-blur-md fixed top-0 ">
-        <div className="flex flex-col justify-between items-center p-3 space-y-2 container mx-auto h-3/4 mt-20 w-2/3 rounded-lg border-2 border-gray-200 bg-blue-400">
+      <div
+        id="backDrop"
+        className="w-screen h-screen backdrop-blur-md fixed top-0 "
+        onClick={closeMap}
+      >
+        <div className="flex flex-col justify-between items-center p-3 space-y-2 container mx-auto h-3/4 mt-20 w-2/3 rounded-lg border-2 border-gray-200 bg-blue-400 text-white">
+          Click on the Marker to see coordinates
           <div className=" w-full h-full mb-0 bg-red-600 rounded">
             <MapContainer
-              center={[currentLocation.lat, currentLocation.long]}
+              center={[currentMarkerLocation.lat, currentMarkerLocation.long]}
               zoom={zoom_level}
               ref={mapRef}
             >
               <TileLayer
-                attribution={omm.openStreet.attribution}
-                url={omm.openStreet.url}
+                attribution={omm.maptiler.attribution}
+                url={omm.maptiler.url}
               />
 
               <Marker
                 draggable={draggable}
-                position={[currentLocation.lat, currentLocation.long]}
+                position={[
+                  currentMarkerLocation.lat,
+                  currentMarkerLocation.long,
+                ]}
                 icon={markerIcon}
                 eventHandlers={eventHandlers}
                 ref={markerRef}
@@ -97,7 +121,7 @@ const MapDiv = (props) => {
                 <Popup>
                   {draggable
                     ? "Draggable mode on"
-                    : `${currentLocation.lat}, ${currentLocation.long}`}
+                    : `${currentMarkerLocation.lat}, ${currentMarkerLocation.long}`}
                   <br />
                   <span onClick={toggleDraggable}>
                     <a href="#">
@@ -112,10 +136,11 @@ const MapDiv = (props) => {
           </div>
           <div className="flex flex-row justify-center space-x-2">
             <button
+              id="selectCoord"
               className="px-4 py-2 border rounded-lg  bg-green-600 text-white"
               onClick={closeMap}
             >
-              Select
+              Select Coordinates
             </button>
             <button
               className="px-4 py-2 border rounded-lg  bg-green-600 text-white"
@@ -124,6 +149,9 @@ const MapDiv = (props) => {
               Locate Me
             </button>
           </div>
+          <span className="text-white underline" onClick={goToMarker}>
+            <a href="#">Go to marker</a>
+          </span>
         </div>
       </div>
     </>
