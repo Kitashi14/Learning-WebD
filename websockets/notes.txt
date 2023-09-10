@@ -1,0 +1,103 @@
+NEW KEYWORS {
+
+    websocket vs real-time database : https://stackoverflow.com/questions/30527698/socket-io-vs-rethinkdb-changefeed
+}
+
+sockets{
+
+    A socket is one endpoint of a two-way communication link between two programs running on the network;
+    A socket is bound to a port number so that the TCP layer can identify the application that data is destined to be sent to;
+    A TCP connection is defined by two endpoints aka sockets;
+
+    it is the combination of port no. and IP address;
+    the client creates a socket and sends the request to the server through the socket;
+}
+
+polling a server{
+
+    the process when a client requests a particular piece of data at regular intervals from a server;
+}
+
+websocket{
+
+    it is an asynchronous communication protocol;
+    it provides full duplex, two way communication over a single TCP connection;
+
+    it enables real-time, bi-directional communication between web clients and servers;
+
+    it allows an open connection so that no new connections is required to be formed for every new request;
+    it can send and receive data at any time;
+
+    it is used for application like online gaming, chat application etc which requires real time updates;
+
+}
+
+duplexes{
+
+    full duplex{
+
+        allow data transmission in both directions simultaneously;
+        achieved by using seperate channels or frequency bands for sending and receiving data;
+    }
+
+    half duplex{
+
+        data can be transmitted in both the directions but not at same time;
+        it has to take turns to either send or receive data;
+    }
+
+    simplex{
+
+        its a unidirectional communication;
+        data can be transmitted from one direction only;
+        eg. tv, radio, etc.;
+    }
+
+}
+
+
+websocket-functions{
+
+    onmessage;
+    onopen;
+    send;
+    close;
+    onconnection
+}
+
+
+socket.io{
+
+    its basically a library to use websocket at a better capability;
+    It is built on top of the WebSocket protocol;
+
+    provides additional features{
+
+        fallback to HTTP long-polling; (#1 reason people used Socket.IO earlier)
+        automatic reconnection;
+        packets are automatically buffered when the client is disconnected, and will be sent upon reconnection;
+    } 
+
+    issue{
+        it adds additional metadata to each packet. That is why a WebSocket client will not be able to successfully connect to a Socket.IO server, and a Socket.IO client will not be able to connect to a plain WebSocket server either;
+    }
+    
+
+    The Socket.IO codebase is split into two distinct layers{
+
+        the low-level plumbing: what we call Engine.IO, the engine inside Socket.IO;
+        the high-level API: Socket.IO itself;
+    }
+
+    Engine.IO{
+
+        it is responsible for establishing the low-level connection between the server and the client;
+        it handles{
+
+            the various transports and the upgrade mechanism;
+            the disconnection detection;
+        }
+                    
+    } 
+
+}

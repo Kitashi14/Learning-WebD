@@ -1,0 +1,9 @@
+messages{
+
+    id,
+    from,
+    to,
+    message,
+    time,
+    status (sent, received, seen);
+}
