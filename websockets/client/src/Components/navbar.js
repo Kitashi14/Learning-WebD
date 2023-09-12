@@ -1,6 +1,6 @@
 /** @format */
 
-import { useContext, useRef, useState } from "react";
+import { useContext, useRef } from "react";
 import { toast } from "react-toastify";
 import AuthContext from "../context/authContext";
 

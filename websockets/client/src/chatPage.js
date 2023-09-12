@@ -1,7 +1,6 @@
 /** @format */
 
 import { useContext, useState } from "react";
-import { toast } from "react-toastify";
 import ChatContext from "./context/chatContext";
 import OnlineUsers from "./Components/onlineuser";
 import ChatBox from "./Components/chatBox";

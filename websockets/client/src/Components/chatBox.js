@@ -1,7 +1,6 @@
 /** @format */
 
 import { useContext, useRef } from "react";
-import { toast } from "react-toastify";
 import ChatContext from "../context/chatContext";
 import AuthContext from "../context/authContext";
 
@@ -45,17 +44,17 @@ const ChatBox = (props) => {
           </button>
           <span className="ml-5">{`${userName}`}</span>
         </div>
-        <div className="bg-white h-4/6 flex flex-col-reverse space-y-3 py-3 px-2 overflow-scroll overflow-x-hidden ">
+        <div className="bg-white h-4/6 flex flex-col-reverse space-y-1 py-1 px-2 overflow-scroll overflow-x-hidden ">
           {props.isOld && props.userInfo.messages.length ? (
             <>
               {messages.map((message) => {
-                if (message.to == userName) {
+                if (message.to === userName) {
                   return (
                     <div
                       key={message._id}
                       className="w-full  flex flex-row justify-end mt-1"
                     >
-                      <span className="max-w-screen-md bg-red-400 rounded px-3 py-1 rounded pr-6">
+                      <span className="max-w-screen-md bg-red-400 rounded px-3 py-1 rounded pl-6">
                         {message.message}
                       </span>
                     </div>

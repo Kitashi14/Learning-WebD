@@ -1,12 +1,6 @@
 /** @format */
 
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useReducer,
-  useState,
-} from "react";
+import { createContext, useContext, useReducer, useState } from "react";
 import AuthContext from "./authContext";
 import { toast } from "react-toastify";
 import { socket } from "../sc";
@@ -18,7 +12,7 @@ const ChatContext = createContext({
 
 export const ChatContextProvider = (props) => {
   const auth = useContext(AuthContext);
-  
+
   class User {
     constructor(otherParty) {
       this.userName = otherParty;
@@ -34,11 +28,11 @@ export const ChatContextProvider = (props) => {
       var date = new Date(data.time);
 
       if (this.latestMessage < date || !this.latestMessage)
-      this.latestMessage = date;
+        this.latestMessage = date;
       this.messages.push(data);
     }
 
-    async sendMessage(from,message) {
+    async sendMessage(from, message) {
       var currTime = new Date();
       var stat = "Not Delivered";
       var to = this.userName;
@@ -49,9 +43,9 @@ export const ChatContextProvider = (props) => {
           from,
           to,
           message,
-          status : stat,
-          time : currTime
-        }
+          status: stat,
+          time: currTime,
+        };
         socket.emit("send message", messageObj);
       } catch (err) {
         console.log(err);
@@ -71,13 +65,14 @@ export const ChatContextProvider = (props) => {
     async clientSaw(authUser) {
       var ids = this.messages.filter((data) => {
         return (
-          data.to == authUser &&
-          (data.status == "received" || data.status == "delivered")
+          data.to === authUser &&
+          (data.status === "received" || data.status === "delivered")
         );
       });
 
       try {
         //socket call
+        console.log(ids);
       } catch (err) {
         console.log(err);
       }
@@ -87,7 +82,7 @@ export const ChatContextProvider = (props) => {
       for (var j = 0; j < this.messages.length; j++) {
         var id = this.messages[j].id;
         for (var i = 0; i < ids.length; i++) {
-          if (id == ids[i]) {
+          if (id === ids[i]) {
             this.messages[j].status = "seen";
           }
         }
@@ -96,11 +91,12 @@ export const ChatContextProvider = (props) => {
 
     async clientReceived(authUser) {
       var ids = this.messages.filter((data) => {
-        return data.to == authUser && data.status == "delivered";
+        return data.to === authUser && data.status === "delivered";
       });
 
       try {
         //socket call
+        console.log(ids);
       } catch (err) {
         console.log(err);
       }
@@ -110,7 +106,7 @@ export const ChatContextProvider = (props) => {
       for (var j = 0; j < this.messages.length; j++) {
         var id = this.messages[j].id;
         for (var i = 0; i < ids.length; i++) {
-          if (id == ids[i]) {
+          if (id === ids[i]) {
             this.messages[j].status = "received";
           }
         }
@@ -125,9 +121,9 @@ export const ChatContextProvider = (props) => {
       this.onlineUsers = [];
     }
 
-    addData(authUser,data) {
+    addData(authUser, data) {
       data.map((row) => {
-        var otherParty = row.from == authUser ? row.to : row.from;
+        var otherParty = row.from === authUser ? row.to : row.from;
         if (this.userIndex.has(otherParty)) {
           var i = this.userIndex.get(otherParty);
           this.users[i].addMessage(row);
@@ -137,6 +133,7 @@ export const ChatContextProvider = (props) => {
           this.users.push(user);
           this.userIndex.set(otherParty, this.users.length - 1);
         }
+        return 1;
       });
 
       this.users.sort((a, b) => {
@@ -148,7 +145,7 @@ export const ChatContextProvider = (props) => {
       }
     }
 
-    async send(from,name, message) {
+    async send(from, name, message) {
       if (!this.userIndex.has(name)) {
         const user = new User(name);
         this.users.push(user);
@@ -158,17 +155,17 @@ export const ChatContextProvider = (props) => {
           this.users[i + 1] = this.users[i];
           this.userIndex.set(this.users[i + 1].getName(), i + 1);
         }
-        await temp.sendMessage(from,message);
+        await temp.sendMessage(from, message);
         this.users[0] = temp;
         this.userIndex.set(name, 0);
       } else {
-        var idx = this.userIndex.get(name);
-        var temp = this.users[idx];
-        for (var i = idx - 1; i >= 0; i--) {
+        idx = this.userIndex.get(name);
+        temp = this.users[idx];
+        for (i = idx - 1; i >= 0; i--) {
           this.users[i + 1] = this.users[i];
           this.userIndex.set(this.users[i + 1].getName(), i + 1);
         }
-        await temp.sendMessage(from,message);
+        await temp.sendMessage(from, message);
         this.users[0] = temp;
         this.userIndex.set(this.users[0].getName(), 0);
       }
@@ -188,9 +185,9 @@ export const ChatContextProvider = (props) => {
         this.users[0] = temp;
         this.userIndex.set(name, 0);
       } else {
-        var idx = this.userIndex.get(name);
-        var temp = this.users[idx];
-        for (var i = idx - 1; i >= 0; i--) {
+        idx = this.userIndex.get(name);
+        temp = this.users[idx];
+        for (i = idx - 1; i >= 0; i--) {
           this.users[i + 1] = this.users[i];
           this.userIndex.set(this.users[i + 1].getName(), i + 1);
         }
@@ -202,7 +199,7 @@ export const ChatContextProvider = (props) => {
 
     isUserPresent(name) {
       var userFound = this.users.filter((user) => {
-        return user.userName == name;
+        return user.userName === name;
       });
 
       if (userFound.length > 0) return userFound[0];
@@ -213,14 +210,15 @@ export const ChatContextProvider = (props) => {
       this.onlineUsers.push(data);
     }
 
-    removeOnlineUser(userName){
-      this.onlineUsers = this.onlineUsers.filter((user)=>{
-        return user.userName!=userName;
+    removeOnlineUser(userName) {
+      this.onlineUsers = this.onlineUsers.filter((user) => {
+        return user.userName !== userName;
       });
     }
   }
 
   const [chatBoxx, setChatBoxx] = useState(new ChatBox());
+  // eslint-disable-next-line
   const [_, forceRender] = useReducer((x) => !x, false);
   const [hasjoined, setHasJoined] = useState(false);
 

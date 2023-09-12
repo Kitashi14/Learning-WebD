@@ -1,6 +1,10 @@
+import { useContext } from "react";
+import AuthContext from "../context/authContext";
+
 const ChatUserCard = (props)=>{
 
     const user = props.user;
+    const userName= useContext(AuthContext).userName;
     const date = new Date(user.latestMessage);
     const openUser = (e) => {
         e.preventDefault();
@@ -16,9 +20,9 @@ const ChatUserCard = (props)=>{
                 <span className="text-green-800 text-3xl font-bold font-sans">
                   {user.userName}
                 </span>
-                <span className="text-green-800 text-xl italic pl-2 font-serif">
+                <span className="text-green-800 text-xl italic pl-2 font-serif truncate">
                   {user.messages.length
-                    ? user.messages[user.messages.length - 1].message
+                    ? `${user.messages[user.messages.length - 1].to===userName ? user.userName: "You" }: ${user.messages[user.messages.length - 1].message}`
                     : "lores ipsum"}
                 </span>
               </div>

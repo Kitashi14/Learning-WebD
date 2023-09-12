@@ -31,6 +31,7 @@ export const useSocket = () => {
         if (data.onlineUsers.length) {
           data.onlineUsers.map((user) => {
             currObj.addOnlineUser(user);
+            return 1;
           });
         }
         currObj.addData(auth.userName,data.oldData);
@@ -58,5 +59,5 @@ export const useSocket = () => {
         socket.off("new message");
       };
     }
-  }, [auth.userName]);
+  }, [auth.userName,chat]);
 };
