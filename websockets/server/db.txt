@@ -5,5 +5,5 @@ messages{
     to,
     message,
     time,
-    status (sent, received, seen);
+    status (delivered, received, seen);
 }

@@ -1,6 +1,6 @@
 /** @format */
 
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useReducer, useState } from "react";
 
 const AuthContext = createContext({
   userName: null,
@@ -9,9 +9,11 @@ const AuthContext = createContext({
 
 export const AuthContextProvider = (props) => {
   const [userName, setUserName] = useState(null);
+  const [_, forceRender] = useReducer((x) => !x, false);
 
   const setUser = (value)=>{
     setUserName(value);
+    forceRender();
   }
 
   const context = {
