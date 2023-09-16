@@ -15,6 +15,7 @@ export const useSocket = () => {
         console.log("new user joined : ", data);
         const currObj = chat.chatBox;
         currObj.addOnlineUser(data);
+        currObj.userReceived(data.userName);
         chat.setChatBox(currObj);
       });
 
@@ -50,6 +51,21 @@ export const useSocket = () => {
         const currObj = chat.chatBox;
         currObj.addMessage(data.from,data);
         chat.setChatBox(currObj);
+        console.log(chat);
+        if(chat.chatScreenUser===data.from){
+          socket.emit("seen",data.from);
+        }
+      })
+
+      socket.on("seen",(userName)=>{
+        console.log(`${userName} saw messages`);
+        const currObj = chat.chatBox;
+        currObj.userSaw(userName);
+        chat.setChatBox(currObj);
+      })
+
+      socket.on("typing",(data)=>{
+        chat.setUserTyping(data.typer);
       })
 
       return () => {
@@ -57,6 +73,8 @@ export const useSocket = () => {
         socket.off("online users info");
         socket.off("server received message");
         socket.off("new message");
+        socket.off("seen");
+        socket.off("typing");
       };
     }
   }, [auth.userName,chat]);

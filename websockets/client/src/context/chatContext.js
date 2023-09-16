@@ -2,12 +2,15 @@
 
 import { createContext, useContext, useReducer, useState } from "react";
 import AuthContext from "./authContext";
-import { toast } from "react-toastify";
 import { socket } from "../sc";
 
 const ChatContext = createContext({
   chatBox: null,
   setChatBox: function (data) {},
+  chatScreenUser: null,
+  setChatScreenUser: (user)=>{},
+  userTyping : false,
+  setUserTyping : (user)=>{}
 });
 
 export const ChatContextProvider = (props) => {
@@ -49,7 +52,6 @@ export const ChatContextProvider = (props) => {
         socket.emit("send message", messageObj);
       } catch (err) {
         console.log(err);
-        toast.error("Message can't be send.");
         this.latestMessage = currTime;
         this.messages.push({
           time: currTime,
@@ -62,58 +64,27 @@ export const ChatContextProvider = (props) => {
       }
     }
 
-    async clientSaw(authUser) {
-      var ids = this.messages.filter((data) => {
-        return (
-          data.to === authUser &&
-          (data.status === "received" || data.status === "delivered")
-        );
-      });
-
-      try {
-        //socket call
-        console.log(ids);
-      } catch (err) {
-        console.log(err);
-      }
-    }
-
-    otheruserSaw(ids) {
+    userReceived() {
       for (var j = 0; j < this.messages.length; j++) {
-        var id = this.messages[j].id;
-        for (var i = 0; i < ids.length; i++) {
-          if (id === ids[i]) {
-            this.messages[j].status = "seen";
-          }
+        if (this.messages[j].status === "delivered") {
+          this.messages[j].status = "received";
         }
       }
+      return;
     }
 
-    async clientReceived(authUser) {
-      var ids = this.messages.filter((data) => {
-        return data.to === authUser && data.status === "delivered";
-      });
-
-      try {
-        //socket call
-        console.log(ids);
-      } catch (err) {
-        console.log(err);
-      }
-    }
-
-    otheruserReceived(ids) {
+    userSaw() {
       for (var j = 0; j < this.messages.length; j++) {
-        var id = this.messages[j].id;
-        for (var i = 0; i < ids.length; i++) {
-          if (id === ids[i]) {
-            this.messages[j].status = "received";
-          }
+        if (
+          this.messages[j].status === "received" ||
+          this.messages[j].status === "delivered"
+        ) {
+          this.messages[j].status = "seen";
         }
       }
+      return;
     }
   }
-
   class ChatBox {
     constructor() {
       this.userIndex = new Map();
@@ -140,8 +111,7 @@ export const ChatContextProvider = (props) => {
         return b.latestMessage.getTime() - a.latestMessage.getTime();
       });
       for (var i = 0; i < this.users.length; i++) {
-        this.userIndex.set(this.users[i].getName(), i);
-        this.users[i].clientReceived();
+        this.userIndex.set(this.users[i].userName, i);
       }
     }
 
@@ -215,9 +185,22 @@ export const ChatContextProvider = (props) => {
         return user.userName !== userName;
       });
     }
+
+    userReceived(userName) {
+      if (this.userIndex.has(userName)) {
+        this.users[this.userIndex.get(userName)].userReceived();
+      }
+    }
+    userSaw(userName) {
+      if (this.userIndex.has(userName)) {
+        this.users[this.userIndex.get(userName)].userSaw();
+      }
+    }
   }
 
   const [chatBoxx, setChatBoxx] = useState(new ChatBox());
+  const [chatScreenUser,setChatScreenUser] = useState(null);
+  const [isTyping,setIsTyping] = useState(false);
   // eslint-disable-next-line
   const [_, forceRender] = useReducer((x) => !x, false);
   const [hasjoined, setHasJoined] = useState(false);
@@ -228,6 +211,17 @@ export const ChatContextProvider = (props) => {
     console.log(chatBoxx);
     forceRender();
   };
+
+  const modifyChatScreenUser = (userName)=>{
+    setChatScreenUser(userName);
+  }
+
+  const modifyIsTyping = (userName)=>{
+    setIsTyping(userName);
+    setTimeout(() => {
+      setIsTyping(null);
+    }, 2500);
+  }
 
   if (!hasjoined && auth.userName) {
     console.log("sending join request");
@@ -240,6 +234,11 @@ export const ChatContextProvider = (props) => {
   const context = {
     chatBox: chatBoxx,
     setChatBox: modifyChatBox,
+    chatScreenUser: chatScreenUser,
+    setChatScreenUser: modifyChatScreenUser,
+    userTyping: isTyping,
+    setUserTyping: modifyIsTyping
+    
   };
   return (
     <ChatContext.Provider value={context}>

@@ -7,7 +7,7 @@ const startSocket = async (httpServer) => {
   try {
     const io = new Server(httpServer, {
       cors: {
-        origin: "http://localhost:8080",
+        origin: '*'
       },
     });
     var count = 0;
@@ -34,6 +34,13 @@ const startSocket = async (httpServer) => {
               time : 1
             }
           );
+
+          await Chat.updateMany({
+            to: data.userName,
+            status: "delivered"
+          },{
+            status: "received"
+          });
 
           console.log("sending online users info and his data\n");
           socket.emit("initial info", {
@@ -68,18 +75,25 @@ const startSocket = async (httpServer) => {
           if(!data.from || !data.to || !data.message) {
             throw Error("Data not defined properly");
           }
+          var status = "delivered";
+
+          onlineUsers.forEach((val, key) => {
+            if(val.userName===data.to){
+              status="received";
+            }
+          });
+
           const newMessage = new Chat({
             from: data.from,
             to: data.to,
             message: data.message,
             time: data.time,
-            status: "delivered",
+            status,
           });
 
           await newMessage.save();
           console.log("sending sender ack");
           socket.emit("server received message", {
-            status: true,
             data: newMessage,
           });
           console.log("sending message to receiver");
@@ -87,12 +101,35 @@ const startSocket = async (httpServer) => {
         } catch (err) {
           console.log(err, "\n");
           console.log("sending sender ack");
-          socket.emit("server received message", {
-            status: false,
-            data: data,
-          });
+          socket.emit("server received message", {data});
         }
       });
+
+      socket.on("seen",async(userName)=>{
+        console.log("seen request",userName);
+        const userWhoSaw = onlineUsers.get(socket.id).userName;
+        const userWhoseMessageWasSeen = userName;
+
+        try{
+
+          await Chat.updateMany({
+            from : userWhoseMessageWasSeen,
+            to : userWhoSaw,
+            $or : [{status : 'delivered'}, {status : 'received'}]
+          },{
+            status : 'seen'
+          });
+
+          socket.to(userWhoseMessageWasSeen).emit("seen",userWhoSaw);
+        }catch(err){
+          console.log(err);
+        }
+      })
+
+      socket.on("typing",(data)=>{
+        socket.to(data.for).emit("typing",data);
+      })
+
     });
   } catch (err) {
     console.log(err);

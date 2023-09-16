@@ -5,6 +5,7 @@ import ChatContext from "./context/chatContext";
 import OnlineUsers from "./Components/onlineuser";
 import ChatBox from "./Components/chatBox";
 import ChatUsers from "./Components/chatUsers";
+import { socket } from "./sc";
 
 const ChatPage = () => {
   const [isChatBoxOpen, setChatBoxOpen] = useState(false);
@@ -33,6 +34,8 @@ const ChatPage = () => {
       setSelectedUser(userName);
     }
     setChatBoxOpen(true);
+    chat.setChatScreenUser(userName);
+    socket.emit("seen",userName);
   };
 
   const closeChatBox = () => {
@@ -40,6 +43,7 @@ const ChatPage = () => {
     setIsSelectedUserOld(false);
     setSelectedUser(null);
     setChatBoxOpen(false);
+    chat.setChatScreenUser(null);
   };
 
   return (
