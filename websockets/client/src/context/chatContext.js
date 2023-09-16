@@ -21,6 +21,7 @@ export const ChatContextProvider = (props) => {
       this.userName = otherParty;
       this.latestMessage = 0;
       this.messages = [];
+      this.unseenCount =0;
     }
 
     getName() {
@@ -32,6 +33,8 @@ export const ChatContextProvider = (props) => {
 
       if (this.latestMessage < date || !this.latestMessage)
         this.latestMessage = date;
+      if((data.status==='delivered'|| data.status==='received')&& data.from===this.userName)
+        this.unseenCount++;
       this.messages.push(data);
     }
 
@@ -66,7 +69,7 @@ export const ChatContextProvider = (props) => {
 
     userReceived() {
       for (var j = 0; j < this.messages.length; j++) {
-        if (this.messages[j].status === "delivered") {
+        if ((this.messages[j].status === "delivered")&& this.messages[j].to===this.userName) {
           this.messages[j].status = "received";
         }
       }
@@ -76,14 +79,16 @@ export const ChatContextProvider = (props) => {
     userSaw() {
       for (var j = 0; j < this.messages.length; j++) {
         if (
-          this.messages[j].status === "received" ||
-          this.messages[j].status === "delivered"
+          (this.messages[j].status === "received" ||
+          this.messages[j].status === "delivered")&& this.messages[j].to===this.userName
         ) {
           this.messages[j].status = "seen";
         }
       }
       return;
     }
+
+    
   }
   class ChatBox {
     constructor() {
@@ -195,6 +200,11 @@ export const ChatContextProvider = (props) => {
       if (this.userIndex.has(userName)) {
         this.users[this.userIndex.get(userName)].userSaw();
       }
+    }
+
+    meSaw(userName){
+      var i = this.userIndex.get(userName);
+      this.users[i].unseenCount =0;
     }
   }
 

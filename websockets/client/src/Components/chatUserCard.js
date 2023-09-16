@@ -53,14 +53,14 @@ const ChatUserCard = (props) => {
     <button
       onClick={openUser}
       value={user.userName}
-      className="h-24 w-full bg-blue-200 flex flex-row border border-green-800"
+      className="h-20 w-full bg-blue-200 flex flex-row border border-green-800"
     >
-      <div className=" w-4/5 h-full flex flex-col pl-4 py-2 items-start space-y-2">
-        <span className="text-green-800 text-3xl font-bold font-sans">
+      <div className=" w-4/5 h-full flex flex-col pl-4 py-1 items-start space-y-1">
+        <span className="text-green-800 text-2xl font-bold font-sans">
           {user.userName}
-          <span className="ml-3 text-sm text-red-800  font-medium italic">{(chat.userTyping===user.userName) ? "is typing....": ""}</span>
+          <span className="ml-5 text-sm text-red-800  font-medium italic">{(chat.userTyping===user.userName) ? "is typing....": ""}</span>
         </span>
-        <span className="text-green-800 text-xl italic pl-2 font-serif truncate">
+        <span className="text-green-800 text-m  pl-2  truncate">
           {user.messages.length
             ? `${
                 user.messages[user.messages.length - 1].to === userName
@@ -70,7 +70,7 @@ const ChatUserCard = (props) => {
             : "lores ipsum"}
         </span>
       </div>
-      <div className="w-1/5 h-full  flex flex-col  pr-4 py-2 space-y-2 items-end">
+      <div className="w-1/5 h-full  flex flex-col  pr-4 py-0 space-y-0 items-end">
         <span className="text-blue-800 font-mono">
           {user.latestMessage
             ? lastDay(date)
@@ -81,6 +81,12 @@ const ChatUserCard = (props) => {
             ? getTime(date)
             : ""}
         </span>
+        {user.unseenCount? (
+          <span className="bg-blue-800 text-white text-xs rounded-full px-2 py-1">{user.unseenCount}</span>
+        ): (
+          <></>
+        )}
+        
       </div>
     </button>
   );

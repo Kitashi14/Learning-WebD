@@ -106,10 +106,10 @@ const startSocket = async (httpServer) => {
       });
 
       socket.on("seen",async(userName)=>{
-        console.log("seen request",userName);
+        
         const userWhoSaw = onlineUsers.get(socket.id).userName;
         const userWhoseMessageWasSeen = userName;
-
+        console.log("seen request from",userWhoSaw,"for",userWhoseMessageWasSeen);
         try{
 
           await Chat.updateMany({

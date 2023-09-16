@@ -7,11 +7,12 @@ import ChatBox from "./Components/chatBox";
 import ChatUsers from "./Components/chatUsers";
 import { socket } from "./sc";
 
-const ChatPage = () => {
+const ChatPage = (props) => {
   const [isChatBoxOpen, setChatBoxOpen] = useState(false);
   const [isSelectedUserOld, setIsSelectedUserOld] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedUserName,setSelectedUserName] = useState(null);
+  
   const chat = useContext(ChatContext);
   const chatBox = chat.chatBox;
 
@@ -29,6 +30,9 @@ const ChatPage = () => {
     if (user) {
       setIsSelectedUserOld(true);
       setSelectedUser(user);
+      var currObj = chat.chatBox;
+      currObj.meSaw(userName);
+      chat.setChatBox(currObj);
     } else {
       setIsSelectedUserOld(false);
       setSelectedUser(userName);
@@ -61,7 +65,7 @@ const ChatPage = () => {
               users={chatBox.onlineUsers}
               openChatBox={openChatBox}
             />
-            <ChatUsers users={chatBox.users} openChatBox={openChatBox}/>
+            <ChatUsers users={props.searchedUsers} openChatBox={openChatBox}/>
           </>
         )}
       </div>

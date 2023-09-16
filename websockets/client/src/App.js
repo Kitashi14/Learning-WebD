@@ -5,10 +5,20 @@ import ChatPage from "./chatPage";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer, toast } from "react-toastify";
 import { useSocket } from "./socket";
+import { useContext, useState } from "react";
+import ChatContext from "./context/chatContext";
 
 function App() {
   useSocket();
+  const chatBox = useContext(ChatContext).chatBox;
+  const [showUsers,setShowUsers] = useState(chatBox.users);
 
+  const searchedUsers = (text)=>{
+    const searchResult = chatBox.users.filter((user)=>{
+      return (user.userName.includes(text));
+    })
+    setShowUsers(searchResult);
+  }
   return (
     <>
       <ToastContainer
@@ -18,8 +28,8 @@ function App() {
         theme="light"
       />
       <div className="h-screen">
-        <Navbar />
-        <ChatPage />
+        <Navbar searchFunc={searchedUsers}/>
+        <ChatPage searchedUsers={showUsers}/>
       </div>
     </>
   );
