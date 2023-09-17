@@ -48,13 +48,15 @@ export const useSocket = () => {
 
       socket.on("new message",(data)=>{
         console.log("new message received");
+        
+        if(chat.chatScreenUser===data.from){
+          socket.emit("seen",data.from);
+          data.status="seen";
+        }
         const currObj = chat.chatBox;
         currObj.addMessage(data.from,data);
         chat.setChatBox(currObj);
         console.log(chat);
-        if(chat.chatScreenUser===data.from){
-          socket.emit("seen",data.from);
-        }
       })
 
       socket.on("seen",(userName)=>{

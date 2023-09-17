@@ -37,12 +37,11 @@ const ChatUserCard = (props) => {
     const min = date.getMinutes();
     return (
       `${
-        hour < 10 ? `0${hour}` : hour
+        hour < 10 ? `0${hour}`:hour
       }:${
         min < 10
-          ? `0${min}`
-          : min
-      } ${part}`
+          ? `0${min}`:min
+      }${part}`
     );
   }
   const openUser = (e) => {
