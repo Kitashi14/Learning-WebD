@@ -12,6 +12,7 @@ const ChatPage = (props) => {
   const [isSelectedUserOld, setIsSelectedUserOld] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedUserName,setSelectedUserName] = useState(null);
+  const [selectedMsg,setSelectedMsg] = useState(null);
   
   const chat = useContext(ChatContext);
   const chatBox = chat.chatBox;
@@ -24,7 +25,13 @@ const ChatPage = (props) => {
     }
   }
 
-  const openChatBox = (userName) => {
+  const openChatBox = (userName,message_id) => {
+    if(message_id){
+      setSelectedMsg(message_id);
+    }
+    else{
+      setSelectedMsg(null);
+    }
     setSelectedUserName(userName);
     var user = chat.chatBox.isUserPresent(userName);
     if (user) {
@@ -58,6 +65,7 @@ const ChatPage = (props) => {
             closeChatBox={closeChatBox}
             isOld={isSelectedUserOld}
             userInfo={selectedUser}
+            selectedMsg={selectedMsg}
           />
         ) : (
           <>
@@ -65,7 +73,7 @@ const ChatPage = (props) => {
               users={chatBox.onlineUsers}
               openChatBox={openChatBox}
             />
-            <ChatUsers users={props.searchedUsers} openChatBox={openChatBox}/>
+            <ChatUsers searchedMsg={props.searchedMsg} users={props.searchedUsers} openChatBox={openChatBox}/>
           </>
         )}
       </div>

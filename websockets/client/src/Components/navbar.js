@@ -53,7 +53,7 @@ const Navbar = (props) => {
                     type="search"
                     id="default-search"
                     class="block w-full p-4 pl-10 text-sm text-red-900 border border-red-300 rounded-lg bg-red-50" 
-                    placeholder="Search user..."
+                    placeholder="Search..."
                     onChange={searchUsers}
                     ref={searchInputRef}
                   />

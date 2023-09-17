@@ -1,6 +1,6 @@
 /** @format */
 
-import { useContext, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import ChatContext from "../context/chatContext";
 import AuthContext from "../context/authContext";
 import { socket } from "../sc";
@@ -9,6 +9,15 @@ const ChatBox = (props) => {
   const chatInputRef = useRef();
   const chat = useContext(ChatContext);
   const auth = useContext(AuthContext);
+  const selectedMsgRef = useRef();
+
+  const showSelectedMsg = ()=>{
+    selectedMsgRef.current?.scrollIntoView({block: "center"});
+  }
+
+  useEffect(()=>{
+    showSelectedMsg();
+  },[]);
 
   const userName = props.isOld ? props.userInfo.userName : props.userInfo;
 
@@ -84,7 +93,8 @@ const ChatBox = (props) => {
                   return (
                     <div
                       key={message._id}
-                      className="w-full  flex flex-row justify-end mt-1 "
+                      ref={props.selectedMsg===message._id? selectedMsgRef:null}
+                      className={`w-full ${props.selectedMsg===message._id? "bg-red-200 rounded":""} flex flex-row justify-end mt-1 `}
                     >
                       <span className="max-w-screen-md bg-red-400 rounded flex flex-row py-1 rounded pl-4">
                         {message.message}
@@ -97,7 +107,8 @@ const ChatBox = (props) => {
                   return (
                     <div
                       key={message._id}
-                      className=" w-full flex flex-row mt-1"
+                      ref={props.selectedMsg===message._id? selectedMsgRef:null}
+                      className={`w-full ${props.selectedMsg===message._id? "bg-red-200 rounded":""} flex flex-row mt-1 `}
                     >
                       <span className="bg-orange-300 px-3 py-1 rounded pr-6 max-w-screen-md">
                         {message.message}
