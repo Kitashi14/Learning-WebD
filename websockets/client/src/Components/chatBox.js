@@ -10,7 +10,9 @@ const ChatBox = (props) => {
   const chat = useContext(ChatContext);
   const auth = useContext(AuthContext);
   const selectedMsgRef = useRef();
-  
+  const scrollBlock = useRef();
+  const [scrollDownButton, setScrollDownButton] = useState(false);
+
   const getDay = (date) => {
     date = new Date(date);
     const currDate = new Date();
@@ -44,16 +46,27 @@ const ChatBox = (props) => {
     } ${part}`;
   };
 
+  const scrollHandler = (e) => {
+    e.preventDefault();
+    if (scrollBlock.current.scrollTop < 0) {
+      setScrollDownButton(true);
+    } else {
+      setScrollDownButton(false);
+    }
+  };
+
   const showSelectedMsg = () => {
     selectedMsgRef.current?.scrollIntoView({ block: "center" });
   };
 
   useEffect(() => {
+    if (scrollBlock.current.scrollTop < 0) {
+      setScrollDownButton(true);
+    } else {
+      setScrollDownButton(false);
+    }
     showSelectedMsg();
-  }, []);
-
-  
-
+  }, [props.selectedMsg]);
 
   const userName = props.isOld ? props.userInfo.userName : props.userInfo;
 
@@ -105,9 +118,9 @@ const ChatBox = (props) => {
     }
   };
 
-  const backButtonHandler = () => {
-    props.closeChatBox();
-  };
+  // const backButtonHandler = () => {
+  //   props.closeChatBox();
+  // };
 
   const sendButtonHandler = async () => {
     const chatInput = chatInputRef.current.value;
@@ -120,15 +133,15 @@ const ChatBox = (props) => {
     }
     return;
   };
-  var messages =[];
+  var messages = [];
   if (props.isOld && props.userInfo.messages.length) {
     messages = JSON.parse(JSON.stringify(props.userInfo.messages));
     messages.reverse();
   }
 
   var currDate;
-  if(messages.length){
-      currDate = getDay(messages[0].time);
+  if (messages.length) {
+    currDate = getDay(messages[0].time);
   }
 
   const setTyping = () => {
@@ -140,38 +153,45 @@ const ChatBox = (props) => {
 
   return (
     <>
-      <div className="bg-orange-200 flex flex-col h-full">
+      <div className="bg-orange-200 flex flex-col h-full w-2/3">
         <div className="h-1/6 flex flex-row pl-2 items-center text-blue-600 text-xl font-bold bg-green-300 ">
-          <button
+          {/* <button
             className="border bg-green-600 text-white py-1 px-3 font-medium rounded shadow"
             onClick={backButtonHandler}
           >
             Back
-          </button>
+          </button> */}
           <span className="ml-5">{`${userName}`}</span>
           <span className="ml-5 text-m text-red-800 underline font-medium italic">
             {chat.userTyping ? "is typing...." : ""}
           </span>
         </div>
-        <div className="bg-white h-4/6 flex flex-col-reverse space-y-1 py-1 px-2 overflow-scroll overflow-x-hidden ">
+        <div
+          className="bg-white h-4/6 flex flex-col-reverse space-y-1 py-1 px-2 overflow-scroll overflow-x-hidden "
+          onScroll={scrollHandler}
+          ref={scrollBlock}
+        >
           {props.isOld && props.userInfo.messages.length ? (
             <>
               {messages.map((message) => {
                 var setDay = false;
                 var prevDay = "";
                 var msgDay = getDay(message.time);
-                if ((msgDay !== currDate)) {
-                  console.log(currDate, msgDay, setDay);
+                if (msgDay !== currDate) {
                   prevDay = currDate;
                   currDate = msgDay;
-                  setDay=true;
+                  setDay = true;
                 }
                 if (message.to === userName) {
                   return (
                     <>
-                    {setDay ? (
+                      {setDay ? (
                         <>
-                           <div className="flex flex-row justify-center"><span className="w-1/3 bg-green-400 text-center py-1 rounded">{prevDay}</span></div>
+                          <div className="flex flex-row justify-center">
+                            <span className="w-1/3 bg-green-400 text-center py-1 rounded">
+                              {prevDay}
+                            </span>
+                          </div>
                         </>
                       ) : (
                         <>{/* <div>set day</div> */}</>
@@ -199,15 +219,18 @@ const ChatBox = (props) => {
                           </div>
                         </span>
                       </div>
-                      
                     </>
                   );
                 } else {
                   return (
                     <>
-                    {setDay ? (
+                      {setDay ? (
                         <>
-                           <div className="flex flex-row justify-center"><span className="w-1/3 bg-green-400 text-center py-1 rounded">{prevDay}</span></div>
+                          <div className="flex flex-row justify-center">
+                            <span className="w-1/3 bg-green-400 text-center py-1 rounded">
+                              {prevDay}
+                            </span>
+                          </div>
                         </>
                       ) : (
                         <>{/* <div>set day</div> */}</>
@@ -234,7 +257,6 @@ const ChatBox = (props) => {
                           </div>
                         </span>
                       </div>
-                      
                     </>
                   );
                 }
@@ -243,11 +265,38 @@ const ChatBox = (props) => {
           ) : (
             <></>
           )}
-          {messages.length? (
+          {messages.length ? (
             <>
-             <div className="flex flex-row justify-center"><span className="w-1/3 bg-green-400 text-center py-1 rounded">{currDate}</span></div>
+              <div className="flex flex-row justify-center">
+                <span className="w-1/3 bg-green-400 text-center py-1 rounded">
+                  {currDate}
+                </span>
+              </div>
             </>
-          ):(
+          ) : (
+            <></>
+          )}
+          {scrollDownButton ? (
+            <>
+              <div className=" w-2/3 h-[50px] fixed flex flex-row justify-center">
+                <span
+                  onClick={() => {
+                    scrollBlock.current.scrollTop = 0;
+                  }}
+                  className="bg-gray-300 h-full w-[50px] flex flex-row justify-center rounded-full items-center"
+                >
+                  <svg
+                    className="fill-gray-500"
+                    xmlns="http://www.w3.org/2000/svg"
+                    height="1em"
+                    viewBox="0 0 448 512"
+                  >
+                    <path d="M201.4 342.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 274.7 86.6 137.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z" />
+                  </svg>
+                </span>
+              </div>
+            </>
+          ) : (
             <></>
           )}
         </div>

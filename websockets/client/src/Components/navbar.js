@@ -26,12 +26,12 @@ const Navbar = (props) => {
   return (
     <>
       <div className="h-1/6">
-        <div className="py-2 w-full h-full bg-red-600 text-white text-xl font-bold flex flex-col justify-center items-center">
+        <div className={`py-2 w-full h-full bg-red-600 text-white text-xl font-bold flex flex-col ${auth.userName? " items-start  pl-0 ": " items-center " }justify-center`}>
           {auth.userName ? (
             <>
-              <span className="my-2">{`User : ${auth.userName}`}</span>
-              <div>
-                <div class="relative w-full ">
+              <span className="my-2 ml-4">{`User : ${auth.userName}`}</span>
+              <div className=" w-full">
+                <div class="relative w-1/3 ">
                   <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                     <svg
                       class="w-4 h-4 text-red-500 dark:text-red-400"
