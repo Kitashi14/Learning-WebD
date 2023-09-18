@@ -1,6 +1,6 @@
 /** @format */
 
-import { useContext, useRef, useState } from "react";
+import { useContext, useRef } from "react";
 import { toast } from "react-toastify";
 import AuthContext from "../context/authContext";
 
@@ -16,25 +16,29 @@ const Navbar = (props) => {
     }
     auth.setUser(user);
   };
-  const searchInputRef= useRef();
+  const searchInputRef = useRef();
 
-  const searchUsers = (e)=>{
+  const searchUsers = (e) => {
     e.preventDefault();
     const inputText = searchInputRef.current.value;
     props.searchFunc(inputText);
-  }
+  };
   return (
     <>
       <div className="h-1/6">
-        <div className={`py-2 w-full h-full bg-red-600 text-white text-xl font-bold flex flex-col ${auth.userName? " items-start  pl-0 ": " items-center " }justify-center`}>
+        <div
+          className={`py-2 w-full h-full bg-red-600 text-white text-xl rounded-tr-2xl  flex flex-col ${
+            auth.userName ? " items-start  pl-0 " : " items-center "
+          }justify-center`}
+        >
           {auth.userName ? (
             <>
-              <span className="my-2 ml-4">{`User : ${auth.userName}`}</span>
+              <span className="my-2 font-bold ml-4">{`User : ${auth.userName}`}</span>
               <div className=" w-full">
-                <div class="relative w-1/3 ">
-                  <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <div class="relative w-full ">
+                  <div class="absolute  inset-y-0 flex items-center pl-14 pointer-events-none">
                     <svg
-                      class="w-4 h-4 text-red-500 dark:text-red-400"
+                      class="w-4 h-4 text-red-300"
                       aria-hidden="true"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
@@ -49,14 +53,15 @@ const Navbar = (props) => {
                       />
                     </svg>
                   </div>
-                  <input
-                    type="search"
-                    id="default-search"
-                    class="block w-full p-4 pl-10 text-sm text-red-900 border border-red-300 rounded-lg bg-red-50" 
-                    placeholder="Search..."
-                    onChange={searchUsers}
-                    ref={searchInputRef}
-                  />
+                  <div className="w-full flex flex-row justify-center">
+                    <input
+                      type="text"
+                      class="w-5/6 p-4 pl-10 text-sm text-white rounded-lg font-semibold placeholder:text-red-200  bg-red-500 focus:outline-none"
+                      placeholder="Search here..."
+                      onChange={searchUsers}
+                      ref={searchInputRef}
+                    />
+                  </div>
                 </div>
               </div>
             </>
@@ -65,7 +70,7 @@ const Navbar = (props) => {
               <input
                 ref={userInputRef}
                 type="text"
-                className="w-1/4 px-3 py-2 text-sm leading-tight text-red-700 border rounded shadow appearance-none mb-2 focus:outline-none focus:shadow-outline"
+                className="w-1/4 font-bold px-3 py-2 text-sm leading-tight text-red-700 border rounded shadow appearance-none mb-2 focus:outline-none focus:shadow-outline"
               />
               <button
                 className="px-4 py-1 border rounded-lg font-normal bg-green-600 text-white"

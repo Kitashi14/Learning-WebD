@@ -6,25 +6,27 @@ import SearchedMsgCard from "./searchedMsgCard";
 const ChatUsers = (props) => {
   return (
     <>
-      <div className="h-5/6 w-full bg-orange-200  flex-col space-y-2  py-2 overflow-y-scroll ">
+      <div className="h-5/6 w-full bg-red-600  flex-col   overflow-y-scroll sc-hide rounded-br-2xl">
         {props.users.map((user) => {
           return (
             <ChatUserCard
               key={user.userName}
               user={user}
+              selectedUser={props.selectedUser}
               openChatBox={props.openChatBox}
             />
           );
         })}
         {props.searchedMsg.length ? (
           <>
-            <div className="h-10 w-full bg-blue-400 flex flex-row border border-blue-800 text-xl px-4 font-bold">
+            <div className="h-10 w-full bg-red-700 flex flex-row  text-xl px-4 font-bold">
               Chat:
             </div>
             {props.searchedMsg.map((data) => {
           return (
             <SearchedMsgCard
               key={data.message._id}
+              selectedMsg={props.selectedMsg}
               searchedMsg={data}
               openChatBox={props.openChatBox}
             />

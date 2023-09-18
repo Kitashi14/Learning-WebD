@@ -17,11 +17,11 @@ const ChatBox = (props) => {
     date = new Date(date);
     const currDate = new Date();
     if (
-      date.getFullYear() == currDate.getFullYear() &&
-      date.getMonth() == currDate.getMonth()
+      date.getFullYear() === currDate.getFullYear() &&
+      date.getMonth() === currDate.getMonth()
     ) {
-      if (date.getDate() == currDate.getDate()) return "Today";
-      else if (date.getDate() + 1 == currDate.getDate()) return "Yesterday";
+      if (date.getDate() === currDate.getDate()) return "Today";
+      else if (date.getDate() + 1 === currDate.getDate()) return "Yesterday";
       else
         return `${
           date.getDate() < 10 ? `0${date.getDate()}` : date.getDate()
@@ -74,7 +74,7 @@ const ChatBox = (props) => {
     if (status === "delivered") {
       return (
         <svg
-          className=" m-auto ml-2 mr-1"
+          className=" m-auto ml-2 mr-1 fill-white"
           xmlns="http://www.w3.org/2000/svg"
           height="1em"
           viewBox="0 0 448 512"
@@ -85,20 +85,20 @@ const ChatBox = (props) => {
     } else if (status === "received") {
       return (
         <svg
-          className=" m-auto ml-2 mr-1"
+          className=" m-auto ml-2 mr-1 fill-white"
           xmlns="http://www.w3.org/2000/svg"
-          height="1em"
+          height="1.2em"
           viewBox="0 0 512 512"
         >
           <path d="M256 48a208 208 0 1 1 0 416 208 208 0 1 1 0-416zm0 464A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM369 209c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-111 111-47-47c-9.4-9.4-24.6-9.4-33.9 0s-9.4 24.6 0 33.9l64 64c9.4 9.4 24.6 9.4 33.9 0L369 209z" />
         </svg>
       );
-    } else if (status == "seen") {
+    } else if (status === "seen") {
       return (
         <svg
-          className=" m-auto ml-2 mr-1"
+          className=" m-auto ml-2 mr-1 fill-white"
           xmlns="http://www.w3.org/2000/svg"
-          height="1em"
+          height="1.2em"
           viewBox="0 0 512 512"
         >
           <path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM369 209L241 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L335 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z" />
@@ -107,7 +107,7 @@ const ChatBox = (props) => {
     } else {
       return (
         <svg
-          className="fill-red-600 m-auto ml-2 mr-2"
+          className="fill-red-600 m-auto ml-2 mr-2 fill-white"
           xmlns="http://www.w3.org/2000/svg"
           height="1em"
           viewBox="0 0 384 512"
@@ -153,21 +153,15 @@ const ChatBox = (props) => {
 
   return (
     <>
-      <div className="bg-orange-200 flex flex-col h-full w-2/3">
-        <div className="h-1/6 flex flex-row pl-2 items-center text-blue-600 text-xl font-bold bg-green-300 ">
-          {/* <button
-            className="border bg-green-600 text-white py-1 px-3 font-medium rounded shadow"
-            onClick={backButtonHandler}
-          >
-            Back
-          </button> */}
+      <div className="bg-gray-200  flex flex-col h-full w-2/3">
+        <div className="h-1/6 flex drop-shadow-lg flex-row pl-10 items-center  text-4xl text-red-600 font-semibold bg-gray-200 ">
           <span className="ml-5">{`${userName}`}</span>
-          <span className="ml-5 text-m text-red-800 underline font-medium italic">
+          <span className="ml-5 mt-2 text-2xl font-normal text-red-400  italic">
             {chat.userTyping ? "is typing...." : ""}
           </span>
         </div>
         <div
-          className="bg-white h-4/6 flex flex-col-reverse space-y-1 py-1 px-2 overflow-scroll overflow-x-hidden "
+          className="bg-white h-4/6 px-4 flex flex-col-reverse space-y-1 py-1 px-2 overflow-y-scroll sc-hide overflow-x-hidden shadow-inner"
           onScroll={scrollHandler}
           ref={scrollBlock}
         >
@@ -188,7 +182,7 @@ const ChatBox = (props) => {
                       {setDay ? (
                         <>
                           <div className="flex flex-row justify-center">
-                            <span className="w-1/3 bg-green-400 text-center py-1 rounded">
+                            <span className="w-1/3 bg-red-700 text-white text-center py-1 rounded">
                               {prevDay}
                             </span>
                           </div>
@@ -205,16 +199,16 @@ const ChatBox = (props) => {
                         }
                         className={`w-full ${
                           props.selectedMsg === message._id
-                            ? "bg-red-200 rounded"
+                            ? "bg-red-300 rounded"
                             : ""
                         } flex flex-row justify-end mt-1 `}
                       >
-                        <span className="max-w-screen-md bg-red-400 rounded">
-                          <div className=" flex flex-row rounded pl-6 ">
-                            {message.message}
-                            {statusIcon(message.status)}
+                        <span className="max-w-screen-md bg-red-600 rounded">
+                          <div className=" flex flex-row rounded pl-6 space-x-8 pb-2 pt-2 items-end text-white justify-end">
+                            <span>{message.message}</span>
+                            <span>{statusIcon(message.status)}</span>
                           </div>
-                          <div className="flex flex-row justify-end pr-1  text-red-800 text-[10px]">
+                          <div className="flex flex-row justify-end pr-1  text-gray-100 text-[10px]">
                             {getTime(message.time)}
                           </div>
                         </span>
@@ -227,7 +221,7 @@ const ChatBox = (props) => {
                       {setDay ? (
                         <>
                           <div className="flex flex-row justify-center">
-                            <span className="w-1/3 bg-green-400 text-center py-1 rounded">
+                            <span className="w-1/3 bg-red-700 text-white text-center py-1 rounded">
                               {prevDay}
                             </span>
                           </div>
@@ -244,15 +238,15 @@ const ChatBox = (props) => {
                         }
                         className={`w-full ${
                           props.selectedMsg === message._id
-                            ? "bg-red-200 rounded"
+                            ? "bg-red-300 rounded"
                             : ""
                         } flex flex-row mt-1 `}
                       >
-                        <span className="max-w-screen-md bg-orange-300 rounded">
-                          <div className=" flex flex-row rounded pr-6 pl-2">
+                        <span className="max-w-screen-md bg-gray-300 rounded">
+                          <div className=" flex flex-row rounded pr-14  pl-6 pb-2 pt-2">
                             {message.message}
                           </div>
-                          <div className="flex flex-row justify-end pr-1  text-red-800 text-[10px]">
+                          <div className="flex flex-row justify-end pr-1  text-gray-800 text-[10px]">
                             {getTime(message.time)}
                           </div>
                         </span>
@@ -268,7 +262,7 @@ const ChatBox = (props) => {
           {messages.length ? (
             <>
               <div className="flex flex-row justify-center">
-                <span className="w-1/3 bg-green-400 text-center py-1 rounded">
+                <span className="w-1/3 bg-red-700 text-white text-center py-1 rounded">
                   {currDate}
                 </span>
               </div>
@@ -283,10 +277,10 @@ const ChatBox = (props) => {
                   onClick={() => {
                     scrollBlock.current.scrollTop = 0;
                   }}
-                  className="bg-gray-300 h-full w-[50px] flex flex-row justify-center rounded-full items-center"
+                  className="bg-red-400 h-full w-[50px] flex flex-row justify-center rounded-full items-center"
                 >
                   <svg
-                    className="fill-gray-500"
+                    className="fill-white"
                     xmlns="http://www.w3.org/2000/svg"
                     height="1em"
                     viewBox="0 0 448 512"
@@ -302,15 +296,23 @@ const ChatBox = (props) => {
         </div>
         <div className="h-1/6 flex flex-row justify-center items-center space-x-3">
           <textarea
-            className="w-3/4 h-4/6 px-3 py-2 text-sm leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline resize-none "
+            className="w-3/4 h-4/6 px-3 py-2 text-xl leading-tight bg-gray-200 outline-none text-red-500 font-medium appearance-none focus:outline-none focus:shadow-outline resize-none placeholder:font-normal"
             ref={chatInputRef}
             onChange={setTyping}
+            placeholder="Type your message here..."
           />
           <button
-            className="px-4 py-1 border rounded-lg font-normal bg-green-600 text-white"
+            className="px-3 py-3 rounded-full font-normal bg-red-600 text-white"
             onClick={sendButtonHandler}
           >
-            Send
+            <svg
+              className="fill-gray-100"
+              xmlns="http://www.w3.org/2000/svg"
+              height="1.9em"
+              viewBox="0 0 512 512"
+            >
+              <path d="M16.1 260.2c-22.6 12.9-20.5 47.3 3.6 57.3L160 376V479.3c0 18.1 14.6 32.7 32.7 32.7c9.7 0 18.9-4.3 25.1-11.8l62-74.3 123.9 51.6c18.9 7.9 40.8-4.5 43.9-24.7l64-416c1.9-12.1-3.4-24.3-13.5-31.2s-23.3-7.5-34-1.4l-448 256zm52.1 25.5L409.7 90.6 190.1 336l1.2 1L68.2 285.7zM403.3 425.4L236.7 355.9 450.8 116.6 403.3 425.4z" />
+            </svg>
           </button>
         </div>
       </div>

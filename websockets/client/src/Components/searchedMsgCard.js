@@ -2,7 +2,6 @@
 
 import { useContext } from "react";
 import AuthContext from "../context/authContext";
-import ChatContext from "../context/chatContext";
 
 const SearchedMsgCard = (props) => {
   const user = props.searchedMsg.userName;
@@ -12,11 +11,11 @@ const SearchedMsgCard = (props) => {
   const lastDay = (date) => {
     const currDate = new Date();
     if (
-      date.getFullYear() == currDate.getFullYear() &&
-      date.getMonth() == currDate.getMonth()
+      date.getFullYear() === currDate.getFullYear() &&
+      date.getMonth() === currDate.getMonth()
     ) {
-      if (date.getDate() == currDate.getDate()) return "Today";
-      else if (date.getDate() + 1 == currDate.getDate()) return "Yesterday";
+      if (date.getDate() === currDate.getDate()) return "Today";
+      else if (date.getDate() + 1 === currDate.getDate()) return "Yesterday";
       else
         return `${
           date.getDate() < 10 ? `0${date.getDate()}` : date.getDate()
@@ -46,23 +45,29 @@ const SearchedMsgCard = (props) => {
   return (
     <button
       onClick={openUser}
-      className="h-20 w-full bg-blue-200 flex flex-row border border-green-800"
+      className={`h-24 w-full  bg-red-${
+        props.selectedMsg && (messageObj._id === props.selectedMsg)
+          ? "400"
+          : "600"
+      } flex flex-row ${props.selectedMsg && (messageObj._id === props.selectedMsg)
+        ? ""
+        : "hover:bg-red-500"} `}
     >
       <div className=" w-4/5 h-full flex flex-col pl-4 py-1 items-start space-y-1">
-        <span className="text-green-800 text-2xl font-bold font-sans">
+        <span className="text-white text-2xl font-bold font-sans">
           {user}
         </span>
-        <span className="text-green-800 text-m  pl-2  truncate">
+        <span className="text-white text-m  pl-2  truncate">
           {`${messageObj.to === authUser ? user : "You"}: ${
             messageObj.message
           }`}
         </span>
       </div>
       <div className="w-1/5 h-full  flex flex-col  pr-4 py-0 space-y-0 items-end">
-        <span className="text-blue-800 font-mono">
+        <span className="text-red-100 font-mono">
           {lastDay(date)}
         </span>
-        <span className="text-blue-800 font-mono">
+        <span className="text-red-100 font-mono">
           {getTime(date)}
         </span>
       </div>

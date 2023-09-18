@@ -3,23 +3,34 @@
 const OnlineUsers = (props) => {
   const openUser = (e) => {
     e.preventDefault();
-    props.openChatBox(e.target.value);
+    console.log(e.target.user);
+    props.openChatBox(e.target.user);
   };
   return (
     <>
-      <div className="h-1/6 w-full flex flex-col bg-blue-400 space-y-2">
-        <div className="font-bold text-xl px-3 py-1 underline">Online Users: </div>
-        <div className="px-2 text-white text-xl font-bold flex flex-row justify-start items-center space-x-4">
+      <div className="h-1/6 w-full flex flex-col bg-red-700 justify-center">
+        <div className="px-4 text-white text-xl font-bold flex flex-row justify-start items-center space-x-4">
           {props.users.map((data) => {
             return (
+              <>
+              <div className="flex flex-col items-center justify-center">
+                <div className="absolute ml-10 mb-14 rounded-full border-2 w-4 h-4 bg-green-400">
+                </div>
               <button
                 key={data.userName}
-                value={data.userName}
+                user={data.userName}
                 onClick={openUser}
-                className="px-4 py-1 border rounded-lg font-normal bg-green-600 text-white"
+                className="w-16 h-16 border rounded-full font-normal bg-green-600 text-white"
               >
-                {data.userName}
+                <img user={data.userName} className="rounded-full" src={`https://static.vecteezy.com/system/resources/thumbnails/003/337/584/small/default-avatar-photo-placeholder-profile-icon-vector.jpg`} />
               </button>
+              <span className="text-xs pt-0 font-normal">
+              {data.userName}
+              </span>
+              </div>
+              
+              </>
+             
             );
           })}
         </div>

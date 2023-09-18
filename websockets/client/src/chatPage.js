@@ -1,21 +1,22 @@
-/** @format */
-
 import { useContext, useState } from "react";
 import ChatContext from "./context/chatContext";
-import OnlineUsers from "./Components/onlineuser";
-import ChatBox from "./Components/chatBox";
-import ChatUsers from "./Components/chatUsers";
+import ControlBlock from "./Components/controlBlock";
+import ChatBlock from "./Components/chatBlock";
 import { socket } from "./sc";
 
-const ChatPage = (props) => {
+const ChatPage = ()=>{
+    const chat = useContext(ChatContext);
+  const chatBox = chat.chatBox;
+
+  const [showUsers, setShowUsers] = useState(chatBox.users);
+  const [searchedMsg, setSearchedMsg] = useState([]);
   const [isChatBoxOpen, setChatBoxOpen] = useState(false);
+
   const [isSelectedUserOld, setIsSelectedUserOld] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedUserName, setSelectedUserName] = useState(null);
   const [selectedMsg, setSelectedMsg] = useState(null);
 
-  const chat = useContext(ChatContext);
-  const chatBox = chat.chatBox;
 
   if (isChatBoxOpen && selectedUserName) {
     var user = chat.chatBox.isUserPresent(selectedUserName);
@@ -48,64 +49,41 @@ const ChatPage = (props) => {
     socket.emit("seen", userName);
   };
 
-  const closeChatBox = () => {
-    setSelectedUserName(null);
-    setIsSelectedUserOld(false);
-    setSelectedUser(null);
-    setChatBoxOpen(false);
-    chat.setChatScreenUser(null);
+
+  const searchedUsers = (text) => {
+    var msgs = [];
+    const searchResult = chatBox.users.filter((user) => {
+      user.messages.map((msg) => {
+        if (text.length)
+          if (msg.message.includes(text)) {
+            msgs.push({
+              userName: user.userName,
+              message: msg,
+            });
+          }
+        return 0;
+      });
+      return user.userName.includes(text);
+    });
+    setShowUsers(searchResult);
+    msgs.sort((a,b)=>{
+      var timeA = new Date(a.message.time);
+      timeA=timeA.getTime();
+      var timeB = new Date(b.message.time);
+      timeB=timeB.getTime();
+      return timeB-timeA;
+    })
+    setSearchedMsg(msgs);
   };
-
-  return (
-    <>
-      <div className="h-5/6 w-full">
-        {isChatBoxOpen ? (
-          <>
-            <div className="flex flex-row h-full">
-              <div className="flex flex-col w-1/3 h-full">
-                <OnlineUsers
-                  users={chatBox.onlineUsers}
-                  openChatBox={openChatBox}
-                />
-                <ChatUsers
-                  searchedMsg={props.searchedMsg}
-                  users={props.searchedUsers}
-                  openChatBox={openChatBox}
-                />
-              </div>
-
-              <ChatBox
-                closeChatBox={closeChatBox}
-                isOld={isSelectedUserOld}
-                userInfo={selectedUser}
-                selectedMsg={selectedMsg}
-              />
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="flex flex-row h-full">
-              <div className="flex flex-col w-1/3 h-full">
-                <OnlineUsers
-                  users={chatBox.onlineUsers}
-                  openChatBox={openChatBox}
-                />
-                <ChatUsers
-                  searchedMsg={props.searchedMsg}
-                  users={props.searchedUsers}
-                  openChatBox={openChatBox}
-                />
-              </div>
-
-              <div className="bg-orange-100 flex w-2/3 flex-col h-full justify-center items-center text-gray-400 text-xl">
-                Your chat will appear here
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-    </>
-  );
-};
+    return (
+        <>
+        <div className="h-screen w-full bg-gray-200 flex flex-row">
+        <ControlBlock searchFunc={searchedUsers} searchedUsers={showUsers} searchedMsg={searchedMsg} openChatBox={openChatBox} selectedMsg={selectedMsg} selectedUser={selectedUser}/>
+        <ChatBlock isChatBoxOpen={isChatBoxOpen} isOld={isSelectedUserOld} userInfo={selectedUser} selectedMsg={selectedMsg}/>
+        {/* <Navbar  />
+        <ChatPage  /> */}
+      </div></>
+    );
+}
 
 export default ChatPage;
