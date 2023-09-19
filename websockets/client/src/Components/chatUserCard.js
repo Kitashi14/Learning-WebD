@@ -62,7 +62,7 @@ const ChatUserCard = (props) => {
             {(chat.userTyping === user.userName) ? "is typing...." : ""}
           </span>
         </span>
-        <span className="text-white text-m  pl-2  truncate">
+        <span className="text-white w-4/5 text-start  text-m  pl-2  truncate">
           {user.messages.length
             ? `${
                 user.messages[user.messages.length - 1].to === userName

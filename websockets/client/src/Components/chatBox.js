@@ -122,7 +122,8 @@ const ChatBox = (props) => {
   //   props.closeChatBox();
   // };
 
-  const sendButtonHandler = async () => {
+  const sendButtonHandler = async (e) => {
+    e.preventDefault();
     const chatInput = chatInputRef.current.value;
 
     if (chatInput) {
@@ -204,8 +205,10 @@ const ChatBox = (props) => {
                         } flex flex-row justify-end mt-1 `}
                       >
                         <span className="max-w-screen-md bg-red-600 rounded">
-                          <div className=" flex flex-row rounded pl-6 space-x-8 pb-2 pt-2 items-end text-white justify-end">
-                            <span>{message.message}</span>
+                          <div className="w-full flex bg-red-600 flex-row rounded pl-6 space-x-8 pb-2 px-0 pt-2 items-end text-white justify-start ">
+                            <span className="w-11/12  break-words whitespace-pre-wrap">
+                              {message.message}
+                            </span>
                             <span>{statusIcon(message.status)}</span>
                           </div>
                           <div className="flex flex-row justify-end pr-1  text-gray-100 text-[10px]">
@@ -240,11 +243,13 @@ const ChatBox = (props) => {
                           props.selectedMsg === message._id
                             ? "bg-red-300 rounded"
                             : ""
-                        } flex flex-row mt-1 `}
+                        } flex flex-row mt-1  `}
                       >
                         <span className="max-w-screen-md bg-gray-300 rounded">
-                          <div className=" flex flex-row rounded pr-14  pl-6 pb-2 pt-2">
-                            {message.message}
+                          <div className="w-full flex flex-row rounded pr-14  pl-6 pb-2 pt-2">
+                            <span className="w-full  break-words whitespace-pre-wrap">
+                              {message.message}
+                            </span>
                           </div>
                           <div className="flex flex-row justify-end pr-1  text-gray-800 text-[10px]">
                             {getTime(message.time)}
@@ -294,26 +299,29 @@ const ChatBox = (props) => {
             <></>
           )}
         </div>
-        <div className="h-1/6 flex flex-row justify-center items-center space-x-3">
-          <textarea
-            className="w-3/4 h-4/6 px-3 py-2 text-xl leading-tight bg-gray-200 outline-none text-red-500 font-medium appearance-none focus:outline-none focus:shadow-outline resize-none placeholder:font-normal"
-            ref={chatInputRef}
-            onChange={setTyping}
-            placeholder="Type your message here..."
-          />
-          <button
-            className="px-3 py-3 rounded-full font-normal bg-red-600 text-white"
-            onClick={sendButtonHandler}
-          >
-            <svg
-              className="fill-gray-100"
-              xmlns="http://www.w3.org/2000/svg"
-              height="1.9em"
-              viewBox="0 0 512 512"
+        <div className="h-1/6 ">
+          <form className="h-full w-full px-0  flex flex-row justify-around items-center space-x-3">
+            <textarea
+              className="w-3/4 h-full px-3 py-2 text-xl leading-tight bg-gray-200 outline-none text-red-500 font-medium appearance-none focus:outline-none focus:shadow-outline resize-none placeholder:font-normal"
+              ref={chatInputRef}
+              onChange={setTyping}
+              placeholder="Type your message here..."
+            />
+            <button
+              className="px-3 py-3 rounded-full font-normal bg-red-600 text-white"
+              onClick={sendButtonHandler}
+              type="submit"
             >
-              <path d="M16.1 260.2c-22.6 12.9-20.5 47.3 3.6 57.3L160 376V479.3c0 18.1 14.6 32.7 32.7 32.7c9.7 0 18.9-4.3 25.1-11.8l62-74.3 123.9 51.6c18.9 7.9 40.8-4.5 43.9-24.7l64-416c1.9-12.1-3.4-24.3-13.5-31.2s-23.3-7.5-34-1.4l-448 256zm52.1 25.5L409.7 90.6 190.1 336l1.2 1L68.2 285.7zM403.3 425.4L236.7 355.9 450.8 116.6 403.3 425.4z" />
-            </svg>
-          </button>
+              <svg
+                className="fill-gray-100"
+                xmlns="http://www.w3.org/2000/svg"
+                height="1.9em"
+                viewBox="0 0 512 512"
+              >
+                <path d="M16.1 260.2c-22.6 12.9-20.5 47.3 3.6 57.3L160 376V479.3c0 18.1 14.6 32.7 32.7 32.7c9.7 0 18.9-4.3 25.1-11.8l62-74.3 123.9 51.6c18.9 7.9 40.8-4.5 43.9-24.7l64-416c1.9-12.1-3.4-24.3-13.5-31.2s-23.3-7.5-34-1.4l-448 256zm52.1 25.5L409.7 90.6 190.1 336l1.2 1L68.2 285.7zM403.3 425.4L236.7 355.9 450.8 116.6 403.3 425.4z" />
+              </svg>
+            </button>
+          </form>
         </div>
       </div>
     </>
