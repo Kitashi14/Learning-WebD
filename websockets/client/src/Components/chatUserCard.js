@@ -56,27 +56,27 @@ const ChatUserCard = (props) => {
         : "hover:bg-red-500"} `}
     >
       <div className=" w-4/5 h-full flex flex-col pl-4 py-1 items-start justify-center space-y-1">
-        <span className="text-white text-2xl font-bold font-sans">
+        <span className="text-white text-2xl font-normal font-[Laila]">
           {user.userName}
           <span className="ml-5 text-sm text-yellow-400  font-medium italic">
-            {(chat.userTyping === user.userName) ? "is typing...." : ""}
+            {(chat.userTyping[user.userName] > 0) ? "is typing...." : ""}
           </span>
         </span>
         <span className="text-white w-4/5 text-start  text-m  pl-2  truncate">
           {user.messages.length
             ? `${
                 user.messages[user.messages.length - 1].to === userName
-                  ? user.userName
-                  : "You"
-              }: ${user.messages[user.messages.length - 1].message}`
+                  ? user.userName + "   "
+                  : "You "
+              }:   ${user.messages[user.messages.length - 1].message}`
             : "lores ipsum"}
         </span>
       </div>
       <div className="w-1/5 h-full  flex flex-col  pr-4 py-0 space-y-0 justify-center items-end">
-        <span className="text-red-100 font-mono">
+        <span className="text-red-100 ">
           {user.latestMessage ? lastDay(date) : ""}
         </span>
-        <span className="text-red-100 font-mono">
+        <span className="text-red-100 text-sm">
           {user.latestMessage ? getTime(date) : ""}
         </span>
         {user.unseenCount ? (

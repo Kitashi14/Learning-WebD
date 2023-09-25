@@ -77,6 +77,7 @@ export const useSocket = () => {
         socket.off("new message");
         socket.off("seen");
         socket.off("typing");
+        socket.off("left");
       };
     }
   }, [auth.userName,chat]);

@@ -25,7 +25,7 @@ const Navbar = (props) => {
   };
   return (
     <>
-      <div className="h-1/6">
+      <div className="h-1/6 drop-shadow-lg ">
         <div
           className={`py-2 w-full h-full bg-red-600 text-white text-xl rounded-tr-2xl  flex flex-col ${
             auth.userName ? " items-start  pl-0 " : " items-center "

@@ -53,21 +53,21 @@ const SearchedMsgCard = (props) => {
         ? ""
         : "hover:bg-red-500"} `}
     >
-      <div className=" w-4/5 h-full flex flex-col pl-4 py-1 items-start space-y-1">
-        <span className="text-white text-2xl font-bold font-sans">
+      <div className=" w-4/5 h-full flex flex-col pl-4 py-1 items-start justify-center space-y-1">
+        <span className="text-white text-2xl font-normal font-[Laila]">
           {user}
         </span>
-        <span className="text-white text-m  pl-2  truncate">
+        <span className="text-white text-start  w-4/5 text-m  pl-2  truncate">
           {`${messageObj.to === authUser ? user : "You"}: ${
             messageObj.message
           }`}
         </span>
       </div>
-      <div className="w-1/5 h-full  flex flex-col  pr-4 py-0 space-y-0 items-end">
-        <span className="text-red-100 font-mono">
+      <div className="w-1/5 h-full justify-center flex flex-col  pr-4 py-0 space-y-0 items-end">
+        <span className="text-red-100 text-sm">
           {lastDay(date)}
         </span>
-        <span className="text-red-100 font-mono">
+        <span className="text-red-100 text-sm">
           {getTime(date)}
         </span>
       </div>

@@ -62,7 +62,7 @@ const startSocket = async (httpServer) => {
         console.log("disconnected : ", reason);
         count--;
         if (onlineUsers.has(socket.id)) {
-          console.log("sending braodcast for left user\n");
+          console.log("sending braodcast for left user\n",onlineUsers.get(socket.id).userName);
           socket.broadcast.emit("left", onlineUsers.get(socket.id).userName);
           onlineUsers.delete(socket.id);
         }

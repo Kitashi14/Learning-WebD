@@ -8,9 +8,9 @@ const ChatContext = createContext({
   chatBox: null,
   setChatBox: function (data) {},
   chatScreenUser: null,
-  setChatScreenUser: (user)=>{},
-  userTyping : false,
-  setUserTyping : (user)=>{}
+  setChatScreenUser: (user) => {},
+  userTyping: false,
+  setUserTyping: (user) => {},
 });
 
 export const ChatContextProvider = (props) => {
@@ -21,7 +21,7 @@ export const ChatContextProvider = (props) => {
       this.userName = otherParty;
       this.latestMessage = 0;
       this.messages = [];
-      this.unseenCount =0;
+      this.unseenCount = 0;
     }
 
     getName() {
@@ -33,7 +33,10 @@ export const ChatContextProvider = (props) => {
 
       if (this.latestMessage < date || !this.latestMessage)
         this.latestMessage = date;
-      if((data.status==='delivered'|| data.status==='received')&& data.from===this.userName)
+      if (
+        (data.status === "delivered" || data.status === "received") &&
+        data.from === this.userName
+      )
         this.unseenCount++;
       this.messages.push(data);
     }
@@ -69,7 +72,10 @@ export const ChatContextProvider = (props) => {
 
     userReceived() {
       for (var j = 0; j < this.messages.length; j++) {
-        if ((this.messages[j].status === "delivered")&& this.messages[j].to===this.userName) {
+        if (
+          this.messages[j].status === "delivered" &&
+          this.messages[j].to === this.userName
+        ) {
           this.messages[j].status = "received";
         }
       }
@@ -80,15 +86,14 @@ export const ChatContextProvider = (props) => {
       for (var j = 0; j < this.messages.length; j++) {
         if (
           (this.messages[j].status === "received" ||
-          this.messages[j].status === "delivered")&& this.messages[j].to===this.userName
+            this.messages[j].status === "delivered") &&
+          this.messages[j].to === this.userName
         ) {
           this.messages[j].status = "seen";
         }
       }
       return;
     }
-
-    
   }
   class ChatBox {
     constructor() {
@@ -181,6 +186,15 @@ export const ChatContextProvider = (props) => {
       return false;
     }
 
+    isUserOnline(name) {
+      var userFound = this.onlineUsers.filter((user) => {
+        return user.userName === name;
+      });
+
+      if (userFound.length > 0) return true;
+      return false;
+    }
+
     addOnlineUser(data) {
       this.onlineUsers.push(data);
     }
@@ -202,15 +216,16 @@ export const ChatContextProvider = (props) => {
       }
     }
 
-    meSaw(userName){
+    meSaw(userName) {
       var i = this.userIndex.get(userName);
-      this.users[i].unseenCount =0;
+      this.users[i].unseenCount = 0;
     }
   }
 
   const [chatBoxx, setChatBoxx] = useState(new ChatBox());
-  const [chatScreenUser,setChatScreenUser] = useState(null);
-  const [isTyping,setIsTyping] = useState(false);
+  const [chatScreenUser, setChatScreenUser] = useState(null);
+  const [isTyping, setIsTyping] = useState({});
+  const [typingTime, setTypingTime] = useState(0);
   // eslint-disable-next-line
   const [_, forceRender] = useReducer((x) => !x, false);
   const [hasjoined, setHasJoined] = useState(false);
@@ -222,16 +237,20 @@ export const ChatContextProvider = (props) => {
     forceRender();
   };
 
-  const modifyChatScreenUser = (userName)=>{
+  const modifyChatScreenUser = (userName) => {
     setChatScreenUser(userName);
-  }
+  };
 
-  const modifyIsTyping = (userName)=>{
-    setIsTyping(userName);
+  const modifyIsTyping = (userName) => {
+    isTyping[userName] = isTyping[userName] + 1 || 1;
+    console.log(isTyping);
+    forceRender();
     setTimeout(() => {
-      setIsTyping(null);
+      isTyping[userName] = isTyping[userName] - 1;
+      console.log(isTyping);
+      forceRender();
     }, 2500);
-  }
+  };
 
   if (!hasjoined && auth.userName) {
     console.log("sending join request");
@@ -247,8 +266,7 @@ export const ChatContextProvider = (props) => {
     chatScreenUser: chatScreenUser,
     setChatScreenUser: modifyChatScreenUser,
     userTyping: isTyping,
-    setUserTyping: modifyIsTyping
-    
+    setUserTyping: modifyIsTyping,
   };
   return (
     <ChatContext.Provider value={context}>

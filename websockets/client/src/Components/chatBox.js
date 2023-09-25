@@ -46,8 +46,7 @@ const ChatBox = (props) => {
     } ${part}`;
   };
 
-  const scrollHandler = (e) => {
-    e.preventDefault();
+  const scrollHandler = () => {
     if (scrollBlock.current.scrollTop < 0) {
       setScrollDownButton(true);
     } else {
@@ -66,9 +65,12 @@ const ChatBox = (props) => {
       setScrollDownButton(false);
     }
     showSelectedMsg();
-  }, [props.selectedMsg]);
+  }, [props.selectedMsg, chat.userTyping]);
+
 
   const userName = props.isOld ? props.userInfo.userName : props.userInfo;
+
+  const isUserOnline = chat.chatBox.isUserOnline(userName);
 
   const statusIcon = (status) => {
     if (status === "delivered") {
@@ -122,9 +124,8 @@ const ChatBox = (props) => {
   //   props.closeChatBox();
   // };
 
-  const sendButtonHandler = async (e) => {
-    e.preventDefault();
-    const chatInput = chatInputRef.current.value;
+  const sendButtonHandler = async () => {
+    const chatInput = chatInputRef.current.value.trim();
 
     if (chatInput) {
       var currObj = chat.chatBox;
@@ -152,17 +153,34 @@ const ChatBox = (props) => {
     });
   };
 
+  console.log(isUserOnline);
+  console.log(chat.userTyping[userName]);
+
   return (
     <>
-      <div className="bg-gray-200  flex flex-col h-full w-2/3">
-        <div className="h-1/6 flex drop-shadow-lg flex-row pl-10 items-center  text-4xl text-red-600 font-semibold bg-gray-200 ">
-          <span className="ml-5">{`${userName}`}</span>
-          <span className="ml-5 mt-2 text-2xl font-normal text-red-400  italic">
-            {chat.userTyping ? "is typing...." : ""}
+      <div className="bg-gray-200 flex flex-col h-full w-2/3">
+        <div className="h-1/6 flex drop-shadow-lg flex-row pl-10 items-center  text-4xl text-red-600 font-semibold bg-gray-200 justify-between">
+          <span className="ml-5 h-full w-3/4 flex flex-col pr-3">
+            <span className="w-full h-2/3 font-[Laila] pt-6 truncate ">{`${userName}`}</span>
+            <span className="  h-1/3 text-xl font-normal text-red-400  italic">
+              {chat.userTyping[userName] > 0 ? "is typing...." : ""}
+            </span>
           </span>
+
+          <div className="w-1/3  flex flex-row justify-end pr-4">
+            {isUserOnline ? (
+              <>
+                <span className="bg-green-500 text-3xl py-2 px-5 rounded-full text-white">
+                  Online
+                </span>
+              </>
+            ) : (
+              <></>
+            )}
+          </div>
         </div>
         <div
-          className="bg-white h-4/6 px-4 flex flex-col-reverse space-y-1 py-1 px-2 overflow-y-scroll sc-hide overflow-x-hidden shadow-inner"
+          className="bg-white h-4/6 px-4 flex flex-col-reverse space-y-1 py-1 px-2 overflow-y-auto sc-design overflow-x-hidden shadow-inner"
           onScroll={scrollHandler}
           ref={scrollBlock}
         >
@@ -204,14 +222,14 @@ const ChatBox = (props) => {
                             : ""
                         } flex flex-row justify-end mt-1 `}
                       >
-                        <span className="max-w-screen-md bg-red-600 rounded">
+                        <span className="max-w-screen-md bg-red-600 rounded-l-2xl rounded-tr-2xl rounder-br-xs overflow-hidden">
                           <div className="w-full flex bg-red-600 flex-row rounded pl-6 space-x-8 pb-2 px-0 pt-2 items-end text-white justify-start ">
                             <span className="w-11/12  break-words whitespace-pre-wrap">
                               {message.message}
                             </span>
                             <span>{statusIcon(message.status)}</span>
                           </div>
-                          <div className="flex flex-row justify-end pr-1  text-gray-100 text-[10px]">
+                          <div className="flex flex-row justify-end pr-2 pb-2  text-gray-100 text-[10px]">
                             {getTime(message.time)}
                           </div>
                         </span>
@@ -245,13 +263,13 @@ const ChatBox = (props) => {
                             : ""
                         } flex flex-row mt-1  `}
                       >
-                        <span className="max-w-screen-md bg-gray-300 rounded">
+                        <span className="max-w-screen-md bg-gray-300 rounded-r-2xl rounded-tl-2xl rounder-bl-xs overflow-hidden">
                           <div className="w-full flex flex-row rounded pr-14  pl-6 pb-2 pt-2">
                             <span className="w-full  break-words whitespace-pre-wrap">
                               {message.message}
                             </span>
                           </div>
-                          <div className="flex flex-row justify-end pr-1  text-gray-800 text-[10px]">
+                          <div className="flex flex-row justify-end pr-2 pb-2  text-gray-800 text-[10px] ">
                             {getTime(message.time)}
                           </div>
                         </span>
@@ -300,17 +318,21 @@ const ChatBox = (props) => {
           )}
         </div>
         <div className="h-1/6 ">
-          <form className="h-full w-full px-0  flex flex-row justify-around items-center space-x-3">
+          <div className="h-full w-full px-0  flex flex-row justify-around items-center space-x-3">
             <textarea
               className="w-3/4 h-full px-3 py-2 text-xl leading-tight bg-gray-200 outline-none text-red-500 font-medium appearance-none focus:outline-none focus:shadow-outline resize-none placeholder:font-normal"
               ref={chatInputRef}
               onChange={setTyping}
+              onKeyPress={(e) => {
+                if (e.which === 13 && !e.shiftKey) {
+                  sendButtonHandler();
+                }
+              }}
               placeholder="Type your message here..."
             />
             <button
               className="px-3 py-3 rounded-full font-normal bg-red-600 text-white"
               onClick={sendButtonHandler}
-              type="submit"
             >
               <svg
                 className="fill-gray-100"
@@ -321,7 +343,7 @@ const ChatBox = (props) => {
                 <path d="M16.1 260.2c-22.6 12.9-20.5 47.3 3.6 57.3L160 376V479.3c0 18.1 14.6 32.7 32.7 32.7c9.7 0 18.9-4.3 25.1-11.8l62-74.3 123.9 51.6c18.9 7.9 40.8-4.5 43.9-24.7l64-416c1.9-12.1-3.4-24.3-13.5-31.2s-23.3-7.5-34-1.4l-448 256zm52.1 25.5L409.7 90.6 190.1 336l1.2 1L68.2 285.7zM403.3 425.4L236.7 355.9 450.8 116.6 403.3 425.4z" />
               </svg>
             </button>
-          </form>
+          </div>
         </div>
       </div>
     </>
