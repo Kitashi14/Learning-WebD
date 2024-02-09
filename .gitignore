@@ -2,3 +2,4 @@
 *node_modules/
 *.exe
 *.lnk
+*.DS_Store
