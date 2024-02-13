@@ -10,6 +10,7 @@ import {
 
 //creating global variables that can be used anywhere inside the react-app
 const DataContext = createContext({
+  isLoading: true,
   dplTable: [],
   jiraTable: [],
   childParentMap: new Map(),
@@ -18,6 +19,7 @@ const DataContext = createContext({
 });
 
 export const DataContextProvider = (props) => {
+  const [isLoading, setIsLoading] = useState(true);
   const [dplTable, setDplTable] = useState([]);
   const [jiraTable, setJiraTable] = useState([]);
   const [childParentMap, setChildParentMap] = useState(new Map());
@@ -28,29 +30,40 @@ export const DataContextProvider = (props) => {
   useEffect(() => {
     const fetchData = async () => {
       //use fetch api's here
-      const dlpResponseData = tableData;
-      const jiraResponseData = tableData;
-      const childParentMapResponse = child_parent_map;
 
-      const parentChildData = parent_child_map;
-      const userFullNameData = userdId_fullName_map;
+      const response = () => {
+        return new Promise((resolve, reject) => {
+          setTimeout(() => {
+            const dlpResponseData = tableData;
+            const jiraResponseData = tableData;
+            const childParentMapResponse = child_parent_map;
 
-      setDplTable(dlpResponseData);
-      setJiraTable(jiraResponseData);
-      setChildParentMap(childParentMapResponse);
-      setParentChildMap(parentChildData);
-      setUserFullNameMap(userFullNameData);
+            const parentChildData = parent_child_map;
+            const userFullNameData = userdId_fullName_map;
+
+            setDplTable(dlpResponseData);
+            setJiraTable(jiraResponseData);
+            setChildParentMap(childParentMapResponse);
+            setParentChildMap(parentChildData);
+            setUserFullNameMap(userFullNameData);
+            setIsLoading(false);
+            resolve();
+          }, 1000);
+        });
+      };
+      await response();
     };
 
     fetchData();
   }, []);
 
   const context = {
-    dplTable: dplTable,
-    jiraTable: jiraTable,
-    childParentMap: childParentMap,
-    parentChildMap: parentChildMap,
-    userFullNameMap: userFullNameMap,
+    isLoading,
+    dplTable,
+    jiraTable,
+    childParentMap,
+    parentChildMap,
+    userFullNameMap,
   };
 
   return (
