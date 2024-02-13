@@ -48,7 +48,7 @@ export const DataContextProvider = (props) => {
             setUserFullNameMap(userFullNameData);
             setIsLoading(false);
             resolve();
-          }, 1000);
+          }, 500);
         });
       };
       await response();

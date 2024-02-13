@@ -7,13 +7,12 @@ import DataContext from "../context/dataContext";
 
 //page for a particular feature
 const FeatureViewPage = (props) => {
-
-  const contextData = useContext(DataContext)
+  const contextData = useContext(DataContext);
 
   const featureId = useParams().fid; //extracting feature reference and storing it as feature-id
   var tableToUse;
-  if(props.type==="dpl") tableToUse = contextData.dplTable
-  else tableToUse = contextData.jiraTable
+  if (props.type === "dpl") tableToUse = contextData.dplTable;
+  else tableToUse = contextData.jiraTable;
   const featureData = tableToUse.filter(
     (elem) => elem.feature_reference === featureId
   )[0]; //finding the feature from feature table
@@ -30,6 +29,15 @@ const FeatureViewPage = (props) => {
             <span className="text-blue-500">
               {featureData.feature_reference}
             </span>
+            {props.type === "active" ? (
+              <>
+                <span className="ml-3 bg-cyan-400 py-2 px-3 rounded-lg text-white font-bold text-lg">
+                  ACTIVE RELEASE
+                </span>
+              </>
+            ) : (
+              <></>
+            )}
           </div>
         </Card>
         <div className="w-full  flex flex-row justify-evenly items-center">
@@ -89,14 +97,18 @@ const FeatureViewPage = (props) => {
                   navigate(`/${props.type}/view/${featureData.assigned_to}`);
                 }}
               >
-                {`${contextData.userFullNameMap.get(featureData.assigned_to)} (${
+                {`${contextData.userFullNameMap.get(
                   featureData.assigned_to
-                }) `}
+                )} (${featureData.assigned_to}) `}
               </span>
             </Typography>
           </div>
           <div className="w-fit pl-4 pt-4 ">
-            <FeatureTimeline creationDate={featureData.creation_date} lastStatusChangeDate={featureData.last_status_change_date} createdBy={featureData.created_by}/>
+            <FeatureTimeline
+              creationDate={featureData.creation_date}
+              lastStatusChangeDate={featureData.last_status_change_date}
+              createdBy={featureData.created_by}
+            />
           </div>
         </div>
         <Card className="py-3 px-6 flex-col flex">
@@ -112,7 +124,6 @@ const FeatureViewPage = (props) => {
             <span className="font-normal">{featureData.feature_des}</span>
           </Typography>
           <hr />
-          
         </Card>
       </div>
     </>

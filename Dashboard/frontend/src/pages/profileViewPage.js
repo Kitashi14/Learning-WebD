@@ -548,6 +548,12 @@ const ProfileViewPage = (props) => {
     <>
       {/* page block */}
       <div className="bg-gray-200 flex h-full overflow-y-auto flex-col py-3 space-y-2">
+        <div className="flex flex-row justify-center mb-[-10px]">
+          {" "}
+          <span className=" bg-blue-600 py-2 px-3 rounded-lg text-white font-bold text-lg">
+            {props.type === "dpl" ? "DPL Metrics" : "Active Releases"}
+          </span>
+        </div>
         <ProfileSearchBar
           selectUserId={selectUserId}
           table={
