@@ -21,6 +21,8 @@ const table = [
         feature_type : 'small',
 
     },
+
+
     {
         feature_reference : 'IOSXE-2757',
         feature_name : 'WebUI Angular JS Migration 21.1.1',
@@ -706,7 +708,7 @@ export const parent_child_map = new Map([
     ['chandrap',['risbasu','dmanchan','psesham']],
     ['risbasu',['psrigiri','vtanjore']],
     ['dmanchan',['babubabu','grudwara']],
-    ['psesham',['goasawa','rdivecha','hraghuna','stsarang']]
+    ['psesham',['goasawa','rdivecha','hraghuna','stsarang']],
 ])
 
 
@@ -726,3 +728,5 @@ export const userdId_fullName_map = new Map([
     ['stsarang','SthitiRanjan Sarangi'],
     ['sargorth','Sarath Gorthi Subrahmanya']
 ])
+
+

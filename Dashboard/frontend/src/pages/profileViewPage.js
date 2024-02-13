@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import FeatureTable from "../components/featureTable";
 import FeatureTagRadio from "../components/featureTagRadio";
 import FeatureTypeRadio from "../components/featureTypeRadio";
@@ -7,18 +7,17 @@ import { Card, Typography } from "@material-tailwind/react";
 import CloseIcon from "@rsuite/icons/Close";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
-import {
-  child_parent_map,
-  parent_child_map,
-  tableData,
-  userdId_fullName_map,
-} from "../data/mockData";
 import SearchBar from "../components/SearchBar";
 import { useNavigate, useParams } from "react-router-dom";
 import FeatureReleaseRadio from "../components/featureReleaseRadio";
+import DataContext from "../context/dataContext";
 
 // dashboard view page for any user
-const ProfileView = (props) => {
+const ProfileViewPage = (props) => {
+
+  //extracting context global data
+  const contextData = useContext(DataContext);
+
   // useState containing all filter's states
   // level 1 filters
   const [featureRelease, setFeatureRelease] = useState("all");
@@ -44,9 +43,9 @@ const ProfileView = (props) => {
   // for finding all parents nodes of the current user
   const previous_parents = [userId];
   let currChild = userId;
-  while (child_parent_map.has(currChild)) {
-    previous_parents.unshift(child_parent_map.get(currChild));
-    currChild = child_parent_map.get(currChild);
+  while (contextData.childParentMap.has(currChild)) {
+    previous_parents.unshift(contextData.childParentMap.get(currChild));
+    currChild = contextData.childParentMap.get(currChild);
   }
   if (userId !== "all") previous_parents.unshift("all");
 
@@ -105,8 +104,8 @@ const ProfileView = (props) => {
           data = table;
         } else {
           // storing all direct children nodes
-          const childrens = parent_child_map.has(userId)
-            ? parent_child_map.get(userId)
+          const childrens = contextData.parentChildMap.has(userId)
+            ? contextData.parentChildMap.get(userId)
             : [];
 
           // filtering features assigned directly to user
@@ -118,8 +117,8 @@ const ProfileView = (props) => {
 
           // dfs search in the tree
           const dfs_search = (curr, ultimate_parent) => {
-            const childNodes = parent_child_map.has(curr)
-              ? parent_child_map.get(curr)
+            const childNodes = contextData.parentChildMap.has(curr)
+              ? contextData.parentChildMap.get(curr)
               : [];
             table.forEach((elem) => {
               if (elem.assigned_to === curr) {
@@ -154,10 +153,10 @@ const ProfileView = (props) => {
         loadTableData(data, "all", "all");
       };
 
-      loadData(tableData);
+      loadData(contextData.dplTable);
     },
     // eslint-disable-next-line
-    [userId, featureTag, featureType, featureRelease] // dependency array
+    [userId, featureTag, featureType, featureRelease,contextData] // dependency array
   );
 
   //release chart parameters
@@ -291,7 +290,7 @@ const ProfileView = (props) => {
             if (elem.assigned_under === assign) count++;
           });
           return {
-            name: assign !== "self" ? userdId_fullName_map.get(assign) : assign,
+            name: assign !== "self" ? contextData.userFullNameMap.get(assign) : assign,
             y: count,
           };
         })
@@ -551,7 +550,7 @@ const ProfileView = (props) => {
           <Card className="w-fit flex flex-row items-center px-3 py-3 ml-4">
             View For :
             <span className="text-base text-blue-500 font-bold pl-2">
-              {userId === "all" ? "All" : userdId_fullName_map.get(userId)}
+              {userId === "all" ? "All" : contextData.userFullNameMap.get(userId)}
             </span>
           </Card>
 
@@ -679,7 +678,7 @@ const ProfileView = (props) => {
             <Typography className="pl-4 pb-4" variant="h3">
               <span className="font-medium font-mono text-base text-blue-500 text-md">
                 View For:{" "}
-                {userId !== "all" ? userdId_fullName_map.get(userId) : "All"}
+                {userId !== "all" ? contextData.userFullNameMap.get(userId) : "All"}
               </span>
               <br />
               {featureTag !== "all" ||
@@ -775,4 +774,4 @@ const ProfileView = (props) => {
   );
 };
 
-export default ProfileView;
+export default ProfileViewPage;

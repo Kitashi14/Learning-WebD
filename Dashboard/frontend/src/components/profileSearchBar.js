@@ -1,29 +1,33 @@
 import { SelectPicker } from "rsuite";
-import { tableData, userdId_fullName_map } from "../data/mockData";
-
-// a set for storing all unique users 
-const s = new Set();
-
-//adding unique users from feature table
-tableData.forEach((elem)=>{
-    s.add(elem.assigned_to)
-})
-
-//adding users from user tree
-userdId_fullName_map.forEach((v,k)=>{
-    s.add(k)})
-
-// mapping unique user with their full names
-const data = [];
-s.forEach((e)=>data.push({label: `${userdId_fullName_map.get(e)} (${e})`, value: e}))
-data.unshift({label : 'All', value: 'all'});
+import { useContext } from "react";
+import DataContext from "../context/dataContext";
 
 // user profile search bar component
 const ProfileSearchBar = (props) => {
-  const selectUser = (e) => {
-    props.selectUserId(e==null? "all":e);
-  };
+  // a set for storing all unique users
+  const s = new Set();
 
+  //adding unique users from feature table
+  const contextData = useContext(DataContext);
+  contextData.dplTable.forEach((elem) => {
+    s.add(elem.assigned_to);
+  });
+
+  //adding users from user tree
+  contextData.userFullNameMap.forEach((v, k) => {
+    s.add(k);
+  });
+
+  // mapping unique user with their full names
+  const data = [];
+  s.forEach((e) =>
+    data.push({ label: `${contextData.userFullNameMap.get(e)} (${e})`, value: e })
+  );
+  data.unshift({ label: "All", value: "all" });
+
+  const selectUser = (e) => {
+    props.selectUserId(e == null ? "all" : e);
+  };
 
   return (
     <>
@@ -32,7 +36,7 @@ const ProfileSearchBar = (props) => {
         label="User"
         data={data}
         onChange={selectUser}
-        value={props.userId}    //default value
+        value={props.userId} //default value
       />
     </>
   );

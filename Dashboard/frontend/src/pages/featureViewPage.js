@@ -1,13 +1,17 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { tableData, userdId_fullName_map } from "../data/mockData";
 import { Card, Typography } from "@material-tailwind/react";
 import { Progress } from "rsuite";
 import { FeatureTimeline } from "../components/featureTimeline";
+import { useContext } from "react";
+import DataContext from "../context/dataContext";
 
 //page for a particular feature
 const FeatureViewPage = () => {
+
+  const contextData = useContext(DataContext)
+
   const featureId = useParams().fid; //extracting feature reference and storing it as feature-id
-  const featureData = tableData.filter(
+  const featureData = contextData.dplTable.filter(
     (elem) => elem.feature_reference === featureId
   )[0]; //finding the feature from feature table
 
@@ -82,7 +86,7 @@ const FeatureViewPage = () => {
                   navigate(`/dpl/view/${featureData.assigned_to}`);
                 }}
               >
-                {`${userdId_fullName_map.get(featureData.assigned_to)} (${
+                {`${contextData.userFullNameMap.get(featureData.assigned_to)} (${
                   featureData.assigned_to
                 }) `}
               </span>
