@@ -147,7 +147,7 @@ export default function FeatureTable(props) {
                   color="blue-gray"
                   className="font-normal hover:cursor-pointer hover:text-blue-600"
                   onClick={() => {
-                    navigate(`/dpl/feature/${data.feature_reference}`);
+                    navigate(`/${props.type}/feature/${data.feature_reference}`);
                   }}
                 >
                   {data.feature_reference}
@@ -231,7 +231,7 @@ export default function FeatureTable(props) {
                   color="blue-gray"
                   className="font-normal cursor-pointer"
                   onClick={() => {
-                    navigate(`/dpl/view/${data.assigned_to}`);
+                    navigate(`/${props.type}/view/${data.assigned_to}`);
                   }}
                 >
                   {data.assigned_to}
@@ -248,7 +248,7 @@ export default function FeatureTable(props) {
                       }`}
                       onClick={() => {
                         if (data.assigned_under !== "self")
-                          navigate(`/dpl/view/${data.assigned_under}`);
+                          navigate(`/${props.type}/view/${data.assigned_under}`);
                       }}
                     >
                       {data.assigned_under}

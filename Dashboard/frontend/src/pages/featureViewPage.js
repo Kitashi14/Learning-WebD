@@ -6,12 +6,15 @@ import { useContext } from "react";
 import DataContext from "../context/dataContext";
 
 //page for a particular feature
-const FeatureViewPage = () => {
+const FeatureViewPage = (props) => {
 
   const contextData = useContext(DataContext)
 
   const featureId = useParams().fid; //extracting feature reference and storing it as feature-id
-  const featureData = contextData.dplTable.filter(
+  var tableToUse;
+  if(props.type==="dpl") tableToUse = contextData.dplTable
+  else tableToUse = contextData.jiraTable
+  const featureData = tableToUse.filter(
     (elem) => elem.feature_reference === featureId
   )[0]; //finding the feature from feature table
 
@@ -83,7 +86,7 @@ const FeatureViewPage = () => {
               <span
                 className="text-blue-600 hover:cursor-pointer hover:text-blue-800"
                 onClick={() => {
-                  navigate(`/dpl/view/${featureData.assigned_to}`);
+                  navigate(`/${props.type}/view/${featureData.assigned_to}`);
                 }}
               >
                 {`${contextData.userFullNameMap.get(featureData.assigned_to)} (${

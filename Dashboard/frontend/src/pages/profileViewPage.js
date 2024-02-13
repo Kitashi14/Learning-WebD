@@ -14,7 +14,6 @@ import DataContext from "../context/dataContext";
 
 // dashboard view page for any user
 const ProfileViewPage = (props) => {
-
   //extracting context global data
   const contextData = useContext(DataContext);
 
@@ -152,17 +151,20 @@ const ProfileViewPage = (props) => {
         setFeaturePin("all");
         loadTableData(data, "all", "all");
       };
-
-      loadData(contextData.dplTable);
+      var tableToUse;
+      if (props.type === "dpl") tableToUse = contextData.dplTable;
+      else tableToUse = contextData.jiraTable;
+      loadData(tableToUse);
     },
     // eslint-disable-next-line
-    [userId, featureTag, featureType, featureRelease,contextData] // dependency array
+    [userId, featureTag, featureType, featureRelease, contextData, props.type] // dependency array
   );
 
   //release chart parameters
   const diffRelease = viewData
     .map((elem) => elem.release_name)
     .filter((x, i, a) => a.indexOf(x) === i);
+  diffRelease.sort();
 
   const diffReleaseCount = diffRelease.map((release) => {
     let count = 0;
@@ -290,7 +292,10 @@ const ProfileViewPage = (props) => {
             if (elem.assigned_under === assign) count++;
           });
           return {
-            name: assign !== "self" ? contextData.userFullNameMap.get(assign) : assign,
+            name:
+              assign !== "self"
+                ? contextData.userFullNameMap.get(assign)
+                : assign,
             y: count,
           };
         })
@@ -330,7 +335,7 @@ const ProfileViewPage = (props) => {
         events: {
           click: (e) => {
             if (e.point.category !== "self")
-              navigate(`/dpl/view/${e.point.category}`);
+              navigate(`/${props.type}/view/${e.point.category}`);
           },
         },
       },
@@ -507,7 +512,7 @@ const ProfileViewPage = (props) => {
     setFeatureTag("all");
     setFeatureType("all");
     setFeatureRelease("all");
-    navigate(`/dpl/view/${userId}`);
+    navigate(`/${props.type}/view/${userId}`);
   };
 
   // filtering data according to tag (lvl 1 filter)
@@ -543,14 +548,22 @@ const ProfileViewPage = (props) => {
     <>
       {/* page block */}
       <div className="bg-gray-200 flex h-full overflow-y-auto flex-col py-3 space-y-2">
-        <ProfileSearchBar selectUserId={selectUserId} userId={userId} />
+        <ProfileSearchBar
+          selectUserId={selectUserId}
+          table={
+            props.type === "dpl" ? contextData.dplTable : contextData.jiraTable
+          }
+          userId={userId}
+        />
 
         {/* level 1 filter block */}
         <div className="flex flex-col items-center px-3 rounded-lg space-y-3 bg-gray-50 drop-shadow-md border-blue-200 border-none border-[1px] border-solid py-2 w-fit m-auto">
           <Card className="w-fit flex flex-row items-center px-3 py-3 ml-4">
             View For :
             <span className="text-base text-blue-500 font-bold pl-2">
-              {userId === "all" ? "All" : contextData.userFullNameMap.get(userId)}
+              {userId === "all"
+                ? "All"
+                : contextData.userFullNameMap.get(userId)}
             </span>
           </Card>
 
@@ -586,7 +599,7 @@ const ProfileViewPage = (props) => {
                   <span
                     className="px-2 cursor-pointer text-blue-500"
                     onClick={() => {
-                      navigate(`/dpl/view/${elem}`);
+                      navigate(`/${props.type}/view/${elem}`);
                     }}
                   >
                     {elem}
@@ -678,7 +691,9 @@ const ProfileViewPage = (props) => {
             <Typography className="pl-4 pb-4" variant="h3">
               <span className="font-medium font-mono text-base text-blue-500 text-md">
                 View For:{" "}
-                {userId !== "all" ? contextData.userFullNameMap.get(userId) : "All"}
+                {userId !== "all"
+                  ? contextData.userFullNameMap.get(userId)
+                  : "All"}
               </span>
               <br />
               {featureTag !== "all" ||
@@ -766,6 +781,7 @@ const ProfileViewPage = (props) => {
               data={viewTableData}
               sortViewTableAscending={sortViewTableAscending}
               sortedFeature={sortedFeature}
+              type={props.type}
             />
           </div>
         </div>

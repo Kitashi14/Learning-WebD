@@ -35,7 +35,7 @@ export const DataContextProvider = (props) => {
         return new Promise((resolve, reject) => {
           setTimeout(() => {
             const dlpResponseData = tableData;
-            const jiraResponseData = tableData;
+            const jiraResponseData = tableData.slice(12, -12);
             const childParentMapResponse = child_parent_map;
 
             const parentChildData = parent_child_map;
