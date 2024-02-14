@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { Card, Typography } from "@material-tailwind/react";
-import { Progress } from "rsuite";
+// import { Progress } from "rsuite";
 import { FeatureTimeline } from "../components/featureTimeline";
 import { useContext } from "react";
 import DataContext from "../context/dataContext";
@@ -31,7 +31,7 @@ const FeatureViewPage = (props) => {
           </div>
         </Card>
         <div className="w-full  flex flex-row justify-evenly items-center">
-          <div className="w-1/6 p-4 ">
+          {/* <div className="w-1/6 p-4 ">
             <Progress.Circle
               percent={featureData.complete_perct}
               strokeColor={
@@ -40,7 +40,7 @@ const FeatureViewPage = (props) => {
               trailColor="white"
               status={featureData.complete_perct === 100 ? "success" : null}
             />
-          </div>
+          </div> */}
           <div className="w-fit p-4 pl-16 flex flex-col space-y-2">
             <Typography className="text-xl">
               No Tie Rank:{" "}

@@ -1,6 +1,6 @@
 import { Card, Typography } from "@material-tailwind/react";
 import { useNavigate } from "react-router-dom";
-import { Progress } from "rsuite";
+// import { Progress } from "rsuite";
 
 // table heads
 export default function FeatureTable(props) {
@@ -10,12 +10,10 @@ export default function FeatureTable(props) {
     "Status",
     "No Tie Rank",
     "Type",
-    "Complete",
     "Tag",
     "Release Name",
     "PIN",
     "Assigned to",
-    "Rally Id",
     "Jira Id",
     "Created By",
   ];
@@ -28,7 +26,6 @@ export default function FeatureTable(props) {
     ["Ref", "feature_reference"],
     ["No Tie Rank", "no_tie_rank"],
     ["Name", "feature_name"],
-    ["Complete", "complete_perct"],
   ]);
 
   //for navigating to different routes
@@ -195,9 +192,9 @@ export default function FeatureTable(props) {
                   {data.feature_type}
                 </Typography>
               </td>
-              <td className="p-4 w-[200px]">
+              {/* <td className="p-4 w-[200px]">
                 <Progress.Line percent={data.complete_perct} showInfo={true} />
-              </td>
+              </td> */}
               <td className="p-4">
                 <Typography
                   variant="small"
@@ -258,15 +255,6 @@ export default function FeatureTable(props) {
               ) : (
                 <></>
               )}
-              <td className="p-4">
-                <Typography
-                  variant="small"
-                  color="blue-gray"
-                  className="font-normal"
-                >
-                  {data.rally_id}
-                </Typography>
-              </td>
               <td className="p-4">
                 <Typography
                   variant="small"

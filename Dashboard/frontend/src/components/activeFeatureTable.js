@@ -6,7 +6,7 @@ export default function ActiveFeatureTable(props) {
   const TABLE_HEAD = [
     "Feature Key",
     "Summary",
-    "Status",
+    "Workflow State",
     "Release Name",
     "Dev Managers",
     "Test Managers",

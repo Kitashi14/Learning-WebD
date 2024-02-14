@@ -353,7 +353,7 @@ const ActiveViewPage = (props) => {
       height: 300,
     },
     title: {
-      text: "Feature Type Chart",
+      text: "Field Chart",
     },
     plotOptions: {
       series: {

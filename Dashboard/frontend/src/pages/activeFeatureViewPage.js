@@ -22,7 +22,7 @@ const ActiveFeatureViewPage = (props) => {
       <div className="w-full flex flex-col overflow-y-auto  space-y-2 py-2 px-3">
         <Card className="p-3">
           <div className="text-lg font-bold">
-            Feature Reference :{" "}
+            Jira ID :{" "}
             <span className="text-blue-500">{featureData.jira_id}</span>
             <span className="ml-3 bg-cyan-400 py-2 px-3 rounded-lg text-white font-bold text-lg">
               ACTIVE RELEASE

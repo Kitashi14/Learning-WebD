@@ -3,4 +3,5 @@
 *.exe
 *.lnk
 *.DS_Store
+*.env
 

@@ -18,7 +18,6 @@ function App() {
 
   useEffect(() => {
     // execute on location change
-    console.log("Location changed!", location.pathname);
     if (location.pathname.includes("dpl")) {
       setCurrentTab("dpl");
     } else if (location.pathname.includes("active")) setCurrentTab("active");
