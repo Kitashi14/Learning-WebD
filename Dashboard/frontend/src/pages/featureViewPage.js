@@ -11,8 +11,7 @@ const FeatureViewPage = (props) => {
 
   const featureId = useParams().fid; //extracting feature reference and storing it as feature-id
   var tableToUse;
-  if (props.type === "dpl") tableToUse = contextData.dplTable;
-  else tableToUse = contextData.jiraTable;
+  tableToUse = contextData.dplTable;
   const featureData = tableToUse.filter(
     (elem) => elem.feature_reference === featureId
   )[0]; //finding the feature from feature table
@@ -29,15 +28,6 @@ const FeatureViewPage = (props) => {
             <span className="text-blue-500">
               {featureData.feature_reference}
             </span>
-            {props.type === "active" ? (
-              <>
-                <span className="ml-3 bg-cyan-400 py-2 px-3 rounded-lg text-white font-bold text-lg">
-                  ACTIVE RELEASE
-                </span>
-              </>
-            ) : (
-              <></>
-            )}
           </div>
         </Card>
         <div className="w-full  flex flex-row justify-evenly items-center">
@@ -94,7 +84,7 @@ const FeatureViewPage = (props) => {
               <span
                 className="text-blue-600 hover:cursor-pointer hover:text-blue-800"
                 onClick={() => {
-                  navigate(`/${props.type}/view/${featureData.assigned_to}`);
+                  navigate(`/dpl/view/${featureData.assigned_to}`);
                 }}
               >
                 {`${contextData.userFullNameMap.get(

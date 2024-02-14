@@ -503,7 +503,7 @@ const ActiveViewPage = (props) => {
       },
     },
     credits: {
-      text: "NOTE: Some features are assigned under more than one person reporting to you",
+      text: "NOTE: Some features may be assigned under more than one person reporting to you",
       style: {
         fontSize: "15px",
         color: "red",

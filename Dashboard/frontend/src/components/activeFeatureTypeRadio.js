@@ -19,7 +19,7 @@ const ActiveFeatureTypeRadio = (props) => {
         value={props.value}
         onChange={selectType}
       >
-        <RadioLabel>Field Type: </RadioLabel>
+        <RadioLabel>Field: </RadioLabel>
         <Radio value="all">All</Radio>
         <Radio value="dev">Dev</Radio>
         <Radio value="test">Test</Radio>

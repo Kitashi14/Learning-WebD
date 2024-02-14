@@ -163,11 +163,11 @@ export default function ActiveFeatureTable(props) {
                   color="blue-gray"
                   className="font-normal hover:cursor-pointer hover:text-blue-600"
                   onClick={() => {
-                    console.log(data.jira_id);
-                    window.open(
-                      `https://miggbo.atlassian.net/browse/${data.jira_id}`,
-                      "blank"
-                    );
+                    // window.open(
+                    //   `https://miggbo.atlassian.net/browse/${data.jira_id}`,
+                    //   "blank"
+                    // );
+                    navigate(`/active/feature/${data.jira_id}`)
                   }}
                 >
                   <span title="open in jira">{data.jira_id}</span>

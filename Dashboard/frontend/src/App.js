@@ -8,6 +8,7 @@ import { useContext, useEffect, useState } from "react";
 import DataContext from "./context/dataContext";
 import { Loader } from "rsuite";
 import ActiveViewPage from "./pages/activeViewPage";
+import ActiveFeatureViewPage from "./pages/activeFeatureViewPage";
 // contains all routes for the client side
 function App() {
   const contextData = useContext(DataContext);
@@ -48,7 +49,7 @@ function App() {
               <Route
                 exact
                 path="/dpl/feature/:fid"
-                element={<FeatureViewPage type={"dpl"} />}
+                element={<FeatureViewPage  />}
               ></Route>
               <Route
                 exact
@@ -58,7 +59,7 @@ function App() {
               <Route
                 exact
                 path="/active/feature/:fid"
-                element={<FeatureViewPage type={"active"} />}
+                element={<ActiveFeatureViewPage />}
               ></Route>
             </Routes>
           )}
