@@ -9,8 +9,8 @@ import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import SearchBar from "../components/SearchBar";
 import { useNavigate, useParams } from "react-router-dom";
-import FeatureReleaseRadio from "../components/featureReleaseRadio";
 import DataContext from "../context/dataContext";
+import { SelectPicker } from "rsuite";
 
 // dashboard view page for any user
 const ProfileViewPage = (props) => {
@@ -152,14 +152,12 @@ const ProfileViewPage = (props) => {
         loadTableData(data, "all", "all");
       };
       var tableToUse;
-      if (props.type === "dpl") tableToUse = contextData.dplTable;
-      else tableToUse = contextData.jiraTable;
+      tableToUse = contextData.dplTable;
       loadData(tableToUse);
     },
     // eslint-disable-next-line
-    [userId, featureTag, featureType, featureRelease, contextData, props.type] // dependency array
+    [userId, featureTag, featureType, featureRelease, contextData] // dependency array
   );
-
   //release chart parameters
   const diffRelease = viewData
     .map((elem) => elem.release_name)
@@ -335,7 +333,7 @@ const ProfileViewPage = (props) => {
         events: {
           click: (e) => {
             if (e.point.category !== "self")
-              navigate(`/${props.type}/view/${e.point.category}`);
+              navigate(`/dpl/view/${e.point.category}`);
           },
         },
       },
@@ -512,7 +510,7 @@ const ProfileViewPage = (props) => {
     setFeatureTag("all");
     setFeatureType("all");
     setFeatureRelease("all");
-    navigate(`/${props.type}/view/${userId}`);
+    navigate(`/dpl/view/${userId}`);
   };
 
   // filtering data according to tag (lvl 1 filter)
@@ -544,22 +542,28 @@ const ProfileViewPage = (props) => {
     .map((item) => ({ label: item, value: item }));
   pinSelectorData.unshift({ label: "All", value: "all" });
 
+  // finding different unique release for status filter bar
+  const releaseSelectorData = userData
+    .map((data) => data.release_name)
+    .filter((x, i, a) => a.indexOf(x) === i)
+    .map((item) => ({ label: item, value: item }));
+  releaseSelectorData.unshift({ label: "All", value: "all" });
+
   return (
     <>
       {/* page block */}
       <div className="bg-gray-200 flex h-full overflow-y-auto flex-col py-3 space-y-2">
-        <div className="flex flex-row justify-center mb-[-10px]">
+        <div className="flex flex-row justify-center mb-[-40px]">
           {" "}
           <span className=" bg-blue-600 py-2 px-3 rounded-lg text-white font-bold text-lg">
-            {props.type === "dpl" ? "DPL Metrics" : "Active Releases"}
+            DPL Metrics
           </span>
         </div>
         <ProfileSearchBar
           selectUserId={selectUserId}
-          table={
-            props.type === "dpl" ? contextData.dplTable : contextData.jiraTable
-          }
+          table={contextData.dplTable}
           userId={userId}
+          type={"dpl"}
         />
 
         {/* level 1 filter block */}
@@ -574,10 +578,14 @@ const ProfileViewPage = (props) => {
           </Card>
 
           <div className="flex flex-col items-center space-y-3">
-            <FeatureReleaseRadio
+            <SelectPicker
+              label="Release"
+              style={{ width: 200 }}
+              data={releaseSelectorData}
+              onChange={(e) => {
+                selectFeatureRelease(e == null ? "all" : e);
+              }}
               value={featureRelease}
-              selectFeatureRelease={selectFeatureRelease}
-              userData={userData}
             />
             <FeatureTagRadio
               selectFeatureTag={selectFeatureTag}
@@ -605,7 +613,7 @@ const ProfileViewPage = (props) => {
                   <span
                     className="px-2 cursor-pointer text-blue-500"
                     onClick={() => {
-                      navigate(`/${props.type}/view/${elem}`);
+                      navigate(`/dpl/view/${elem}`);
                     }}
                   >
                     {elem}
@@ -621,7 +629,7 @@ const ProfileViewPage = (props) => {
         {/* data block, contains charts and table */}
         <div className="w-full flex flex-col space-y-4">
           {/* level 1 charts */}
-          <div className="flex flex-col space-y-1 items-center pt-3 pb-5 px-8 bg-blue-gray-200">
+          <div className="flex flex-col space-y-1 items-center pt-3 pb-3 px-8 bg-blue-gray-200">
             {featureRelease === "all" ? (
               <>
                 <Card className="p-4 hover:drop-shadow-xl w-full ">
@@ -787,7 +795,7 @@ const ProfileViewPage = (props) => {
               data={viewTableData}
               sortViewTableAscending={sortViewTableAscending}
               sortedFeature={sortedFeature}
-              type={props.type}
+              type={"dpl"}
             />
           </div>
         </div>

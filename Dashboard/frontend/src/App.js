@@ -7,12 +7,13 @@ import FeatureViewPage from "./pages/featureViewPage";
 import { useContext, useEffect, useState } from "react";
 import DataContext from "./context/dataContext";
 import { Loader } from "rsuite";
+import ActiveViewPage from "./pages/activeViewPage";
 // contains all routes for the client side
 function App() {
   const contextData = useContext(DataContext);
 
   const location = useLocation();
-  const [currentTab, setCurrentTab] = useState()
+  const [currentTab, setCurrentTab] = useState();
 
   useEffect(() => {
     // execute on location change
@@ -20,7 +21,7 @@ function App() {
     if (location.pathname.includes("dpl")) {
       setCurrentTab("dpl");
     } else if (location.pathname.includes("active")) setCurrentTab("active");
-    else{
+    else {
       setCurrentTab(null);
     }
   }, [location]);
@@ -42,7 +43,7 @@ function App() {
               <Route
                 exact
                 path="/dpl/view/:uid"
-                element={<ProfileViewPage type={"dpl"} />}
+                element={<ProfileViewPage />}
               ></Route>
               <Route
                 exact
@@ -52,7 +53,7 @@ function App() {
               <Route
                 exact
                 path="/active/view/:uid"
-                element={<ProfileViewPage type={"active"} />}
+                element={<ActiveViewPage />}
               ></Route>
               <Route
                 exact

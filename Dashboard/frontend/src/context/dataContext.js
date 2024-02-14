@@ -2,6 +2,7 @@
 
 import { createContext, useEffect, useState } from "react";
 import {
+    activeReleaseTable,
   child_parent_map,
   parent_child_map,
   tableData,
@@ -35,7 +36,7 @@ export const DataContextProvider = (props) => {
         return new Promise((resolve, reject) => {
           setTimeout(() => {
             const dlpResponseData = tableData;
-            const jiraResponseData = tableData.slice(12, -12);
+            const jiraResponseData = activeReleaseTable;
             const childParentMapResponse = child_parent_map;
 
             const parentChildData = parent_child_map;

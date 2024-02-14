@@ -4,21 +4,34 @@ import DataContext from "../context/dataContext";
 
 // user profile search bar component
 const ProfileSearchBar = (props) => {
-
   const contextData = useContext(DataContext);
 
   // a set for storing all unique users
   const s = new Set();
 
   //adding unique users from feature table
-  const callParent = (node)=>{
+  const callParent = (node) => {
     s.add(node);
-    if(contextData.childParentMap.has(node)) callParent(contextData.childParentMap.get(node));
+    if (contextData.childParentMap.has(node))
+      callParent(contextData.childParentMap.get(node));
     return;
-  }
-  props.table.forEach((elem) => {
-    callParent(elem.assigned_to)
-  });
+  };
+  props.type === "dpl"
+    ? props.table.forEach((elem) => {
+        callParent(elem.assigned_to);
+      })
+    : props.table.forEach((elem) => {
+        const uniqueManagers = [];
+        elem.test_managers.forEach((manager) => {
+          uniqueManagers.push(manager);
+        });
+        elem.dev_managers.forEach((manager) => {
+          uniqueManagers.push(manager);
+        });
+        uniqueManagers
+          .filter((x, i, a) => a.indexOf(x) === i)
+          .forEach((manager) => callParent(manager));
+      });
 
   //adding users from user tree
   // contextData.userFullNameMap.forEach((v, k) => {
@@ -28,7 +41,10 @@ const ProfileSearchBar = (props) => {
   // mapping unique user with their full names
   const data = [];
   s.forEach((e) =>
-    data.push({ label: `${contextData.userFullNameMap.get(e)} (${e})`, value: e })
+    data.push({
+      label: `${contextData.userFullNameMap.get(e)} (${e})`,
+      value: e,
+    })
   );
   data.unshift({ label: "All", value: "all" });
 

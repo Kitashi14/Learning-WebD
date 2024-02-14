@@ -1,23 +1,15 @@
 import { Card, Typography } from "@material-tailwind/react";
 import { useNavigate } from "react-router-dom";
-import { Progress } from "rsuite";
 
 // table heads
-export default function FeatureTable(props) {
+export default function ActiveFeatureTable(props) {
   const TABLE_HEAD = [
-    "Ref",
-    "Name",
+    "Feature Key",
+    "Summary",
     "Status",
-    "No Tie Rank",
-    "Type",
-    "Complete",
-    "Tag",
     "Release Name",
-    "PIN",
-    "Assigned to",
-    "Rally Id",
-    "Jira Id",
-    "Created By",
+    "Dev Managers",
+    "Test Managers",
   ];
 
   //table rows passed through props (viewTableData)
@@ -25,17 +17,29 @@ export default function FeatureTable(props) {
 
   //features with sorting option
   const featuresToSort = new Map([
-    ["Ref", "feature_reference"],
-    ["No Tie Rank", "no_tie_rank"],
-    ["Name", "feature_name"],
-    ["Complete", "complete_perct"],
+    ["Feature Key", "jira_id"],
+    ["Summary", "feature_name"],
   ]);
 
   //for navigating to different routes
   const navigate = useNavigate();
-  if (props.userId !== "all" ) {
-    TABLE_HEAD.splice(9, 0, "Assigned under");
+  if (props.userId !== "all") {
+    TABLE_HEAD.splice(4, 0, "Assigned under ");
   }
+
+  const findAssignedManagers = (elem) => {
+    const assignees = [];
+    if (elem.assigned_test_managers && elem.assigned_test_managers.size) {
+      elem.assigned_test_managers.forEach((v, k) => {
+        assignees.push(k);
+      });
+    }
+    if (elem.assigned_dev_managers && elem.assigned_dev_managers.size)
+      elem.assigned_dev_managers.forEach((v, k) => {
+        assignees.push(k);
+      });
+    return assignees.filter((x, i, a) => a.indexOf(x) === i);
+  };
 
   return (
     <Card className=" w-full overflow-scroll">
@@ -69,7 +73,11 @@ export default function FeatureTable(props) {
                             onClick={() => {
                               const tableHeadName = head;
                               const feature = featuresToSort.get(tableHeadName);
-                              props.sortViewTableAscending(TABLE_ROWS,feature, -1);
+                              props.sortViewTableAscending(
+                                TABLE_ROWS,
+                                feature,
+                                -1
+                              );
                             }}
                           >
                             <path
@@ -91,7 +99,11 @@ export default function FeatureTable(props) {
                             onClick={() => {
                               const tableHeadName = head;
                               const feature = featuresToSort.get(tableHeadName);
-                              props.sortViewTableAscending(TABLE_ROWS,feature, 1);
+                              props.sortViewTableAscending(
+                                TABLE_ROWS,
+                                feature,
+                                1
+                              );
                             }}
                           >
                             <path
@@ -114,7 +126,11 @@ export default function FeatureTable(props) {
                           onClick={() => {
                             const tableHeadName = head;
                             const feature = featuresToSort.get(tableHeadName);
-                            props.sortViewTableAscending(TABLE_ROWS,feature, 1);
+                            props.sortViewTableAscending(
+                              TABLE_ROWS,
+                              feature,
+                              1
+                            );
                           }}
                         >
                           <path
@@ -133,7 +149,7 @@ export default function FeatureTable(props) {
             ))}
           </tr>
         </thead>
-                
+
         <tbody>
           {/* table data rows */}
           {TABLE_ROWS.map((data) => (
@@ -147,10 +163,14 @@ export default function FeatureTable(props) {
                   color="blue-gray"
                   className="font-normal hover:cursor-pointer hover:text-blue-600"
                   onClick={() => {
-                    navigate(`/dpl/feature/${data.feature_reference}`);
+                    console.log(data.jira_id);
+                    window.open(
+                      `https://miggbo.atlassian.net/browse/${data.jira_id}`,
+                      "blank"
+                    );
                   }}
                 >
-                  {data.feature_reference}
+                  <span title="open in jira">{data.jira_id}</span>
                 </Typography>
               </td>
               <td className="p-4">
@@ -177,10 +197,10 @@ export default function FeatureTable(props) {
                   color="blue-gray"
                   className="font-normal"
                 >
-                  {data.no_tie_rank}
+                  {data.release_name}
                 </Typography>
               </td>
-              <td className="p-4">
+              {/* <td className="p-4">
                 <Typography
                   variant="small"
                   color="white"
@@ -194,64 +214,35 @@ export default function FeatureTable(props) {
                 >
                   {data.feature_type}
                 </Typography>
-              </td>
-              <td className="p-4 w-[200px]">
-                <Progress.Line percent={data.complete_perct} showInfo={true} />
-              </td>
-              <td className="p-4">
-                <Typography
-                  variant="small"
-                  color="blue-gray"
-                  className="font-normal"
-                >
-                  {data.feature_tag}
-                </Typography>
-              </td>
-              <td className="p-4">
-                <Typography
-                  variant="small"
-                  color="blue-gray"
-                  className="font-normal"
-                >
-                  {data.release_name}
-                </Typography>
-              </td>
-              <td className="p-4">
-                <Typography
-                  variant="small"
-                  color="blue-gray"
-                  className="font-normal"
-                >
-                  {data.pin}
-                </Typography>
-              </td>
-              <td className="p-4">
-                <Typography
-                  variant="small"
-                  color="blue-gray"
-                  className="font-normal cursor-pointer"
-                  onClick={() => {
-                    navigate(`/dpl/view/${data.assigned_to}`);
-                  }}
-                >
-                  {data.assigned_to}
-                </Typography>
-              </td>
-              {(props.userId !== "all") ? (
+              </td> */}
+              {props.userId !== "all" ? (
                 <>
                   <td className="p-4">
                     <Typography
                       variant="small"
-                      color="blue-gray"
-                      className={`font-normal ${
-                        data.assigned_under !== "self" ? "cursor-pointer" : ""
-                      }`}
-                      onClick={() => {
-                        if (data.assigned_under !== "self")
-                          navigate(`/dpl/view/${data.assigned_under}`);
-                      }}
+                      color="white"
+                      className="space-x-1"
                     >
-                      {data.assigned_under}
+                      {findAssignedManagers(data).map((manager) => {
+                        return (
+                          <>
+                            <span
+                              style={{
+                                background: data.color_map.get(manager),
+                              }}
+                              className={`font-normal rounded py-1 px-2 ${
+                                manager !== "self" ? "cursor-pointer " : ""
+                              } `}
+                              onClick={() => {
+                                if (data.assigned_under !== "self")
+                                  navigate(`/active/view/${manager}`);
+                              }}
+                            >
+                              {manager}
+                            </span>
+                          </>
+                        );
+                      })}
                     </Typography>
                   </td>
                 </>
@@ -264,7 +255,34 @@ export default function FeatureTable(props) {
                   color="blue-gray"
                   className="font-normal"
                 >
-                  {data.rally_id}
+                  {Array.from(data.dev_managers).map((manager) => {
+                    return (
+                      <>
+                        <span
+                          style={{
+                            color: data.color_map
+                              ? data.color_map.get(manager)
+                              : "",
+                          }}
+                          className={`${
+                            data.color_map
+                              ? data.color_map.has(manager)
+                                ? "font-bold"
+                                : ""
+                              : ""
+                          } px-1 ${
+                            manager !== "self" ? "cursor-pointer " : ""
+                          } `}
+                          onClick={() => {
+                            if (data.assigned_under !== "self")
+                              navigate(`/active/view/${manager}`);
+                          }}
+                        >
+                          {manager}
+                        </span>
+                      </>
+                    );
+                  })}
                 </Typography>
               </td>
               <td className="p-4">
@@ -273,16 +291,34 @@ export default function FeatureTable(props) {
                   color="blue-gray"
                   className="font-normal"
                 >
-                  {data.jira_id}
-                </Typography>
-              </td>
-              <td className="p-4">
-                <Typography
-                  variant="small"
-                  color="blue-gray"
-                  className="font-normal"
-                >
-                  <span className="">{data.created_by}</span>
+                  {Array.from(data.test_managers).map((manager) => {
+                    return (
+                      <>
+                        <span
+                          style={{
+                            color: data.color_map
+                              ? data.color_map.get(manager)
+                              : "",
+                          }}
+                          className={`${
+                            data.color_map
+                              ? data.color_map.has(manager)
+                                ? "font-bold"
+                                : ""
+                              : ""
+                          } px-1 ${
+                            manager !== "self" ? "cursor-pointer " : ""
+                          } `}
+                          onClick={() => {
+                            if (data.assigned_under !== "self")
+                              navigate(`/active/view/${manager}`);
+                          }}
+                        >
+                          {manager}
+                        </span>
+                      </>
+                    );
+                  })}
                 </Typography>
               </td>
             </tr>

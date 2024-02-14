@@ -11,13 +11,13 @@ const Navbar = (props) => {
 
   return (
     <div className="w-1/5">
-      <Sidenav appearance="inverse" defaultOpenKeys={["3", "4"]}>
+      <Sidenav appearance="inverse">
         <Sidenav.Body className="h-screen">
           <Nav activeKey="1">
             <Nav.Item
               eventKey="1"
               icon={<GroupIcon />}
-              style={{background:'#1675E0'}}
+              style={{ background: "#1675E0" }}
               onClick={() => {
                 navigate("/");
               }}
@@ -27,7 +27,11 @@ const Navbar = (props) => {
             <Nav.Item
               eventKey="2"
               icon={<DashboardIcon />}
-              style={props.currentTab==="dpl"?{background:'#2589F4'}:{}}
+              style={
+                props.currentTab === "dpl"
+                  ? { background: "#2589F4" }
+                  : { background: "#3498FE" }
+              }
               onClick={() => {
                 navigate("dpl/view/all");
               }}
@@ -37,7 +41,11 @@ const Navbar = (props) => {
             <Nav.Item
               eventKey="3"
               icon={<PinIcon />}
-              style={props.currentTab==="active"?{background:'#2589F4'}:{}}
+              style={
+                props.currentTab === "active"
+                  ? { background: "#2589F4" }
+                  : { background: "#3498FE" }
+              }
               onClick={() => {
                 navigate("active/view/all");
               }}
