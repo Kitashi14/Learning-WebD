@@ -89,10 +89,11 @@ const ActiveViewPage = (props) => {
           const colors = [
             "#22c55e",
             "#f97316",
-            "#5D54A4",
-            "#9D65C9",
-            "#D789D7",
-            "#2A3D66",
+            "#ef4444",
+            "#6366f1",
+            "#41AEA9",
+            "#213E3B",
+            "#E8FFFF",
           ];
           // filtering features assigned directly to user
           var i = 0; //index of activeReleaseTable
@@ -161,7 +162,7 @@ const ActiveViewPage = (props) => {
                   if (
                     data[idx]["assigned_test_managers"].has(ultimate_parent)
                   ) {
-                    data[idx]["assigned_test_managers"][ultimate_parent].add(
+                    data[idx]["assigned_test_managers"].get(ultimate_parent).add(
                       curr
                     );
                     data[idx]["color_map"].set(curr, colors[count]);
@@ -176,7 +177,7 @@ const ActiveViewPage = (props) => {
 
                   //handling assinged dev managers
                   if (data[idx]["assigned_dev_managers"].has(ultimate_parent)) {
-                    data[idx]["assigned_dev_managers"][ultimate_parent].add(
+                    data[idx]["assigned_dev_managers"].get(ultimate_parent).add(
                       curr
                     );
                     data[idx]["color_map"].set(curr, colors[count]);
@@ -220,7 +221,7 @@ const ActiveViewPage = (props) => {
                   if (
                     data[idx]["assigned_test_managers"].has(ultimate_parent)
                   ) {
-                    data[idx]["assigned_test_managers"][ultimate_parent].add(
+                    data[idx]["assigned_test_managers"].get(ultimate_parent).add(
                       curr
                     );
                     data[idx]["color_map"].set(curr, colors[count]);
@@ -260,7 +261,7 @@ const ActiveViewPage = (props) => {
 
                   //handling assinged dev managers
                   if (data[idx]["assigned_dev_managers"].has(ultimate_parent)) {
-                    data[idx]["assigned_dev_managers"][ultimate_parent].add(
+                    data[idx]["assigned_dev_managers"].get(ultimate_parent).add(
                       curr
                     );
                     data[idx]["color_map"].set(curr, colors[count]);
@@ -298,13 +299,16 @@ const ActiveViewPage = (props) => {
               dfs_search(childNode, ultimate_parent, count);
             });
           };
-
           // itterating to all nodes under a direct children one by one using dfs
           var colorCount = 1;
-          childrens.forEach((child) => {
-            dfs_search(child, child, colorCount);
-            colorCount++;
-          });
+          try{
+            childrens.forEach((child) => {
+                dfs_search(child, child, colorCount);
+                colorCount++;
+              });
+          }catch(err){
+            console.log(err);
+          }
         }
         setUserData(data);
 
@@ -651,7 +655,7 @@ const ActiveViewPage = (props) => {
             )}
             <SelectPicker
               label="Release"
-              style={{ width: 200 }}
+              style={{ width: 250 }}
               data={releaseSelectorData}
               onChange={(e) => {
                 selectFeatureRelease(e == null ? "all" : e);

@@ -341,7 +341,7 @@ const ProfileViewPage = (props) => {
   };
 
   // type chart parameters
-  const diffTypes = ["small", "mid", "large"];
+  const diffTypes = userData.map(elem=>elem.release_name).filter((x,i,a)=> a.indexOf(x)===i).sort()
 
   const diffTypesCount = diffTypes.map((type) => {
     let count = 0;
@@ -580,7 +580,7 @@ const ProfileViewPage = (props) => {
           <div className="flex flex-col items-center space-y-3">
             <SelectPicker
               label="Release"
-              style={{ width: 200 }}
+              // style={{ width: 200 }}
               data={releaseSelectorData}
               onChange={(e) => {
                 selectFeatureRelease(e == null ? "all" : e);
