@@ -21,6 +21,7 @@ export default function FeatureTable(props) {
   //table rows passed through props (viewTableData)
   const TABLE_ROWS = props.data;
 
+
   //features with sorting option
   const featuresToSort = new Map([
     ["Ref", "feature_reference"],
@@ -30,8 +31,8 @@ export default function FeatureTable(props) {
 
   //for navigating to different routes
   const navigate = useNavigate();
-  if (props.userId !== "all" ) {
-    TABLE_HEAD.splice(9, 0, "Assigned under");
+  if (props.userId !== "all") {
+    TABLE_HEAD.splice(8, 0, "Assigned under");
   }
 
   return (
@@ -66,7 +67,11 @@ export default function FeatureTable(props) {
                             onClick={() => {
                               const tableHeadName = head;
                               const feature = featuresToSort.get(tableHeadName);
-                              props.sortViewTableAscending(TABLE_ROWS,feature, -1);
+                              props.sortViewTableAscending(
+                                TABLE_ROWS,
+                                feature,
+                                -1
+                              );
                             }}
                           >
                             <path
@@ -88,7 +93,11 @@ export default function FeatureTable(props) {
                             onClick={() => {
                               const tableHeadName = head;
                               const feature = featuresToSort.get(tableHeadName);
-                              props.sortViewTableAscending(TABLE_ROWS,feature, 1);
+                              props.sortViewTableAscending(
+                                TABLE_ROWS,
+                                feature,
+                                1
+                              );
                             }}
                           >
                             <path
@@ -111,7 +120,11 @@ export default function FeatureTable(props) {
                           onClick={() => {
                             const tableHeadName = head;
                             const feature = featuresToSort.get(tableHeadName);
-                            props.sortViewTableAscending(TABLE_ROWS,feature, 1);
+                            props.sortViewTableAscending(
+                              TABLE_ROWS,
+                              feature,
+                              1
+                            );
                           }}
                         >
                           <path
@@ -130,7 +143,7 @@ export default function FeatureTable(props) {
             ))}
           </tr>
         </thead>
-                
+
         <tbody>
           {/* table data rows */}
           {TABLE_ROWS.map((data) => (
@@ -180,14 +193,19 @@ export default function FeatureTable(props) {
               <td className="p-4">
                 <Typography
                   variant="small"
-                  color="white"
-                  className={`font-normal bg-${
-                    data.feature_type === "small"
-                      ? "green-500"
-                      : data.feature_type === "mid"
-                      ? "orange-500"
-                      : "red-500"
-                  } rounded py-1 px-3`}
+                  style={{
+                    background:
+                      data.feature_type === "S"
+                        ? "#bbf7d0"
+                        : data.feature_type === "M"
+                        ? "#86efac"
+                        : data.feature_type === "L"
+                        ? "#4ade80"
+                        : data.feature_type === "XL"
+                        ? "#22c55e"
+                        : "#16a34a",
+                  }}
+                  className={`font-normal rounded py-1 px-3`}
                 >
                   {data.feature_type}
                 </Typography>
@@ -222,19 +240,7 @@ export default function FeatureTable(props) {
                   {data.pin}
                 </Typography>
               </td>
-              <td className="p-4">
-                <Typography
-                  variant="small"
-                  color="blue-gray"
-                  className="font-normal cursor-pointer"
-                  onClick={() => {
-                    navigate(`/dpl/view/${data.assigned_to}`);
-                  }}
-                >
-                  {data.assigned_to}
-                </Typography>
-              </td>
-              {(props.userId !== "all") ? (
+              {props.userId !== "all" ? (
                 <>
                   <td className="p-4">
                     <Typography
@@ -255,6 +261,19 @@ export default function FeatureTable(props) {
               ) : (
                 <></>
               )}
+              <td className="p-4">
+                <Typography
+                  variant="small"
+                  color="blue-gray"
+                  className="font-normal cursor-pointer"
+                  onClick={() => {
+                    navigate(`/dpl/view/${data.assigned_to}`);
+                  }}
+                >
+                  {data.assigned_to}
+                </Typography>
+              </td>
+
               <td className="p-4">
                 <Typography
                   variant="small"

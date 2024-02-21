@@ -33,11 +33,6 @@ const ProfileSearchBar = (props) => {
           .forEach((manager) => callParent(manager));
       });
 
-  //adding users from user tree
-  // contextData.userFullNameMap.forEach((v, k) => {
-  //   s.add(k);
-  // });
-
   // mapping unique user with their full names
   const data = [];
   s.forEach((e) =>

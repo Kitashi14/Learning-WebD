@@ -21,7 +21,7 @@ const FeatureViewPage = (props) => {
 
   return (
     <>
-      <div className="w-full flex flex-col overflow-y-auto  space-y-2 py-2 px-3">
+      <div className="w-full h-full flex flex-col overflow-y-auto  space-y-2 py-2 px-3">
         <Card className="p-3">
           <div className=" text-lg font-bold">
             Feature Reference :{" "}
@@ -59,13 +59,19 @@ const FeatureViewPage = (props) => {
             <Typography className="text-xl">
               Type:{" "}
               <span
-                className={`font-normal font-mono text-white bg-${
-                  featureData.feature_type === "small"
-                    ? "green-500"
-                    : featureData.feature_type === "mid"
-                    ? "orange-500"
-                    : "red-500"
-                } rounded py-1 px-3`}
+                style={{
+                  background:
+                    featureData.feature_type === "S"
+                      ? "#bbf7d0"
+                      : featureData.feature_type === "M"
+                      ? "#86efac"
+                      : featureData.feature_type === "L"
+                      ? "#4ade80"
+                      : featureData.feature_type === "XL"
+                      ? "#22c55e"
+                      : "#16a34a",
+                }}
+                className={`font-normal rounded py-1 px-3`}
               >
                 {featureData.feature_type}
               </span>{" "}
@@ -101,7 +107,7 @@ const FeatureViewPage = (props) => {
             />
           </div>
         </div>
-        <Card className="py-3 px-6 flex-col flex">
+        <Card className="py-3 px-6   flex-col flex">
           <Typography variant="h4" className="text-blue-500">
             Name: {"   "}
             <span className="font-normal text-blue-gray-500">
@@ -109,7 +115,7 @@ const FeatureViewPage = (props) => {
             </span>
           </Typography>
           <br />
-          <Typography className="font-bold">
+          <Typography className="font-bold break-words">
             Description: {"   "}
             <span className="font-normal">{featureData.feature_des}</span>
           </Typography>

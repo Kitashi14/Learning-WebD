@@ -18,21 +18,23 @@ const ActiveViewPage = (props) => {
 
   // useState containing all filter's states
   // level 1 filters
-  const [featureRelease, setFeatureRelease] = useState("all");
-  const [featureType, setFeatureType] = useState("all");
-  const [featureStatus, setFeatureStatus] = useState("all");
+  const featureRelease = contextData.active_states.featureRelease;
+  const featureType = contextData.active_states.featureType;
+  const featureStatus = contextData.active_states.featureStatus;
 
   const [userData, setUserData] = useState([]); //it will contain all elements under the user node irrespective of the state of any filters applied, used for finding different release under the user
   const [viewData, setViewData] = useState([]); //it will contain all elements after applying level 1 filter, used for showing lvl 1 charts
   const [viewTableData, setViewTableData] = useState([]); //it will contain all elements after applying level 2 filter, used for filling table
-  const [sortedFeature, setSortedFeature] = useState({
-    //it will store the feature used for sorting the table
-    feature: null,
-    order: null,
-  });
+
+  // getting the feature details that was sorted
+  const sortedFeature = {
+    feature: contextData.active_states.sortedFeature.feature,
+    order: contextData.active_states.sortedFeature.order,
+  };
 
   const navigate = useNavigate(); //for navigating to different routes
   const userId = useParams().uid; //extracting user id from the route/url
+  contextData.setActiveUser(userId);
 
   // for finding all parents nodes of the current user
   const previous_parents = [userId];
@@ -48,22 +50,50 @@ const ActiveViewPage = (props) => {
     const copyViewTableData = table; //for making a copy by data, not reference
     if (order > 0)
       copyViewTableData.sort((a, b) => {
+        if (feature === "dev_managers" || feature === "test_managers") {
+          return a[feature].size > b[feature].size
+            ? 1
+            : a[feature].size < b[feature].size
+            ? -1
+            : 0;
+        }
         return a[feature] > b[feature] ? 1 : a[feature] < b[feature] ? -1 : 0;
       });
     else {
       copyViewTableData.sort((a, b) => {
+        if (feature === "dev_managers" || feature === "test_managers") {
+          return a[feature].size > b[feature].size
+            ? -1
+            : a[feature].size < b[feature].size
+            ? 1
+            : 0;
+        }
         return a[feature] > b[feature] ? -1 : a[feature] < b[feature] ? 1 : 0;
       });
     }
     setViewTableData(copyViewTableData);
-    setSortedFeature({ feature, order });
+    const currentActiveStatus = contextData.active_states;
+    if (
+      currentActiveStatus.sortedFeature.feature !== feature ||
+      currentActiveStatus.sortedFeature.order !== order
+    ) {
+      contextData.setActive({
+        featureRelease: currentActiveStatus.featureRelease,
+        featureType: currentActiveStatus.featureType,
+        featureStatus: currentActiveStatus.featureStatus,
+        sortedFeature: {
+          feature,
+          order,
+        },
+      });
+    }
   };
 
   //function for filtering and loading view table according to level 2 filters
   const loadTableData = (table) => {
     const data = table;
     // sorting the data if a feature are previously selected for sorting
-    if (sortedFeature.feature) {
+    if (sortedFeature.feature !== null) {
       sortViewTableAscending(data, sortedFeature.feature, sortedFeature.order);
     } else {
       setViewTableData(data);
@@ -87,13 +117,16 @@ const ActiveViewPage = (props) => {
             : [];
 
           const colors = [
-            "#22c55e",
-            "#f97316",
-            "#ef4444",
-            "#6366f1",
-            "#41AEA9",
-            "#213E3B",
-            "#E8FFFF",
+            "#16a34a",
+            "#57534e",
+            "#dc2626",
+            "#ea580c",
+            "#ca8a04",
+            "#059669",
+            "#52525b",
+            "#65a30d",
+            "#475569",
+            "#4b5563",
           ];
           // filtering features assigned directly to user
           var i = 0; //index of activeReleaseTable
@@ -162,9 +195,9 @@ const ActiveViewPage = (props) => {
                   if (
                     data[idx]["assigned_test_managers"].has(ultimate_parent)
                   ) {
-                    data[idx]["assigned_test_managers"].get(ultimate_parent).add(
-                      curr
-                    );
+                    data[idx]["assigned_test_managers"]
+                      .get(ultimate_parent)
+                      .add(curr);
                     data[idx]["color_map"].set(curr, colors[count]);
                   } else {
                     data[idx]["assigned_test_managers"].set(
@@ -177,9 +210,9 @@ const ActiveViewPage = (props) => {
 
                   //handling assinged dev managers
                   if (data[idx]["assigned_dev_managers"].has(ultimate_parent)) {
-                    data[idx]["assigned_dev_managers"].get(ultimate_parent).add(
-                      curr
-                    );
+                    data[idx]["assigned_dev_managers"]
+                      .get(ultimate_parent)
+                      .add(curr);
                     data[idx]["color_map"].set(curr, colors[count]);
                   } else {
                     data[idx]["assigned_dev_managers"].set(
@@ -221,9 +254,9 @@ const ActiveViewPage = (props) => {
                   if (
                     data[idx]["assigned_test_managers"].has(ultimate_parent)
                   ) {
-                    data[idx]["assigned_test_managers"].get(ultimate_parent).add(
-                      curr
-                    );
+                    data[idx]["assigned_test_managers"]
+                      .get(ultimate_parent)
+                      .add(curr);
                     data[idx]["color_map"].set(curr, colors[count]);
                   } else {
                     data[idx]["assigned_test_managers"].set(
@@ -261,9 +294,9 @@ const ActiveViewPage = (props) => {
 
                   //handling assinged dev managers
                   if (data[idx]["assigned_dev_managers"].has(ultimate_parent)) {
-                    data[idx]["assigned_dev_managers"].get(ultimate_parent).add(
-                      curr
-                    );
+                    data[idx]["assigned_dev_managers"]
+                      .get(ultimate_parent)
+                      .add(curr);
                     data[idx]["color_map"].set(curr, colors[count]);
                   } else {
                     data[idx]["assigned_dev_managers"].set(
@@ -301,15 +334,37 @@ const ActiveViewPage = (props) => {
           };
           // itterating to all nodes under a direct children one by one using dfs
           var colorCount = 1;
-          try{
+          try {
             childrens.forEach((child) => {
-                dfs_search(child, child, colorCount);
+              var assingeeCount = j;
+              dfs_search(child, child, colorCount);
+              if (assingeeCount !== j) {
                 colorCount++;
-              });
-          }catch(err){
+              }
+            });
+          } catch (err) {
             console.log(err);
           }
         }
+        const findAssignedManagersCount = (elem) => {
+          const assignees = [];
+          if (elem.assigned_test_managers) {
+            elem.assigned_test_managers.forEach((v, k) => {
+              assignees.push(k);
+            });
+          }
+          if (elem.assigned_dev_managers)
+            elem.assigned_dev_managers.forEach((v, k) => {
+              assignees.push(k);
+            });
+          return assignees.filter((x, i, a) => a.indexOf(x) === i).length;
+        };
+
+        data = data.map((elem) => {
+          const reporteesCount = findAssignedManagersCount(elem);
+          return { ...elem, reporteesCount };
+        });
+
         setUserData(data);
 
         //filtering data according to lvl 1 filters
@@ -355,6 +410,7 @@ const ActiveViewPage = (props) => {
     chart: {
       type: "pie",
       height: 300,
+      width: 350,
     },
     title: {
       text: "Field Chart",
@@ -383,7 +439,7 @@ const ActiveViewPage = (props) => {
         data: diffTypeCount,
         events: {
           click: (e) => {
-            setFeatureType(e.point.name);
+            selectFeatureType(e.point.name);
           },
         },
       },
@@ -407,7 +463,8 @@ const ActiveViewPage = (props) => {
   const releaseChartOptions = {
     chart: {
       type: "bar",
-      height: 300,
+      height: userId !== "all" ? 300 : 650,
+      width: userId !== "all" ? 550 : 880,
     },
     title: {
       text: "Release Chart",
@@ -490,6 +547,7 @@ const ActiveViewPage = (props) => {
     chart: {
       type: "column",
       height: 280,
+      width: 1300,
     },
     title: {
       text: "Assignment Chart",
@@ -548,10 +606,11 @@ const ActiveViewPage = (props) => {
   const statusChartOptions = {
     chart: {
       type: "pie",
-      height: 300,
+      height: userId !== "all" ? 300 : featureRelease === "all" ? 650 : 400,
+      width: userId !== "all" ? 350 : featureRelease === "all" ? 400 : 450,
     },
     title: {
-      text: "Feature Status Chart",
+      text: "Workflow State Chart",
     },
     colors: ["#D789D7", "#9D65C9", "#5D54A4", "#2A3D66"],
     plotOptions: {
@@ -578,7 +637,7 @@ const ActiveViewPage = (props) => {
         data: diffStatusCount,
         events: {
           click: (e) => {
-            setFeatureStatus(e.point.name);
+            selectFeatureStatus(e.point.name);
           },
         },
       },
@@ -587,23 +646,40 @@ const ActiveViewPage = (props) => {
 
   // wrappers function for selecting user from the user search bar
   const selectUserId = (userId) => {
-    setFeatureRelease("all");
     navigate(`/active/view/${userId}`);
   };
 
   // filtering data according to release (lvl 1 filter)
   const selectFeatureRelease = (release) => {
-    setFeatureRelease(release);
+    const currentActiveStatus = contextData.active_states;
+    contextData.setActive({
+      featureRelease: release,
+      featureType: currentActiveStatus.featureType,
+      featureStatus: currentActiveStatus.featureStatus,
+      sortedFeature: currentActiveStatus.sortedFeature,
+    });
   };
 
   // filtering data according to status (lvl 1 filter)
   const selectFeatureStatus = (status) => {
-    setFeatureStatus(status);
+    const currentActiveStatus = contextData.active_states;
+    contextData.setActive({
+      featureRelease: currentActiveStatus.featureRelease,
+      featureType: currentActiveStatus.featureType,
+      featureStatus: status,
+      sortedFeature: currentActiveStatus.sortedFeature,
+    });
   };
 
   // filtering data according to type (lvl 1 filter)
-  const selectFeatureType = (status) => {
-    setFeatureType(status);
+  const selectFeatureType = (type) => {
+    const currentActiveStatus = contextData.active_states;
+    contextData.setActive({
+      featureRelease: currentActiveStatus.featureRelease,
+      featureType: type,
+      featureStatus: currentActiveStatus.featureStatus,
+      sortedFeature: currentActiveStatus.sortedFeature,
+    });
   };
 
   // finding different unique release for status filter bar
@@ -702,10 +778,10 @@ const ActiveViewPage = (props) => {
         <div className="w-full flex flex-col space-y-4 px-0">
           {/* level 1 charts */}
           <div className="flex flex-col space-y-3 items-center pt-1 pb-2 px-8 bg-blue-gray-200">
-            <div className="w-full flex flex-row space-x-8 justify-evenly pt-1 px-8">
+            <div className="w-full flex flex-row space-x-3 justify-evenly pt-1 px-8">
               {userId !== "all" && featureType === "all" ? (
                 <>
-                  <Card className=" p-4 hover:drop-shadow-xl w-1/3 ">
+                  <Card className=" p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
                     <HighchartsReact
                       highcharts={Highcharts}
                       options={typeChartOptions}
@@ -717,7 +793,7 @@ const ActiveViewPage = (props) => {
               )}
               {featureRelease === "all" ? (
                 <>
-                  <Card className="p-4 hover:drop-shadow-xl w-1/3 ">
+                  <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit">
                     <HighchartsReact
                       highcharts={Highcharts}
                       options={releaseChartOptions}
@@ -729,7 +805,7 @@ const ActiveViewPage = (props) => {
               )}
               {featureStatus === "all" ? (
                 <>
-                  <Card className=" p-4 hover:drop-shadow-xl w-1/3 ">
+                  <Card className=" p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
                     <HighchartsReact
                       highcharts={Highcharts}
                       options={statusChartOptions}
@@ -742,7 +818,7 @@ const ActiveViewPage = (props) => {
             </div>
             {userId !== "all" ? (
               <>
-                <Card className="p-4 hover:drop-shadow-xl w-full ">
+                <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
                   <HighchartsReact
                     highcharts={Highcharts}
                     options={assignedChartOptions}
@@ -753,16 +829,6 @@ const ActiveViewPage = (props) => {
               <></>
             )}
           </div>
-
-          {/* level 2 charts */}
-          {/* <div className="flex flex-row  space-x-4 justify-evenly px-8 ">
-            <Card className=" p-4 hover:drop-shadow-md w-1/3 ">
-              <HighchartsReact
-                highcharts={Highcharts}
-                options={statusChartOptions}
-              />
-            </Card>
-          </div> */}
 
           {/* table block */}
           <div className="px-4 bg-gray-50 pb-4 pt-6">
@@ -775,7 +841,7 @@ const ActiveViewPage = (props) => {
                   : "All"}
               </span>
               <br />
-              {featureRelease !== "all" ? (
+              {featureRelease !== "all" || featureStatus !== "all" ? (
                 <>
                   {" "}
                   {featureRelease !== "all" ? (
@@ -787,6 +853,22 @@ const ActiveViewPage = (props) => {
                           className="fill-gray-500 hover:fill-red-500 hover:cursor-pointer"
                           onClick={() => {
                             selectFeatureRelease("all");
+                          }}
+                        />
+                      </span>
+                    </>
+                  ) : (
+                    <></>
+                  )}
+                  {featureStatus !== "all" ? (
+                    <>
+                      <span className=" bg-gray-100 py-2 pl-3 ml-3 rounded-md drop-shadow-md text-blue-500 font-medium font-mono text-base">
+                        {featureStatus}{" "}
+                        <CloseIcon
+                          style={{ marginRight: 10, fontSize: "0.8em" }}
+                          className="fill-gray-500 hover:fill-red-500 hover:cursor-pointer"
+                          onClick={() => {
+                            selectFeatureStatus("all");
                           }}
                         />
                       </span>

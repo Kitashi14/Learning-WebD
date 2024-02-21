@@ -19,9 +19,9 @@ const ProfileViewPage = (props) => {
 
   // useState containing all filter's states
   // level 1 filters
-  const [featureRelease, setFeatureRelease] = useState("all");
-  const [featureTag, setFeatureTag] = useState("all");
-  const [featureType, setFeatureType] = useState("all");
+  const featureRelease = contextData.dpl_states.featureRelease;
+  const featureType = contextData.dpl_states.featureType;
+  const featureTag = contextData.dpl_states.featureTag;
 
   // level 2 filters
   const [featureStatus, setFeatureStatus] = useState("all");
@@ -30,14 +30,16 @@ const ProfileViewPage = (props) => {
   const [userData, setUserData] = useState([]); //it will contain all elements under the user node irrespective of the state of any filters applied, used for finding different release under the user
   const [viewData, setViewData] = useState([]); //it will contain all elements after applying level 1 filter, used for showing lvl 1 charts
   const [viewTableData, setViewTableData] = useState([]); //it will contain all elements after applying level 2 filter, used for filling table
-  const [sortedFeature, setSortedFeature] = useState({
-    //it will store the feature used for sorting the table
-    feature: null,
-    order: null,
-  });
+
+  // getting the feature details that was sorted
+  const sortedFeature = {
+    feature: contextData.dpl_states.sortedFeature.feature,
+    order: contextData.dpl_states.sortedFeature.order,
+  }
 
   const navigate = useNavigate(); //for navigating to different routes
   const userId = useParams().uid; //extracting user id from the route/url
+  contextData.setDplUser(userId);
 
   // for finding all parents nodes of the current user
   const previous_parents = [userId];
@@ -61,7 +63,18 @@ const ProfileViewPage = (props) => {
       });
     }
     setViewTableData(copyViewTableData);
-    setSortedFeature({ feature, order });
+    const currentDplStates = contextData.dpl_states;
+    if (currentDplStates.sortedFeature.feature!==feature || currentDplStates.sortedFeature.order!==order){
+      contextData.setDpl({
+        featureRelease: currentDplStates.featureRelease,
+        featureTag: currentDplStates.featureTag,
+        featureType: currentDplStates.featureType,
+        sortedFeature: {
+          feature,
+          order,
+        },
+      })
+    }
   };
 
   //function for filtering and loading view table according to level 2 filters
@@ -73,7 +86,7 @@ const ProfileViewPage = (props) => {
       );
     });
     // sorting the data if a feature are previously selected for sorting
-    if (sortedFeature.feature) {
+    if (sortedFeature.feature!==null) {
       sortViewTableAscending(data, sortedFeature.feature, sortedFeature.order);
     } else {
       setViewTableData(data);
@@ -175,7 +188,7 @@ const ProfileViewPage = (props) => {
   const releaseChartOptions = {
     chart: {
       type: "column",
-      height: 200,
+      height: userId !== "all" ? 200 : 230,
     },
     title: {
       text: "Release Chart",
@@ -266,8 +279,7 @@ const ProfileViewPage = (props) => {
         innerSize: "50%",
         events: {
           click: (e) => {
-            // console.log(e.point.name)
-            setFeatureTag(e.point.name);
+            selectFeatureTag(e.point.name);
           },
         },
       },
@@ -303,6 +315,7 @@ const ProfileViewPage = (props) => {
     chart: {
       type: "bar",
       height: 300,
+      width: 400,
     },
     title: {
       text: "Assignment Chart",
@@ -341,7 +354,7 @@ const ProfileViewPage = (props) => {
   };
 
   // type chart parameters
-  const diffTypes = userData.map(elem=>elem.release_name).filter((x,i,a)=> a.indexOf(x)===i).sort()
+  const diffTypes = ["S", "M", "L", "XL", "XXL"];
 
   const diffTypesCount = diffTypes.map((type) => {
     let count = 0;
@@ -357,7 +370,7 @@ const ProfileViewPage = (props) => {
       height: 300,
     },
 
-    colors: ["#22c55e", "#f97316", "#ef4444"],
+    colors: ["#bbf7d0", "#86efac", "#4ade80", "#22c55e", "#16a34a"],
     title: {
       text: "Feature Type Chart",
     },
@@ -386,8 +399,7 @@ const ProfileViewPage = (props) => {
         innerSize: "50%",
         events: {
           click: (e) => {
-            // console.log(e.point.name)
-            setFeatureType(e.point.name);
+            selectFeatureType(e.point.name);
           },
         },
       },
@@ -506,26 +518,40 @@ const ProfileViewPage = (props) => {
 
   // wrappers function for selecting user from the user search bar
   const selectUserId = (userId) => {
-    // setUserId(userId);
-    setFeatureTag("all");
-    setFeatureType("all");
-    setFeatureRelease("all");
     navigate(`/dpl/view/${userId}`);
   };
 
   // filtering data according to tag (lvl 1 filter)
   const selectFeatureTag = (tag) => {
-    setFeatureTag(tag);
+    const currentDplStates = contextData.dpl_states
+    contextData.setDpl({
+      featureRelease: currentDplStates.featureRelease,
+      featureTag: tag,
+      featureType: currentDplStates.featureType,
+      sortedFeature: currentDplStates.sortedFeature,
+    })
   };
 
   // filtering data according to type (lvl 1 filter)
   const selectFeatureType = (type) => {
-    setFeatureType(type);
+    const currentDplStates = contextData.dpl_states
+    contextData.setDpl({
+      featureRelease: currentDplStates.featureRelease,
+      featureTag: currentDplStates.featureTag,
+      featureType: type,
+      sortedFeature: currentDplStates.sortedFeature,
+    })
   };
 
   // filtering data according to release (lvl 1 filter)
   const selectFeatureRelease = (release) => {
-    setFeatureRelease(release);
+    const currentDplStates = contextData.dpl_states
+    contextData.setDpl({
+      featureRelease: release,
+      featureTag: currentDplStates.featureTag,
+      featureType: currentDplStates.featureType,
+      sortedFeature: currentDplStates.sortedFeature,
+    })
   };
 
   // finding different unique status for status filter bar

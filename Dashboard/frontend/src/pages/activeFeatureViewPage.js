@@ -92,14 +92,6 @@ const ActiveFeatureViewPage = (props) => {
             </span>
           </Typography>
           <br />
-          <Typography className="font-bold">
-            Description: {"   "}
-            <span className="font-normal">
-              {
-                "AngularJS 1.x obsolete software 1.7.9 is shipped on WLC and causing the WLC to be impacted by obsolete software for AngularJS vulnerability. WebUI framework needs to be migrated from AngularJS to a modern framework like React"
-              }
-            </span>
-          </Typography>
           <hr />
         </Card>
       </div>

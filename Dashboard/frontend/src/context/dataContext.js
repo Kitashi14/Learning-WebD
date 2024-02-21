@@ -1,14 +1,13 @@
 /** @format */
 
 import { createContext, useEffect, useState } from "react";
-import {
-  // activeReleaseTable,
-//   child_parent_map,
-//   parent_child_map,
-  // removeSpaces,
-  // tableData,
-//   userdId_fullName_map,
-} from "../data/mockData";
+import // activeReleaseTable,
+// child_parent_map,
+// parent_child_map,
+// removeSpaces,
+// tableData,
+// userdId_fullName_map,
+"../data/mockData";
 
 //creating global variables that can be used anywhere inside the react-app
 const DataContext = createContext({
@@ -19,6 +18,14 @@ const DataContext = createContext({
   childParentMap: new Map(),
   parentChildMap: new Map(),
   userFullNameMap: new Map(),
+  dpl_currentUser: "all",
+  active_currentUser: "all",
+  dpl_states: {},
+  active_states: {},
+  setDplUser: () => {},
+  setActiveUser: () => {},
+  setDpl: () => {},
+  setActive: () => {},
 });
 
 export const DataContextProvider = (props) => {
@@ -28,9 +35,44 @@ export const DataContextProvider = (props) => {
   const [childParentMap, setChildParentMap] = useState(new Map());
   const [parentChildMap, setParentChildMap] = useState(new Map());
   const [userFullNameMap, setUserFullNameMap] = useState(new Map());
+  const [dpl_currentUser, setDplCurrentUser] = useState("all");
+  const [active_currentUser, setActiveCurrentUser] = useState("all");
+  const [dpl_states, setDplStates] = useState({
+    featureRelease: "all",
+    featureTag: "all",
+    featureType: "all",
+    sortedFeature: {
+      feature: null,
+      order: null,
+    }
+  });
+  const [active_states, setActiveStates] = useState({
+    featureRelease: "all",
+    featureType: "all",
+    featureStatus: "all",
+    sortedFeature: {
+      feature: null,
+      order: null,
+    }
+  });
 
   const setLoading = (value) => {
     setIsLoading(value);
+  };
+
+  const setDplUser = (value) => {
+    setDplCurrentUser(value);
+  };
+
+  const setActiveUser = (value) => {
+    setActiveCurrentUser(value);
+  };
+
+  const setDpl = (value) => {
+    setDplStates(value);
+  };
+  const setActive = (value) => {
+    setActiveStates(value);
   };
 
   //storing the fetch api responses
@@ -50,8 +92,14 @@ export const DataContextProvider = (props) => {
 
           const employeeDetailResponseData =
             await employeeDetailResponse.json();
+          const orgs = new Set();
+          employeeDetailResponseData.org.forEach((elem) => {
+            eid_fullName_map.set(elem.cec_id, elem.name);
+            orgs.add(elem.cec_id);
+          });
 
-          employeeDetailResponseData.data.forEach((elem) => {
+          employeeDetailResponseData.employee.forEach((elem) => {
+            if (orgs.has(elem.cec_id)) return;
             fullName_eid_map.set(elem.name.trim(), elem.cec_id);
             eid_fullName_map.set(elem.cec_id, elem.name.trim());
             child_parent_map.set(elem.cec_id, elem.manager);
@@ -62,13 +110,16 @@ export const DataContextProvider = (props) => {
             }
           });
 
-          console.log(employeeDetailResponseData.data.length);
           console.log(
-            fullName_eid_map,
-            eid_fullName_map,
-            child_parent_map,
-            parent_child_map
+            employeeDetailResponseData.employee.length,
+            employeeDetailResponseData.org.length
           );
+          // console.log(
+          //   fullName_eid_map,
+          //   eid_fullName_map,
+          //   child_parent_map,
+          //   parent_child_map
+          // );
         } catch (err) {
           console.log(err);
           alert("Can't fetch employee details at the moment");
@@ -115,8 +166,6 @@ export const DataContextProvider = (props) => {
 
           const dplMetricResponseData = await dplMetricResponse.json();
           const dplArray = [];
-          const smallLimit = 5;
-          const midLimit = 15;
           dplMetricResponseData.plm.forEach((elem) => {
             // console.log(
             //   elem.assigned_to,
@@ -142,11 +191,15 @@ export const DataContextProvider = (props) => {
               creation_date: elem.feature_created_date,
               last_status_change_date: elem.last_status_change_date,
               feature_type:
-                elem.dev_estimate_person_weeks <= smallLimit
-                  ? "small"
-                  : elem.dev_estimate_person_weeks <= midLimit
-                  ? "mid"
-                  : "large",
+                elem.dev_estimate_person_weeks <= 3
+                  ? "S"
+                  : elem.dev_estimate_person_weeks <= 8
+                  ? "M"
+                  : elem.dev_estimate_person_weeks <= 20
+                  ? "L"
+                  : elem.dev_estimate_person_weeks <= 60
+                  ? "XL"
+                  : "XXL",
             };
             dplArray.push(obj);
           });
@@ -156,25 +209,29 @@ export const DataContextProvider = (props) => {
               feature_name: elem.feature_name,
               jira_id: elem.jira_id,
               feature_status: elem.feature_status,
-              feature_tag: "wireless tect debt",
+              feature_tag: "wireless tech debt",
               pin: elem.pin,
               no_tie_rank: elem.no_tie_rank,
               release_name: elem.release_name,
               feature_des: elem.feature_description,
               assigned_to:
-              elem.assigned_to &&
-              fullName_eid_map.has(elem.assigned_to.trim())
-                ? fullName_eid_map.get(elem.assigned_to.trim())
-                : elem.assigned_to.trim(),
+                elem.assigned_to &&
+                fullName_eid_map.has(elem.assigned_to.trim())
+                  ? fullName_eid_map.get(elem.assigned_to.trim())
+                  : elem.assigned_to.trim(),
               created_by: elem.created_by,
               creation_date: elem.feature_created_date,
               last_status_change_date: elem.last_status_change_date,
               feature_type:
-                elem.dev_estimate_person_weeks <= smallLimit
-                  ? "small"
-                  : elem.dev_estimate_person_weeks <= midLimit
-                  ? "mid"
-                  : "large",
+                elem.dev_estimate_person_weeks <= 3
+                  ? "S"
+                  : elem.dev_estimate_person_weeks <= 8
+                  ? "M"
+                  : elem.dev_estimate_person_weeks <= 20
+                  ? "L"
+                  : elem.dev_estimate_person_weeks <= 60
+                  ? "XL"
+                  : "XXL",
             };
             dplArray.push(obj);
           });
@@ -198,11 +255,15 @@ export const DataContextProvider = (props) => {
               creation_date: elem.feature_created_date,
               last_status_change_date: elem.last_status_change_date,
               feature_type:
-                elem.dev_estimate_person_weeks <= smallLimit
-                  ? "small"
-                  : elem.dev_estimate_person_weeks <= midLimit
-                  ? "mid"
-                  : "large",
+                elem.dev_estimate_person_weeks <= 3
+                  ? "S"
+                  : elem.dev_estimate_person_weeks <= 8
+                  ? "M"
+                  : elem.dev_estimate_person_weeks <= 20
+                  ? "L"
+                  : elem.dev_estimate_person_weeks <= 60
+                  ? "XL"
+                  : "XXL",
             };
             dplArray.push(obj);
           });
@@ -212,18 +273,10 @@ export const DataContextProvider = (props) => {
           alert("Can't fetch dpl metric data at the moment");
         }
 
-        const response = () => {
-          return new Promise((resolve, reject) => {
-            setTimeout(() => {
-              setChildParentMap(child_parent_map);
-              setParentChildMap(parent_child_map);
-              setUserFullNameMap(eid_fullName_map);
-              setIsLoading(false);
-              resolve();
-            }, 500);
-          });
-        };
-        await response();
+        setChildParentMap(child_parent_map);
+        setParentChildMap(parent_child_map);
+        setUserFullNameMap(eid_fullName_map);
+        setIsLoading(false);
       } catch (err) {
         console.log(err);
         alert("Something went wrong.");
@@ -241,6 +294,14 @@ export const DataContextProvider = (props) => {
     childParentMap,
     parentChildMap,
     userFullNameMap,
+    dpl_currentUser,
+    active_currentUser,
+    dpl_states,
+    active_states,
+    setDplUser,
+    setActiveUser,
+    setDpl,
+    setActive,
   };
 
   return (

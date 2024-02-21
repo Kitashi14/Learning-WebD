@@ -3,11 +3,14 @@ import DashboardIcon from "@rsuite/icons/legacy/Dashboard";
 import GroupIcon from "@rsuite/icons/legacy/Group";
 import PinIcon from "@rsuite/icons/Pin";
 import { useNavigate } from "react-router-dom";
+import { useContext } from "react";
+import DataContext from "../context/dataContext";
 
 // side navbar of the website
 const Navbar = (props) => {
   // react-hook/function for navigating to different routes
   const navigate = useNavigate();
+  const contextData = useContext(DataContext)
 
   return (
     <div className="w-1/5">
@@ -33,7 +36,7 @@ const Navbar = (props) => {
                   : { background: "#3498FE" }
               }
               onClick={() => {
-                navigate("dpl/view/all");
+                navigate(`dpl/view/${contextData.dpl_currentUser}`);
               }}
             >
               DPL metric
@@ -47,7 +50,7 @@ const Navbar = (props) => {
                   : { background: "#3498FE" }
               }
               onClick={() => {
-                navigate("active/view/all");
+                navigate(`active/view/${contextData.active_currentUser}`);
               }}
             >
               Active Releases

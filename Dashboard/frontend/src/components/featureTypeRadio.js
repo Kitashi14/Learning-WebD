@@ -13,9 +13,11 @@ const FeatureTypeRadio = (props) => {
     <RadioGroup className="hover:bg-gray-100 bg-white  justify-center" name="radioList" inline appearance="picker" value={props.value} onChange={selectType}>
       <RadioLabel>Feature Type: </RadioLabel>
       <Radio  value="all">All</Radio>
-      <Radio value="small">Small</Radio>
-      <Radio value="mid">Mid</Radio>
-      <Radio value="large">Large</Radio>
+      <Radio value="S">S</Radio>
+      <Radio value="M">M</Radio>
+      <Radio value="L">L</Radio>
+      <Radio value="XL">XL</Radio>
+      <Radio value="XXL">XXL</Radio>
     </RadioGroup>
 )};
 

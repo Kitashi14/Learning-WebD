@@ -19,22 +19,25 @@ export default function ActiveFeatureTable(props) {
   const featuresToSort = new Map([
     ["Feature Key", "jira_id"],
     ["Summary", "feature_name"],
+    ["Dev Managers", "dev_managers"],
+    ["Test Managers", "test_managers"],
   ]);
 
   //for navigating to different routes
   const navigate = useNavigate();
   if (props.userId !== "all") {
-    TABLE_HEAD.splice(4, 0, "Assigned under ");
+    TABLE_HEAD.splice(4, 0, "Assigned under");
+    featuresToSort.set("Assigned under", "reporteesCount");
   }
 
   const findAssignedManagers = (elem) => {
     const assignees = [];
-    if (elem.assigned_test_managers && elem.assigned_test_managers.size) {
+    if (elem.assigned_test_managers) {
       elem.assigned_test_managers.forEach((v, k) => {
         assignees.push(k);
       });
     }
-    if (elem.assigned_dev_managers && elem.assigned_dev_managers.size)
+    if (elem.assigned_dev_managers)
       elem.assigned_dev_managers.forEach((v, k) => {
         assignees.push(k);
       });
@@ -167,7 +170,7 @@ export default function ActiveFeatureTable(props) {
                     //   `https://miggbo.atlassian.net/browse/${data.jira_id}`,
                     //   "blank"
                     // );
-                    navigate(`/active/feature/${data.jira_id}`)
+                    navigate(`/active/feature/${data.jira_id}`);
                   }}
                 >
                   <span title="open in jira">{data.jira_id}</span>
