@@ -9,6 +9,7 @@ import DataContext from "./context/dataContext";
 import { Loader } from "rsuite";
 import ActiveViewPage from "./pages/activeViewPage";
 import ActiveFeatureViewPage from "./pages/activeFeatureViewPage";
+import DevMetricsViewPage from "./pages/devMetricsPage";
 // contains all routes for the client side
 function App() {
   const contextData = useContext(DataContext);
@@ -21,6 +22,7 @@ function App() {
     if (location.pathname.includes("dpl")) {
       setCurrentTab("dpl");
     } else if (location.pathname.includes("active")) setCurrentTab("active");
+    else if (location.pathname.includes("dev")) setCurrentTab("dev");
     else {
       setCurrentTab(null);
     }
@@ -48,7 +50,7 @@ function App() {
               <Route
                 exact
                 path="/dpl/feature/:fid"
-                element={<FeatureViewPage  />}
+                element={<FeatureViewPage />}
               ></Route>
               <Route
                 exact
@@ -59,6 +61,11 @@ function App() {
                 exact
                 path="/active/feature/:fid"
                 element={<ActiveFeatureViewPage />}
+              ></Route>
+              <Route
+                exact
+                path="/dev/view/:uid"
+                element={<DevMetricsViewPage />}
               ></Route>
             </Routes>
           )}

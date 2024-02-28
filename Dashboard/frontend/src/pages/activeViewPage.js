@@ -405,7 +405,7 @@ const ActiveViewPage = (props) => {
           return { name: type, y: count };
         })
       : [];
-
+    diffTypeCount.sort((a, b) => a.name > b.name ? 1 : a.name < b.name ? -1 : 0);
   const typeChartOptions = {
     chart: {
       type: "pie",
@@ -431,7 +431,7 @@ const ActiveViewPage = (props) => {
     },
 
     xAxis: {
-      categories: diffTypes,
+      categories: diffTypeCount.map(elem=>elem.name),
     },
     series: [
       {
@@ -459,7 +459,7 @@ const ActiveViewPage = (props) => {
     });
     return { name: release, y: count };
   });
-
+  diffReleaseCount.sort((a, b) => a.name > b.name ? 1 : a.name < b.name ? -1 : 0);
   const releaseChartOptions = {
     chart: {
       type: "bar",
@@ -487,7 +487,7 @@ const ActiveViewPage = (props) => {
     },
 
     xAxis: {
-      categories: diffRelease.map((elem) => ""),
+      categories: diffReleaseCount.map(elem=>""),
     },
     series: [
       {
@@ -520,9 +520,9 @@ const ActiveViewPage = (props) => {
     return assignees.filter((x, i, a) => a.indexOf(x) === i);
   };
   //assignment chart parameters
-  const diffAssign = userId !== "all" ? findDifferentAssignees(viewData) : [];
+  var diffAssign = userId !== "all" ? findDifferentAssignees(viewData) : [];
 
-  const diffAssignCount =
+  var diffAssignCount =
     userId !== "all"
       ? diffAssign.map((assign) => {
           let count = 0;
@@ -534,15 +534,22 @@ const ActiveViewPage = (props) => {
               count++;
           });
           return {
-            name:
-              assign !== "self"
-                ? contextData.userFullNameMap.get(assign)
-                : assign,
+            name: assign,
             y: count,
           };
         })
       : [];
-
+  diffAssignCount.sort((a, b) => a.y - b.y);
+  diffAssign = diffAssignCount.map((elem) => elem.name);
+  diffAssignCount = diffAssignCount.map((elem) => {
+    return {
+      name:
+        elem.name === "self"
+          ? "self"
+          : contextData.userFullNameMap.get(elem.name),
+      y: elem.y,
+    };
+  });
   const assignedChartOptions = {
     chart: {
       type: "column",
@@ -603,6 +610,7 @@ const ActiveViewPage = (props) => {
     return { name: status, y: count };
   });
 
+  diffStatusCount.sort((a, b) => a.name > b.name ? 1 : a.name < b.name ? -1 : 0);
   const statusChartOptions = {
     chart: {
       type: "pie",
@@ -629,7 +637,7 @@ const ActiveViewPage = (props) => {
     },
 
     xAxis: {
-      categories: diffStatus,
+      categories: diffStatusCount.map(elem=>elem.name),
     },
     series: [
       {

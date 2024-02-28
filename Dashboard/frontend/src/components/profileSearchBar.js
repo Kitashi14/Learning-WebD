@@ -20,7 +20,8 @@ const ProfileSearchBar = (props) => {
     ? props.table.forEach((elem) => {
         callParent(elem.assigned_to);
       })
-    : props.table.forEach((elem) => {
+    : props.type === "active"
+    ? props.table.forEach((elem) => {
         const uniqueManagers = [];
         elem.test_managers.forEach((manager) => {
           uniqueManagers.push(manager);
@@ -31,6 +32,14 @@ const ProfileSearchBar = (props) => {
         uniqueManagers
           .filter((x, i, a) => a.indexOf(x) === i)
           .forEach((manager) => callParent(manager));
+      })
+    : props.table.forEach((elem) => {
+        if ("OAIRMVJDCUN".includes(elem.state))
+          callParent(
+            elem.emp_id === "" || !contextData.userFullNameMap.has(elem.emp_id)
+              ? elem.mgr_id
+              : elem.emp_id
+          );
       });
 
   // mapping unique user with their full names

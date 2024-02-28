@@ -1,0 +1,968 @@
+import { useContext, useEffect, useState } from "react";
+import ProfileSearchBar from "../components/profileSearchBar";
+import { Card, Typography } from "@material-tailwind/react";
+import CloseIcon from "@rsuite/icons/Close";
+import Highcharts from "highcharts";
+import HighchartsReact from "highcharts-react-official";
+import { useNavigate, useParams } from "react-router-dom";
+import DataContext from "../context/dataContext";
+import DevMetricsTypeRadio from "../components/devMetricsTypeRadio";
+import DevMetricsSegmentTypeRadio from "../components/devMetricsSegmentTypeRadio";
+import DevMetricsTable from "../components/devMetricsTable";
+import { Loader } from "rsuite";
+
+// dashboard view page for any user
+const DevMetricsViewPage = (props) => {
+  //extracting context global data
+  const contextData = useContext(DataContext);
+  // useState containing all filter's states
+  // level 1 filters
+  const bugSegment = contextData.dev_states.bugSegment;
+  const bugType = contextData.dev_states.bugType;
+
+  const [viewData, setViewData] = useState([]); //it will contain all elements after applying level 1 filter, used for showing lvl 1 charts
+  const [viewTableData, setViewTableData] = useState([]); //it will contain all elements after applying level 2 filter, used for filling table
+  // getting the feature details that was sorted
+  const sortedFeature = {
+    feature: contextData.dev_states.sortedFeature.feature,
+    order: contextData.dev_states.sortedFeature.order,
+  };
+
+  //pagenation
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const segmentFullNameMap = new Map([
+    ["week-0", "Current Week"],
+    ["week-1", "Week 1"],
+    ["week-2", "Week 2"],
+    ["week-3", "Week 3"],
+    ["week-4", "Week 4"],
+    ["quarter", "Quarterly"],
+    ["semi", "Semi Annually"],
+    ["annual", "Annually"],
+  ]);
+  const weekBarValidityMap = new Map([
+    ["week-0", new Set(["week-0", "quarter", "semi", "annual"])],
+    ["week-1", new Set(["week-1", "quarter", "semi", "annual"])],
+    ["week-2", new Set(["week-2", "quarter", "semi", "annual"])],
+    ["week-3", new Set(["week-3", "quarter", "semi", "annual"])],
+    ["week-4", new Set(["week-4", "quarter", "semi", "annual"])],
+    ["quarter", new Set(["quarter", "semi", "annual"])],
+    ["semi", new Set(["semi", "annual"])],
+    ["annual", new Set(["annual"])],
+  ]);
+  const reverseSegmentMap = new Map();
+  segmentFullNameMap.forEach((v, k) => {
+    reverseSegmentMap.set(v, k);
+  });
+
+  const typeFullNameMap = new Map([
+    ["O", "Opened"],
+    ["A", "Assigned"],
+    ["I", "Info required"],
+    ["R", "Resolved"],
+    ["M", "More"],
+    ["V", "Verified"],
+    ["J", "Junked"],
+    ["D", "Duplicate"],
+    ["U", "Unproducible"],
+    ["C", "Closed"],
+    ["N", "New"],
+  ]);
+
+  const typeColors = ["#D789D7", "#9D65C9", "#5D54A4", "#2A3D66"];
+  const stateOrder = ["N", "OAI", "RMV", "JDCU"];
+
+  const [prevUser, setPrevUser] = useState(null);
+  const [segmentCount, setSegmentCount] = useState(new Map());
+
+  const navigate = useNavigate(); //for navigating to different routes
+  const userId = useParams().uid; //extracting user id from the route/url
+  contextData.setDevMetricsUser(userId);
+
+  // for finding all parents nodes of the current user
+  const previous_parents = [userId];
+  let currChild = userId;
+  while (contextData.childParentMap.has(currChild)) {
+    previous_parents.unshift(contextData.childParentMap.get(currChild));
+    currChild = contextData.childParentMap.get(currChild);
+  }
+  if (userId !== "all") previous_parents.unshift("all");
+
+  //function for sorting the view table
+  const sortViewTableAscending = (table, feature, order) => {
+    const copyViewTableData = table; //for making a copy by data, not reference
+    if (order > 0)
+      copyViewTableData.sort((a, b) => {
+        return a[feature] > b[feature] ? 1 : a[feature] < b[feature] ? -1 : 0;
+      });
+    else {
+      copyViewTableData.sort((a, b) => {
+        return a[feature] > b[feature] ? -1 : a[feature] < b[feature] ? 1 : 0;
+      });
+    }
+    setViewTableData(copyViewTableData);
+    setCurrentPage(1);
+    const currentDevStatus = contextData.dev_states;
+    if (
+      currentDevStatus.sortedFeature.feature !== feature ||
+      currentDevStatus.sortedFeature.order !== order
+    ) {
+      contextData.setDevMetricsStates({
+        bugSegment: currentDevStatus.bugSegment,
+        bugType: currentDevStatus.bugType,
+        sortedFeature: {
+          feature,
+          order,
+        },
+      });
+    }
+  };
+
+  //function for filtering and loading view table according to level 2 filters
+  const loadTableData = (table) => {
+    const data = table;
+    // sorting the data if a feature are previously selected for sorting
+    if (sortedFeature.feature !== null) {
+      sortViewTableAscending(data, sortedFeature.feature, sortedFeature.order);
+    } else {
+      setViewTableData(data);
+      setCurrentPage(1);
+    }
+  };
+
+  // for rending the whole page when a variable from dependency array changes its value
+  useEffect(
+    () => {
+      const mainFunction = async () => {
+        const segmentMap = new Map();
+        const loadData = async (table, segment) => {
+          let data = [];
+
+          //condition check is a valid is selected
+          if (userId === "all") {
+            data = table;
+          } else {
+            // storing all direct children nodes
+            const childrens = contextData.parentChildMap.has(userId)
+              ? contextData.parentChildMap.get(userId)
+              : [];
+
+            // filtering features assigned directly to user
+            table.forEach((elem) => {
+              if (
+                elem.emp_id === userId ||
+                (elem.emp_id === null && elem.mgr_id === userId)
+              ) {
+                data.push({ ...elem, assigned_under: "self" });
+              }
+            });
+
+            // dfs search in the tree
+            const dfs_search = (curr, ultimate_parent) => {
+              const childNodes = contextData.parentChildMap.has(curr)
+                ? contextData.parentChildMap.get(curr)
+                : [];
+              table.forEach((elem) => {
+                if (
+                  elem.emp_id === curr ||
+                  ((elem.emp_id === "" ||
+                    !contextData.userFullNameMap.has(elem.emp_id)) &&
+                    elem.mgr_id === curr)
+                ) {
+                  data.push({ ...elem, assigned_under: ultimate_parent });
+                }
+              });
+
+              childNodes.forEach((childNode) => {
+                dfs_search(childNode, ultimate_parent);
+              });
+            };
+
+            // itterating to all nodes under a direct children one by one using dfs
+            childrens.forEach((child) => {
+              dfs_search(child, child);
+            });
+          }
+
+          //filtering data according to lvl 1 filters
+          data = data.filter((elem) => {
+            return (
+              "OAIRMVJDCUN".includes(elem.state) &&
+              (bugType.includes(elem.state) || bugType === "all")
+            );
+          });
+          segmentMap.set(segment, data.length);
+          if (segment === bugSegment) {
+            setViewData(data);
+            loadTableData(data);
+          }
+        };
+        //api call
+        const fetchData = async () => {
+          try {
+            const response = await fetch(
+              `${process.env.REACT_APP_BACKEND_URL}/dev/details`
+            );
+            const responseData = await response.json();
+            contextData.setDevTable(responseData.data);
+          } catch (err) {
+            console.log(err);
+            alert("Can't fetch dev metrics bug details at the moment");
+          }
+        };
+        //fetch table
+        if (!contextData.isDevTableLoaded) {
+          await fetchData();
+          contextData.setIsDevTableLoaded(true);
+        }
+        var tableToUse;
+        //segment will be selected
+        if (userId === prevUser) {
+          tableToUse = contextData.devMetricsTable[bugSegment]
+            ? contextData.devMetricsTable[bugSegment].bugs
+            : [];
+          loadData(tableToUse, bugSegment);
+        } else {
+          segmentFullNameMap.forEach((v, k) => {
+            tableToUse = contextData.devMetricsTable[k]
+              ? contextData.devMetricsTable[k].bugs
+              : [];
+            loadData(tableToUse, k);
+          });
+          setSegmentCount(segmentMap);
+        }
+
+        // segmentFullNameMap.forEach((v, k) => {
+        //   tableToUse = contextData.devMetricsTable[k]
+        //     ? contextData.devMetricsTable[k].bugs
+        //     : [];
+        //   loadData(tableToUse, k);
+        // });
+        // setSegmentCount(segmentMap);
+      };
+      try {
+        mainFunction();
+      } catch (err) {
+        console.log(err);
+      }
+      if (contextData.isDevTableLoaded) {
+        setPrevUser(userId);
+        contextData.setIsDevPageLoading(false);
+      }
+    },
+    // eslint-disable-next-line
+    [userId, bugSegment, contextData.isDevTableLoaded, bugType] // dependency array
+  );
+
+  //segment chart parameters
+  const diffSegment = [
+    "week-0",
+    "week-1",
+    "week-2",
+    "week-3",
+    "week-4",
+    "quarter",
+    "semi",
+    "annual",
+  ];
+  diffSegment.reverse();
+  const diffSegmentCount = diffSegment.map((segment) => {
+    const count = segmentCount.get(segment);
+    return {
+      name: segmentFullNameMap.get(segment),
+      y: count,
+      selected: segment === bugSegment ? true : false,
+      dataLabels:
+        segment === bugSegment
+          ? {
+              enabled: true,
+              color: "#16803C",
+            }
+          : {
+              enabled: true,
+            },
+    };
+  });
+  const segmentChartOptions = {
+    chart: {
+      type: "column",
+      height: userId === "all" ? 580 : 550,
+      width: 1300,
+    },
+    title: {
+      text: "Segment Chart",
+    },
+    // colors: ["#FFC300", "#EC610A", "#A40A3C", "#6B0848"],
+    colors: ["#16803C", "#41AEA9", "#213E3B", "#E8FFFF"],
+    plotOptions: {
+      series: {
+        allowPointSelect: true,
+        cursor: "pointer",
+        dataLabels: {
+          enabled: true,
+          format: "<b>{point.name}</b><br>{point.percentage:.1f}",
+          distance: 20,
+        },
+        states: {
+          select: {
+            colorIndex: "#D789D7",
+            color: "#6CE890",
+            borderWidth: 0,
+            borderColor: "#6CE890",
+          },
+        },
+      },
+    },
+    credits: {
+      text: `${segmentFullNameMap.get(bugSegment)}: ${
+        contextData.devMetricsTable[bugSegment]
+          ? contextData.devMetricsTable[bugSegment]["lower limit"]
+          : ""
+      } - ${
+        contextData.devMetricsTable[bugSegment]
+          ? contextData.devMetricsTable[bugSegment]["upper limit"]
+          : ""
+      }`,
+      enabled: true,
+      href: "#",
+      style: {
+        fontSize: "15px",
+        color: "green",
+        fontWeight: "bold",
+      },
+      position: {
+        align: "center",
+      },
+    },
+
+    xAxis: {
+      categories: diffSegment.map(
+        (e) =>
+          `${
+            contextData.devMetricsTable[e]
+              ? contextData.devMetricsTable[e]["lower limit df"]
+              : ""
+          } <br> - ${
+            contextData.devMetricsTable[e]
+              ? contextData.devMetricsTable[e]["upper limit df"]
+              : ""
+          }`
+      ),
+    },
+    series: [
+      {
+        name: "No. of bugs",
+        data: diffSegmentCount,
+        events: {
+          click: (e) => {
+            selectBugSegment(reverseSegmentMap.get(e.point.name));
+          },
+        },
+      },
+    ],
+  };
+
+  //type chart parameters
+  const diffTypes =
+    bugType === "all" ? ["N", "OAI", "RMV", "JDCU"] : bugType.split("");
+
+  const diffTypeCount = diffTypes.map((type) => {
+    let count = 0;
+    viewData.forEach((elem) => {
+      if (type.includes(elem.state)) count++;
+    });
+    return { name: type, y: count, selected: false };
+  });
+
+  const typeChartOptions = {
+    chart: {
+      type: "pie",
+      height: 300,
+    },
+    title: {
+      text: "State Chart",
+    },
+    colors: ["#D789D7", "#9D65C9", "#5D54A4", "#2A3D66"],
+    plotOptions: {
+      series: {
+        allowPointSelect: true,
+        cursor: "pointer",
+        dataLabels: {
+          enabled: true,
+          format: "<b>{point.name}</b><br>{point.percentage:.1f}%",
+          distance: 20,
+        },
+      },
+    },
+    credits: {
+      enabled: true,
+      href: "#",
+      text: `For: ${segmentFullNameMap.get(bugSegment)}`,
+      style: {
+        fontSize: "15px",
+      },
+    },
+
+    xAxis: {
+      categories: diffTypes,
+    },
+    series: [
+      {
+        name: "No. of bugs",
+        data: diffTypeCount,
+        innerSize: "50%",
+        events: {
+          click: (e) => {
+            console.log(e.point.options.selected);
+            selectBugType(e.point.name);
+          },
+        },
+      },
+    ],
+  };
+
+  //assignment chart parameters
+  var diffAssign =
+    userId !== "all"
+      ? viewData
+          .map((elem) => elem.assigned_under)
+          .filter((x, i, a) => a.indexOf(x) === i)
+      : [];
+
+  var diffAssignCount =
+    userId !== "all"
+      ? diffAssign.map((assign) => {
+          let count = 0;
+          viewData.forEach((elem) => {
+            if (elem.assigned_under === assign) count++;
+          });
+          return {
+            name: assign,
+            y: count,
+          };
+        })
+      : [];
+  diffAssignCount.sort((a, b) => b.y - a.y);
+  diffAssign = diffAssignCount.map((elem) => elem.name);
+  diffAssignCount = diffAssignCount.map((elem) => {
+    return {
+      name:
+        elem.name === "self"
+          ? "self"
+          : contextData.userFullNameMap.get(elem.name),
+      y: elem.y,
+    };
+  });
+  const assignedChartOptions = {
+    chart: {
+      type: "bar",
+      height: 300,
+    },
+    title: {
+      text: "Assignment Chart",
+    },
+    // colors: ['#D789D7'],
+    plotOptions: {
+      series: {
+        allowPointSelect: true,
+        cursor: "pointer",
+        dataLabels: {
+          enabled: true,
+          format: "<b>{point.name}</b><br>{point.percentage:.1f}",
+          distance: 20,
+        },
+      },
+    },
+    credits: {
+      enabled: true,
+      href: "#",
+      text: `For: ${segmentFullNameMap.get(bugSegment)}, State (${bugType})`,
+      style: {
+        fontSize: "15px",
+      },
+    },
+
+    xAxis: {
+      categories: diffAssign,
+    },
+    series: [
+      {
+        name: "No. of bugs",
+        data: diffAssignCount,
+        innerSize: "50%",
+        events: {
+          click: (e) => {
+            if (e.point.category !== "self") {
+              contextData.setIsDevPageLoading(true);
+              navigate(`/dev/view/${e.point.category}`);
+            }
+          },
+        },
+      },
+    ],
+  };
+
+  // wrappers function for selecting user from the user search bar
+  const selectUserId = (user) => {
+    if (user !== userId) {
+      contextData.setIsDevPageLoading(true);
+      navigate(`/dev/view/${user}`);
+    }
+  };
+
+  // filtering data according to release (lvl 1 filter)
+  const selectBugType = (type) => {
+    const currentDevStatus = contextData.dev_states;
+    contextData.setDevMetricsStates({
+      bugSegment: currentDevStatus.bugSegment,
+      bugType: type,
+      sortedFeature: currentDevStatus.sortedFeature,
+    });
+  };
+
+  // filtering data according to status (lvl 1 filter)
+  const selectBugSegment = (segment) => {
+    const currentDevStatus = contextData.dev_states;
+    contextData.setDevMetricsStates({
+      bugSegment: segment,
+      bugType: currentDevStatus.bugType,
+      sortedFeature: currentDevStatus.sortedFeature,
+    });
+  };
+  const pageNumbers = [];
+  var p = 1000;
+  while (p < viewTableData.length) {
+    pageNumbers.push(p / 1000);
+    p = p + 1000;
+  }
+  pageNumbers.push(p / 1000);
+  return (
+    <>
+      {contextData.isDevPageLoading || !contextData.isDevTableLoaded ? (
+        <>
+          <div className="h-full w-full flex flex-row justify-center items-center">
+            <Loader size="lg" />
+          </div>
+        </>
+      ) : (
+        <>
+          {/* page block */}
+          <div className="bg-gray-200 flex h-full overflow-y-auto flex-col py-3 space-y-2">
+            <div className="flex flex-row justify-center mb-[-20px]">
+              {" "}
+              <span className=" bg-blue-600 py-2 px-3 rounded-lg text-white font-bold text-lg">
+                Dev Metrics
+              </span>
+            </div>
+            <ProfileSearchBar
+              selectUserId={selectUserId}
+              table={
+                contextData.devMetricsTable.annual
+                  ? contextData.devMetricsTable.annual.bugs
+                  : []
+              }
+              userId={userId}
+              type={"dev"}
+            />
+
+            {/* level 1 filter block */}
+            <div className=" flex flex-row justify-stretch">
+              <div className="w-1/5"> </div>
+              <div className="flex flex-col items-center px-3 rounded-lg space-y-3 bg-gray-50 drop-shadow-md border-blue-200 border-none border-[1px] border-solid py-2 w-fit m-auto ">
+                <Card className="w-fit flex flex-row items-center px-3 py-3 ml-4">
+                  View For :
+                  <span className="text-base text-blue-500 font-bold pl-2">
+                    {userId === "all"
+                      ? "All"
+                      : contextData.userFullNameMap.get(userId)}
+                  </span>
+                </Card>
+
+                <div className="flex flex-col items-center space-y-3">
+                  <DevMetricsSegmentTypeRadio
+                    value={bugSegment}
+                    selectBugSegment={selectBugSegment}
+                  />
+                  <DevMetricsTypeRadio
+                    value={bugType}
+                    selectBugType={selectBugType}
+                  />
+                </div>
+                <Typography variant="h5" className="pl-4 text-center">
+                  {" "}
+                  Total no. of Bugs : <span>{viewData.length}</span>{" "}
+                </Typography>
+              </div>
+              <div className="   w-1/5 flex flex-col justify-evenly items-center  pr-8">
+                {bugType !== "all" ? (
+                  <>
+                    <div className="  bg-gray-100 border-gray-300 border-solid border-[2px] rounded-lg   w-4/5 h-full flex flex-col justify-evenly items-center">
+                      {bugType.split("").map((char) => (
+                        <>
+                          <div
+                            style={{
+                              color:
+                                typeColors[
+                                  stateOrder[
+                                    stateOrder.findIndex((v, i, a) => {
+                                      return v.includes(char);
+                                    })
+                                  ].indexOf(char)
+                                ],
+                            }}
+                            className=""
+                          >
+                            {" "}
+                            {char}
+                            {" : "}
+                            {typeFullNameMap.get(char)}
+                          </div>
+                        </>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <></>
+                )}
+              </div>
+            </div>
+
+            {/* user path from its ultimate parent */}
+            {userId !== "all" ? (
+              <>
+                <div className=" px-3 flex cursor-default flex-row justify-center">
+                  {" "}
+                  {previous_parents.map((elem) => (
+                    <>
+                      /
+                      <span
+                        className="px-2 cursor-pointer text-blue-500"
+                        onClick={() => {
+                          if (elem !== userId) {
+                            contextData.setIsDevPageLoading(true);
+                            navigate(`/dev/view/${elem}`);
+                          }
+                        }}
+                      >
+                        {elem}
+                      </span>
+                    </>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <></>
+            )}
+
+            <div className="w-full px-8 py-[1px] ">
+              <div className="w-full flex flex-row bg-gray-50 border-solid border-[1px] border-gray-300 rounded-md h-[22px]">
+                <div
+                  style={{
+                    background: weekBarValidityMap.get("annual").has(bugSegment)
+                      ? "#16803B"
+                      : "",
+                  }}
+                  className="rounded-l-md  w-[50%]"
+                ></div>
+                <div
+                  style={{
+                    background: weekBarValidityMap.get("semi").has(bugSegment)
+                      ? "#16803B"
+                      : "",
+                  }}
+                  className="border-solid border-r-[1px] border-gray-300 w-[25%]"
+                ></div>
+                <div
+                  style={{
+                    background: weekBarValidityMap
+                      .get("quarter")
+                      .has(bugSegment)
+                      ? "#16803B"
+                      : "",
+                  }}
+                  className="border-solid border-r-[1px] border-gray-300 w-[7%]"
+                ></div>
+                <div
+                  style={{
+                    background: weekBarValidityMap.get("week-4").has(bugSegment)
+                      ? "#16803B"
+                      : "",
+                  }}
+                  className="border-solid border-r-[1px] border-gray-300 w-[4%]"
+                ></div>
+                <div
+                  style={{
+                    background: weekBarValidityMap.get("week-3").has(bugSegment)
+                      ? "#16803B"
+                      : "",
+                  }}
+                  className="border-solid border-r-[1px] border-gray-300 w-[4%]"
+                ></div>
+                <div
+                  style={{
+                    background: weekBarValidityMap.get("week-2").has(bugSegment)
+                      ? "#16803B"
+                      : "",
+                  }}
+                  className="border-solid border-r-[1px] border-gray-300 w-[4%]"
+                ></div>
+                <div
+                  style={{
+                    background: weekBarValidityMap.get("week-1").has(bugSegment)
+                      ? "#16803B"
+                      : "",
+                  }}
+                  className="border-solid border-r-[1px] border-gray-300 w-[4%]"
+                ></div>
+                <div
+                  style={{
+                    background: weekBarValidityMap.get("week-0").has(bugSegment)
+                      ? "#16803B"
+                      : "",
+                  }}
+                  className=" rounded-r-md border-solid border-r-[1px] border-gray-300 w-[2%]"
+                ></div>
+              </div>
+            </div>
+
+            {/* data block, contains charts and table */}
+            <div className="w-full flex flex-col space-y-4 px-0">
+              {/* level 1 charts */}
+              <div className="flex flex-col space-y-3 pt-3 items-center pt-1 pb-2 px-8 bg-blue-gray-200">
+                {/* {bugSegment === "annual" ? (
+                  <>
+                    <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
+                      <HighchartsReact
+                        highcharts={Highcharts}
+                        options={segmentChartOptions}
+                      />
+                    </Card>
+                  </>
+                ) : (
+                  <>
+                    <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-full font-bold text-lg text-green-800 ">
+                      {" "}
+                      {segmentFullNameMap.get(bugSegment)}
+                      {" : "}
+                      {contextData.devMetricsTable[bugSegment]
+                        ? contextData.devMetricsTable[bugSegment]["lower limit"]
+                        : ""}
+                      {" - "}
+                      {contextData.devMetricsTable[bugSegment]
+                        ? contextData.devMetricsTable[bugSegment]["upper limit"]
+                        : ""}{" "}
+                    </Card>
+                  </>
+                )} */}
+                <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
+                  <HighchartsReact
+                    highcharts={Highcharts}
+                    options={segmentChartOptions}
+                  />
+                </Card>
+                <div className="w-full flex flex-row space-x-3 justify-evenly pt-1 px-8">
+                  {userId !== "all" ? (
+                    <>
+                      <Card className=" px-4 py-0 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
+                        <HighchartsReact
+                          highcharts={Highcharts}
+                          options={assignedChartOptions}
+                        />
+                      </Card>
+                    </>
+                  ) : (
+                    <></>
+                  )}
+                  {bugType.length > 1 ? (
+                    <>
+                      <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit">
+                        <HighchartsReact
+                          highcharts={Highcharts}
+                          options={typeChartOptions}
+                        />
+                      </Card>
+                    </>
+                  ) : (
+                    <></>
+                  )}
+                </div>
+              </div>
+
+              {/* table block */}
+              <div className="px-4 bg-gray-50 pb-4 pt-6">
+                {/* table label with level 1 filter data */}
+                <Typography className="pl-4" variant="h3">
+                  <span className="font-medium font-mono text-base text-blue-500 text-md">
+                    View For:{" "}
+                    {userId !== "all"
+                      ? contextData.userFullNameMap.get(userId)
+                      : "All"}
+                  </span>
+                  <br />
+                  {bugSegment !== "annual" || bugType !== "all" ? (
+                    <>
+                      {" "}
+                      {bugSegment !== "annual" ? (
+                        <>
+                          <span className=" bg-gray-100 py-2 pl-3 rounded-md drop-shadow-md text-blue-500 font-medium font-mono text-base">
+                            {segmentFullNameMap.get(bugSegment)}{" "}
+                            <CloseIcon
+                              style={{ marginRight: 10, fontSize: "0.8em" }}
+                              className="fill-gray-500 hover:fill-red-500 hover:cursor-pointer"
+                              onClick={() => {
+                                selectBugSegment("annual");
+                              }}
+                            />
+                          </span>
+                        </>
+                      ) : (
+                        <></>
+                      )}
+                      {bugType !== "all" ? (
+                        <>
+                          <span className=" bg-gray-100 py-2 pl-3 ml-3 rounded-md drop-shadow-md text-blue-500 font-medium font-mono text-base">
+                            {bugType}{" "}
+                            <CloseIcon
+                              style={{ marginRight: 10, fontSize: "0.8em" }}
+                              className="fill-gray-500 hover:fill-red-500 hover:cursor-pointer"
+                              onClick={() => {
+                                selectBugType("all");
+                              }}
+                            />
+                          </span>
+                        </>
+                      ) : (
+                        <></>
+                      )}
+                      <br />
+                    </>
+                  ) : (
+                    <></>
+                  )}
+                  <hr />
+                  Total Bugs Count :{" "}
+                  <span className=" text-blue-500">
+                    {viewTableData.length}
+                  </span>{" "}
+                  <br />
+                </Typography>
+                <div className="pb-4 flex flex-col justify-center items-center">
+                  <div className="bg-gray-100 border-bold border-gray-300 border-[1px] rounded-md flex flex-row max-w-lg  overflow-x-auto select-none">
+                    {pageNumbers.map((elem) => {
+                      if (elem === pageNumbers.length)
+                        return (
+                          <>
+                            <div
+                              style={{
+                                fontWeight: elem === currentPage ? "bold" : "",
+                                fontSize: elem === currentPage ? "15px" : "",
+                                color: elem === currentPage ? "#2096F3" : "",
+                              }}
+                              className=" flex flex-row justify-center items-center py-2 px-3 hover:bg-gray-300 text-center"
+                              onClick={() => {
+                                if (elem !== currentPage) setCurrentPage(elem);
+                              }}
+                            >
+                              {elem}
+                            </div>
+                          </>
+                        );
+                      return (
+                        <>
+                          <div
+                            style={{
+                              fontWeight: elem === currentPage ? "bold" : "",
+                              fontSize: elem === currentPage ? "15px" : "",
+                              color: elem === currentPage ? "#2096F3" : "",
+                            }}
+                            className=" flex flex-row justify-center items-center py-2 px-3 hover:bg-gray-300 border-r-[1px] border-gray-300 border-bold text-center"
+                            onClick={() => {
+                              if (elem !== currentPage) setCurrentPage(elem);
+                            }}
+                          >
+                            {elem}
+                          </div>
+                        </>
+                      );
+                    })}
+                  </div>
+
+                  <div className="font-bold text-lg text-blue-600">
+                    <span className="text-gray-600 font-sans">Page:</span>{" "}
+                    {currentPage}
+                    <span className="font-normal italic ">
+                      {" ("}
+                      {(currentPage - 1) * 1000 + 1}
+                      {"-"}
+                      {currentPage * 1000 < viewTableData.length
+                        ? currentPage * 1000
+                        : viewTableData.length}
+                      {")"}
+                    </span>
+                  </div>
+                </div>
+                <DevMetricsTable
+                  userId={userId}
+                  data={viewTableData}
+                  sortViewTableAscending={sortViewTableAscending}
+                  sortedFeature={sortedFeature}
+                  bugType={bugType}
+                  lowerIndex={(currentPage - 1) * 1000}
+                  upperIndex={
+                    currentPage * 1000 < viewTableData.length
+                      ? currentPage * 1000
+                      : viewTableData.length
+                  }
+                />
+                <div className="py-4 flex flex-col justify-center items-center">
+                  <div className="bg-gray-100 border-bold border-gray-300 border-[1px] rounded-md flex flex-row max-w-lg  overflow-x-auto select-none">
+                    {pageNumbers.map((elem) => {
+                      if (elem === pageNumbers.length)
+                        return (
+                          <>
+                            <div
+                              style={{
+                                fontWeight: elem === currentPage ? "bold" : "",
+                                fontSize: elem === currentPage ? "15px" : "",
+                                color: elem === currentPage ? "#2096F3" : "",
+                              }}
+                              className=" flex flex-row justify-center items-center py-2 px-3 hover:bg-gray-300 text-center"
+                              onClick={() => {
+                                if (elem !== currentPage) setCurrentPage(elem);
+                              }}
+                            >
+                              {elem}
+                            </div>
+                          </>
+                        );
+                      return (
+                        <>
+                          <div
+                            style={{
+                              fontWeight: elem === currentPage ? "bold" : "",
+                              fontSize: elem === currentPage ? "15px" : "",
+                              color: elem === currentPage ? "#2096F3" : "",
+                            }}
+                            className=" flex flex-row justify-center items-center py-2 px-3 hover:bg-gray-300 border-r-[1px] border-gray-300 border-bold text-center"
+                            onClick={() => {
+                              if (elem !== currentPage) setCurrentPage(elem);
+                            }}
+                          >
+                            {elem}
+                          </div>
+                        </>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+    </>
+  );
+};
+
+export default DevMetricsViewPage;

@@ -35,7 +35,7 @@ const ProfileViewPage = (props) => {
   const sortedFeature = {
     feature: contextData.dpl_states.sortedFeature.feature,
     order: contextData.dpl_states.sortedFeature.order,
-  }
+  };
 
   const navigate = useNavigate(); //for navigating to different routes
   const userId = useParams().uid; //extracting user id from the route/url
@@ -64,7 +64,10 @@ const ProfileViewPage = (props) => {
     }
     setViewTableData(copyViewTableData);
     const currentDplStates = contextData.dpl_states;
-    if (currentDplStates.sortedFeature.feature!==feature || currentDplStates.sortedFeature.order!==order){
+    if (
+      currentDplStates.sortedFeature.feature !== feature ||
+      currentDplStates.sortedFeature.order !== order
+    ) {
       contextData.setDpl({
         featureRelease: currentDplStates.featureRelease,
         featureTag: currentDplStates.featureTag,
@@ -73,7 +76,7 @@ const ProfileViewPage = (props) => {
           feature,
           order,
         },
-      })
+      });
     }
   };
 
@@ -86,7 +89,7 @@ const ProfileViewPage = (props) => {
       );
     });
     // sorting the data if a feature are previously selected for sorting
-    if (sortedFeature.feature!==null) {
+    if (sortedFeature.feature !== null) {
       sortViewTableAscending(data, sortedFeature.feature, sortedFeature.order);
     } else {
       setViewTableData(data);
@@ -287,14 +290,14 @@ const ProfileViewPage = (props) => {
   };
 
   //assignment chart parameters
-  const diffAssign =
+  var diffAssign =
     userId !== "all"
       ? viewData
           .map((elem) => elem.assigned_under)
           .filter((x, i, a) => a.indexOf(x) === i)
       : [];
 
-  const diffAssignCount =
+  var diffAssignCount =
     userId !== "all"
       ? diffAssign.map((assign) => {
           let count = 0;
@@ -302,15 +305,22 @@ const ProfileViewPage = (props) => {
             if (elem.assigned_under === assign) count++;
           });
           return {
-            name:
-              assign !== "self"
-                ? contextData.userFullNameMap.get(assign)
-                : assign,
+            name: assign,
             y: count,
           };
         })
       : [];
-
+  diffAssignCount.sort((a, b) => b.y - a.y);
+  diffAssign = diffAssignCount.map((elem) => elem.name);
+  diffAssignCount = diffAssignCount.map((elem) => {
+    return {
+      name:
+        elem.name === "self"
+          ? "self"
+          : contextData.userFullNameMap.get(elem.name),
+      y: elem.y,
+    };
+  });
   const assignedChartOptions = {
     chart: {
       type: "bar",
@@ -523,35 +533,35 @@ const ProfileViewPage = (props) => {
 
   // filtering data according to tag (lvl 1 filter)
   const selectFeatureTag = (tag) => {
-    const currentDplStates = contextData.dpl_states
+    const currentDplStates = contextData.dpl_states;
     contextData.setDpl({
       featureRelease: currentDplStates.featureRelease,
       featureTag: tag,
       featureType: currentDplStates.featureType,
       sortedFeature: currentDplStates.sortedFeature,
-    })
+    });
   };
 
   // filtering data according to type (lvl 1 filter)
   const selectFeatureType = (type) => {
-    const currentDplStates = contextData.dpl_states
+    const currentDplStates = contextData.dpl_states;
     contextData.setDpl({
       featureRelease: currentDplStates.featureRelease,
       featureTag: currentDplStates.featureTag,
       featureType: type,
       sortedFeature: currentDplStates.sortedFeature,
-    })
+    });
   };
 
   // filtering data according to release (lvl 1 filter)
   const selectFeatureRelease = (release) => {
-    const currentDplStates = contextData.dpl_states
+    const currentDplStates = contextData.dpl_states;
     contextData.setDpl({
       featureRelease: release,
       featureTag: currentDplStates.featureTag,
       featureType: currentDplStates.featureType,
       sortedFeature: currentDplStates.sortedFeature,
-    })
+    });
   };
 
   // finding different unique status for status filter bar

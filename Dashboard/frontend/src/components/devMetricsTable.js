@@ -1,48 +1,43 @@
 import { Card, Typography } from "@material-tailwind/react";
+import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import DataContext from "../context/dataContext";
 
 // table heads
-export default function ActiveFeatureTable(props) {
+export default function DevMetricsTable(props) {
   const TABLE_HEAD = [
-    "Feature Key",
-    "Summary",
-    "Workflow State",
-    "Release Name",
-    "Dev Managers",
-    "Test Managers",
+    "Bug ID",
+    "Headline",
+    "State",
+    "Engineer",
+    "Manager",
+    "Found At",
+    "Component",
+    "Version",
   ];
+
+  const navigate = useNavigate();
+  const contextData = useContext(DataContext);
 
   //table rows passed through props (viewTableData)
   const TABLE_ROWS = props.data;
+  const typeColors = ["#D789D7", "#9D65C9", "#5D54A4", "#2A3D66"];
+  const stateOrder = ["N","OAI", "RMV", "JDCU"];
 
   //features with sorting option
   const featuresToSort = new Map([
-    ["Feature Key", "jira_id"],
-    ["Summary", "feature_name"],
-    ["Dev Managers", "dev_managers"],
-    ["Test Managers", "test_managers"],
+    ["Bug ID", "bug_id"],
+    ["Headline", "headline"],
+    ["Changed At", "changed_at"],
+    ["Age", "age"],
+    ["State", "state"],
+    ["Employee ID", "emp_id"],
   ]);
 
   //for navigating to different routes
-  const navigate = useNavigate();
   if (props.userId !== "all") {
-    TABLE_HEAD.splice(4, 0, "Assigned under");
-    featuresToSort.set("Assigned under", "reporteesCount");
+    TABLE_HEAD.splice(3, 0, "Assigned under");
   }
-
-  const findAssignedManagers = (elem) => {
-    const assignees = [];
-    if (elem.assigned_test_managers) {
-      elem.assigned_test_managers.forEach((v, k) => {
-        assignees.push(k);
-      });
-    }
-    if (elem.assigned_dev_managers)
-      elem.assigned_dev_managers.forEach((v, k) => {
-        assignees.push(k);
-      });
-    return assignees.filter((x, i, a) => a.indexOf(x) === i);
-  };
 
   return (
     <Card className=" w-full overflow-scroll">
@@ -155,9 +150,9 @@ export default function ActiveFeatureTable(props) {
 
         <tbody>
           {/* table data rows */}
-          {TABLE_ROWS.map((data) => (
+          {TABLE_ROWS.slice(props.lowerIndex, props.upperIndex).map((data) => (
             <tr
-              key={data.jira_id}
+              key={data.bug_id}
               className="even:bg-blue-gray-100 hover:bg-blue-100"
             >
               <td className="p-4">
@@ -166,14 +161,13 @@ export default function ActiveFeatureTable(props) {
                   color="blue-gray"
                   className="font-normal hover:cursor-pointer hover:text-blue-600"
                   onClick={() => {
-                    // window.open(
-                    //   `https://miggbo.atlassian.net/browse/${data.jira_id}`,
-                    //   "blank"
-                    // );
-                    navigate(`/active/feature/${data.jira_id}`);
+                    window.open(
+                      `http://wwwin-metrics.cisco.com/protected-cgi-bin/ddtsdisp.cgi?id=${data.bug_id}`,
+                      "blank"
+                    );
                   }}
                 >
-                  <span title="open in jira">{data.jira_id}</span>
+                  <span title="open in jira">{data.bug_id}</span>
                 </Typography>
               </td>
               <td className="p-4">
@@ -182,70 +176,52 @@ export default function ActiveFeatureTable(props) {
                   color="blue-gray"
                   className="font-normal"
                 >
-                  {data.feature_name}
+                  {data.headline}
                 </Typography>
               </td>
               <td className="p-4">
-                <Typography
-                  variant="small"
-                  color="blue-gray"
-                  className="font-normal"
-                >
-                  {data.feature_status}
-                </Typography>
-              </td>
-              <td className="p-4">
-                <Typography
-                  variant="small"
-                  color="blue-gray"
-                  className="font-normal"
-                >
-                  {data.release_name}
-                </Typography>
-              </td>
-              {/* <td className="p-4">
                 <Typography
                   variant="small"
                   color="white"
-                  className={`font-normal bg-${
-                    data.feature_type === "small"
-                      ? "green-500"
-                      : data.feature_type === "mid"
-                      ? "orange-500"
-                      : "red-500"
-                  } rounded py-1 px-3`}
+                  style={{
+                    background:
+                      props.bugType === "all"
+                        ? typeColors[
+                            stateOrder.findIndex((v, i, a) => {
+                              return v.includes(data.state);
+                            })
+                          ]
+                        : typeColors[
+                            stateOrder[
+                              stateOrder.findIndex((v, i, a) => {
+                                return v.includes(data.state);
+                              })
+                            ].indexOf(data.state)
+                          ],
+                  }}
+                  className={`font-normal rounded py-1 px-3`}
                 >
-                  {data.feature_type}
+                  {data.state}
                 </Typography>
-              </td> */}
+              </td>
               {props.userId !== "all" ? (
                 <>
                   <td className="p-4">
                     <Typography
                       variant="small"
-                      color="white"
-                      className="space-x-1"
+                      color="blue-gray"
+                      className="font-normal hover:cursor-pointer"
+                      onClick={() => {
+                        if (
+                          contextData.devMetrics_currentUser !==
+                          data.assigned_under
+                        ) {
+                          contextData.setIsDevPageLoading(true);
+                          navigate(`/dev/view/${data.assigned_under}`);
+                        }
+                      }}
                     >
-                      {findAssignedManagers(data).map((manager) => {
-                        return (
-                          <>
-                            <span
-                              style={{
-                                background: data.color_map.get(manager),
-                              }}
-                              className={`font-normal rounded py-1 px-2 ${
-                                manager !== "self" ? "cursor-pointer " : ""
-                              } `}
-                              onClick={() => {
-                                if (data.assigned_under !== "self")
-                                  navigate(`/active/view/${manager}`);
-                              }}
-                            >
-                              {manager}
-                            </span>
-                          </>
-                        );
-                      })}
+                      {data.assigned_under}
                     </Typography>
                   </td>
                 </>
@@ -256,36 +232,36 @@ export default function ActiveFeatureTable(props) {
                 <Typography
                   variant="small"
                   color="blue-gray"
-                  className="font-normal"
+                  className="font-normal hover:cursor-pointer"
+                  onClick={() => {
+                    if (
+                      contextData.devMetrics_currentUser !== data.emp_id &&
+                      data.emp_id !== ""
+                    ) {
+                      contextData.setIsDevPageLoading(true);
+                      navigate(`/dev/view/${data.emp_id}`);
+                    }
+                  }}
                 >
-                  {Array.from(data.dev_managers).map((manager) => {
-                    return (
-                      <>
-                        <span
-                          style={{
-                            color: data.color_map
-                              ? data.color_map.get(manager)
-                              : "",
-                          }}
-                          className={`${
-                            data.color_map
-                              ? data.color_map.has(manager)
-                                ? "font-bold"
-                                : ""
-                              : ""
-                          } px-1 ${
-                            manager !== "self" ? "cursor-pointer " : ""
-                          } `}
-                          onClick={() => {
-                            if (data.assigned_under !== "self")
-                              navigate(`/active/view/${manager}`);
-                          }}
-                        >
-                          {manager}
-                        </span>
-                      </>
-                    );
-                  })}
+                  {data.emp_id}
+                </Typography>
+              </td>
+              <td className="p-4">
+                <Typography
+                  variant="small"
+                  color="blue-gray"
+                  className="font-normal hover:cursor-pointer"
+                  onClick={() => {
+                    if (
+                      contextData.devMetrics_currentUser !== data.mgr_id &&
+                      data.mgr_id !== ""
+                    ) {
+                      contextData.setIsDevPageLoading(true);
+                      navigate(`/dev/view/${data.mgr_id}`);
+                    }
+                  }}
+                >
+                  {data.mgr_id}
                 </Typography>
               </td>
               <td className="p-4">
@@ -294,34 +270,25 @@ export default function ActiveFeatureTable(props) {
                   color="blue-gray"
                   className="font-normal"
                 >
-                  {Array.from(data.test_managers).map((manager) => {
-                    return (
-                      <>
-                        <span
-                          style={{
-                            color: data.color_map
-                              ? data.color_map.get(manager)
-                              : "",
-                          }}
-                          className={`${
-                            data.color_map
-                              ? data.color_map.has(manager)
-                                ? "font-bold"
-                                : ""
-                              : ""
-                          } px-1 ${
-                            manager !== "self" ? "cursor-pointer " : ""
-                          } `}
-                          onClick={() => {
-                            if (data.assigned_under !== "self")
-                              navigate(`/active/view/${manager}`);
-                          }}
-                        >
-                          {manager}
-                        </span>
-                      </>
-                    );
-                  })}
+                  {data.found_at}
+                </Typography>
+              </td>
+              <td className="p-4">
+                <Typography
+                  variant="small"
+                  color="blue-gray"
+                  className="font-normal"
+                >
+                  {data.component}
+                </Typography>
+              </td>
+              <td className="p-4">
+                <Typography
+                  variant="small"
+                  color="blue-gray"
+                  className="font-normal"
+                >
+                  {data.version}
                 </Typography>
               </td>
             </tr>

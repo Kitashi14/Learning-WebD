@@ -12,31 +12,45 @@ import // activeReleaseTable,
 //creating global variables that can be used anywhere inside the react-app
 const DataContext = createContext({
   isLoading: true,
+  isDevTableLoaded: false,
+  isDevPageLoading: true,
+  setIsDevPageLoading: () => {},
+  setIsDevTableLoaded: () => {},
   setLoading: () => {},
   dplTable: [],
   jiraTable: [],
+  devMetricsTable: {},
   childParentMap: new Map(),
   parentChildMap: new Map(),
   userFullNameMap: new Map(),
   dpl_currentUser: "all",
   active_currentUser: "all",
+  devMetrics_currentUser: "all",
+  dev_states: {},
   dpl_states: {},
   active_states: {},
   setDplUser: () => {},
   setActiveUser: () => {},
+  setDevMetricsUser: () => {},
   setDpl: () => {},
   setActive: () => {},
+  setDevMetricsStates: () => {},
+  setDevTable: () => {},
 });
 
 export const DataContextProvider = (props) => {
   const [isLoading, setIsLoading] = useState(true);
+  const [isDevTableLoaded, setIsDevTableLoaded] = useState(false);
+  const [isDevPageLoading, setIsDevPageLoading] = useState(true);
   const [dplTable, setDplTable] = useState([]);
   const [jiraTable, setJiraTable] = useState([]);
+  const [devMetricsTable, setDevMetricsTable] = useState({});
   const [childParentMap, setChildParentMap] = useState(new Map());
   const [parentChildMap, setParentChildMap] = useState(new Map());
   const [userFullNameMap, setUserFullNameMap] = useState(new Map());
   const [dpl_currentUser, setDplCurrentUser] = useState("all");
   const [active_currentUser, setActiveCurrentUser] = useState("all");
+  const [devMetrics_currentUser, setDevMetricsCurrentUser] = useState("all");
   const [dpl_states, setDplStates] = useState({
     featureRelease: "all",
     featureTag: "all",
@@ -44,7 +58,7 @@ export const DataContextProvider = (props) => {
     sortedFeature: {
       feature: null,
       order: null,
-    }
+    },
   });
   const [active_states, setActiveStates] = useState({
     featureRelease: "all",
@@ -53,7 +67,15 @@ export const DataContextProvider = (props) => {
     sortedFeature: {
       feature: null,
       order: null,
-    }
+    },
+  });
+  const [dev_states, setDevStates] = useState({
+    bugSegment: "annual",
+    bugType: "all",
+    sortedFeature: {
+      feature: null,
+      order: null,
+    },
   });
 
   const setLoading = (value) => {
@@ -73,6 +95,10 @@ export const DataContextProvider = (props) => {
   };
   const setActive = (value) => {
     setActiveStates(value);
+  };
+
+  const setDevTable = (value) => {
+    setDevMetricsTable(value);
   };
 
   //storing the fetch api responses
@@ -128,7 +154,7 @@ export const DataContextProvider = (props) => {
         //active release api
         try {
           const activeReleaseResponse = await fetch(
-            `${process.env.REACT_APP_BACKEND_URL}/act`
+            `${process.env.REACT_APP_BACKEND_URL}/plm/act`
           );
           const activeReleaseResponseData = await activeReleaseResponse.json();
 
@@ -161,17 +187,12 @@ export const DataContextProvider = (props) => {
         //dpl metric api
         try {
           const dplMetricResponse = await fetch(
-            `${process.env.REACT_APP_BACKEND_URL}/dpl`
+            `${process.env.REACT_APP_BACKEND_URL}/plm/dpl`
           );
 
           const dplMetricResponseData = await dplMetricResponse.json();
           const dplArray = [];
           dplMetricResponseData.plm.forEach((elem) => {
-            // console.log(
-            //   elem.assigned_to,
-            //   fullName_eid_map,
-            //   fullName_eid_map.has(elem.assigned_to)
-            // );
             const obj = {
               feature_reference: elem.feature_reference,
               feature_name: elem.feature_name,
@@ -288,20 +309,30 @@ export const DataContextProvider = (props) => {
 
   const context = {
     isLoading,
+    isDevTableLoaded,
+    isDevPageLoading,
+    setIsDevPageLoading,
+    setIsDevTableLoaded,
     setLoading,
     dplTable,
     jiraTable,
+    devMetricsTable,
     childParentMap,
     parentChildMap,
     userFullNameMap,
     dpl_currentUser,
     active_currentUser,
+    devMetrics_currentUser,
     dpl_states,
     active_states,
+    dev_states,
     setDplUser,
     setActiveUser,
+    setDevMetricsUser: setDevMetricsCurrentUser,
     setDpl,
     setActive,
+    setDevMetricsStates: setDevStates,
+    setDevTable,
   };
 
   return (
