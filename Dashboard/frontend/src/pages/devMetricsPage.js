@@ -1,6 +1,12 @@
 import { useContext, useEffect, useState } from "react";
 import ProfileSearchBar from "../components/profileSearchBar";
-import { Card, Typography } from "@material-tailwind/react";
+import {
+  Card,
+  Tab,
+  Tabs,
+  TabsHeader,
+  Typography,
+} from "@material-tailwind/react";
 import CloseIcon from "@rsuite/icons/Close";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
@@ -10,6 +16,7 @@ import DevMetricsTypeRadio from "../components/devMetricsTypeRadio";
 import DevMetricsSegmentTypeRadio from "../components/devMetricsSegmentTypeRadio";
 import DevMetricsTable from "../components/devMetricsTable";
 import { Loader } from "rsuite";
+import DevAssigneeTable from "../components/devAssigneeTable";
 
 // dashboard view page for any user
 const DevMetricsViewPage = (props) => {
@@ -19,9 +26,11 @@ const DevMetricsViewPage = (props) => {
   // level 1 filters
   const bugSegment = contextData.dev_states.bugSegment;
   const bugType = contextData.dev_states.bugType;
+  const tableOpen = contextData.dev_states.tableOpen;
 
   const [viewData, setViewData] = useState([]); //it will contain all elements after applying level 1 filter, used for showing lvl 1 charts
   const [viewTableData, setViewTableData] = useState([]); //it will contain all elements after applying level 2 filter, used for filling table
+  const [assigneeTableData, setAssigneeTableData] = useState([]); // storing assignee table data
   // getting the feature details that was sorted
   const sortedFeature = {
     feature: contextData.dev_states.sortedFeature.feature,
@@ -115,6 +124,7 @@ const DevMetricsViewPage = (props) => {
           feature,
           order,
         },
+        tableOpen: currentDevStatus.tableOpen,
       });
     }
   };
@@ -149,17 +159,41 @@ const DevMetricsViewPage = (props) => {
               : [];
 
             // filtering features assigned directly to user
+            const assigneeCountMap = [];
+            const selfCount = {
+              N: 0,
+              R: 0,
+              M: 0,
+              V: 0,
+              O: 0,
+              A: 0,
+              I: 0,
+              J: 0,
+              D: 0,
+              U: 0,
+              C: 0,
+              Total: 0,
+            };
             table.forEach((elem) => {
               if (
                 elem.emp_id === userId ||
-                (elem.emp_id === null && elem.mgr_id === userId)
+                ((elem.emp_id === "" ||
+                  !contextData.userFullNameMap.has(elem.emp_id)) &&
+                  elem.mgr_id === userId)
               ) {
                 data.push({ ...elem, assigned_under: "self" });
+                selfCount[elem.state]++;
+                selfCount.Total++;
               }
             });
+            if (selfCount.Total > 0)
+              assigneeCountMap.push({
+                assignee: "self",
+                countDetails: selfCount,
+              });
 
             // dfs search in the tree
-            const dfs_search = (curr, ultimate_parent) => {
+            const dfs_search = (curr, ultimate_parent, assigneeObj) => {
               const childNodes = contextData.parentChildMap.has(curr)
                 ? contextData.parentChildMap.get(curr)
                 : [];
@@ -171,18 +205,43 @@ const DevMetricsViewPage = (props) => {
                     elem.mgr_id === curr)
                 ) {
                   data.push({ ...elem, assigned_under: ultimate_parent });
+                  assigneeObj[elem.state]++;
+                  assigneeObj.Total++;
                 }
               });
 
               childNodes.forEach((childNode) => {
-                dfs_search(childNode, ultimate_parent);
+                dfs_search(childNode, ultimate_parent, assigneeObj);
               });
             };
 
             // itterating to all nodes under a direct children one by one using dfs
             childrens.forEach((child) => {
-              dfs_search(child, child);
+              const assigneeCount = {
+                N: 0,
+                R: 0,
+                M: 0,
+                V: 0,
+                O: 0,
+                A: 0,
+                I: 0,
+                J: 0,
+                D: 0,
+                U: 0,
+                C: 0,
+                Total: 0,
+              };
+              dfs_search(child, child, assigneeCount);
+              if (assigneeCount.Total > 0)
+                assigneeCountMap.push({
+                  assignee: child,
+                  countDetails: assigneeCount,
+                });
             });
+            assigneeCountMap.sort(
+              (a, b) => b.countDetails.Total - a.countDetails.Total
+            );
+            setAssigneeTableData(assigneeCountMap);
           }
 
           //filtering data according to lvl 1 filters
@@ -287,7 +346,7 @@ const DevMetricsViewPage = (props) => {
   const segmentChartOptions = {
     chart: {
       type: "column",
-      height: userId === "all" ? 580 : 550,
+      height: userId === "all" ? 520 : 440,
       width: 1300,
     },
     title: {
@@ -324,7 +383,7 @@ const DevMetricsViewPage = (props) => {
           ? contextData.devMetricsTable[bugSegment]["upper limit"]
           : ""
       }`,
-      enabled: true,
+      enabled: false,
       href: "#",
       style: {
         fontSize: "15px",
@@ -518,6 +577,18 @@ const DevMetricsViewPage = (props) => {
       bugSegment: currentDevStatus.bugSegment,
       bugType: type,
       sortedFeature: currentDevStatus.sortedFeature,
+      tableOpen: currentDevStatus.tableOpen,
+    });
+  };
+
+  //for change assignee table states
+  const setTableOpen = (value) => {
+    const currentDevStatus = contextData.dev_states;
+    contextData.setDevMetricsStates({
+      bugSegment: currentDevStatus.bugSegment,
+      bugType: currentDevStatus.bugType,
+      sortedFeature: currentDevStatus.sortedFeature,
+      tableOpen: value,
     });
   };
 
@@ -528,6 +599,7 @@ const DevMetricsViewPage = (props) => {
       bugSegment: segment,
       bugType: currentDevStatus.bugType,
       sortedFeature: currentDevStatus.sortedFeature,
+      tableOpen: currentDevStatus.tableOpen,
     });
   };
   const pageNumbers = [];
@@ -598,28 +670,41 @@ const DevMetricsViewPage = (props) => {
                 {bugType !== "all" ? (
                   <>
                     <div className="  bg-gray-100 border-gray-300 border-solid border-[2px] rounded-lg   w-4/5 h-full flex flex-col justify-evenly items-center">
-                      {bugType.split("").map((char) => (
-                        <>
-                          <div
-                            style={{
-                              color:
-                                typeColors[
-                                  stateOrder[
-                                    stateOrder.findIndex((v, i, a) => {
-                                      return v.includes(char);
-                                    })
-                                  ].indexOf(char)
-                                ],
-                            }}
-                            className=""
-                          >
-                            {" "}
-                            {char}
-                            {" : "}
-                            {typeFullNameMap.get(char)}
-                          </div>
-                        </>
-                      ))}
+                      {stateOrder[
+                        stateOrder.findIndex((v, i, a) => {
+                          return v.includes(bugType);
+                        })
+                      ]
+                        .split("")
+                        .map((char) => (
+                          <>
+                            <div
+                              style={{
+                                color:
+                                  typeColors[
+                                    stateOrder[
+                                      stateOrder.findIndex((v, i, a) => {
+                                        return v.includes(char);
+                                      })
+                                    ].indexOf(char)
+                                  ],
+                              }}
+                              className={
+                                bugType !== char
+                                  ? "underline hover:cursor-pointer"
+                                  : ""
+                              }
+                              onClick={() => {
+                                if (bugType !== char) selectBugType(char);
+                              }}
+                            >
+                              {" "}
+                              {char}
+                              {" : "}
+                              {typeFullNameMap.get(char)}
+                            </div>
+                          </>
+                        ))}
                     </div>
                   </>
                 ) : (
@@ -730,37 +815,83 @@ const DevMetricsViewPage = (props) => {
             <div className="w-full flex flex-col space-y-4 px-0">
               {/* level 1 charts */}
               <div className="flex flex-col space-y-3 pt-3 items-center pt-1 pb-2 px-8 bg-blue-gray-200">
-                {/* {bugSegment === "annual" ? (
-                  <>
-                    <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
+                <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-full font-bold text-lg text-green-800 ">
+                  {" "}
+                  {segmentFullNameMap.get(bugSegment)}
+                  {" : "}
+                  {contextData.devMetricsTable[bugSegment]
+                    ? contextData.devMetricsTable[bugSegment]["lower limit"]
+                    : ""}
+                  {" - "}
+                  {contextData.devMetricsTable[bugSegment]
+                    ? contextData.devMetricsTable[bugSegment]["upper limit"]
+                    : ""}{" "}
+                </Card>
+                <Card className="pb-3 pt-1 px-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
+                  {userId !== "all" ? (
+                    <>
+                      <Tabs value={tableOpen ? "table" : "graph"}>
+                        <TabsHeader>
+                          <Tab
+                            className={`${
+                              tableOpen ? "font-normal" : " font-bold"
+                            } text-blue-600`}
+                            key={"graph"}
+                            value={"graph"}
+                            onClick={() => {
+                              setTableOpen(false);
+                            }}
+                          >
+                            {"Graph"}
+                          </Tab>
+                          <Tab
+                            className={`${
+                              tableOpen ? "font-bold" : " font-normal"
+                            } text-blue-600`}
+                            key={"table"}
+                            value={"table"}
+                            onClick={() => {
+                              setTableOpen(true);
+                            }}
+                          >
+                            {"Table"}
+                          </Tab>
+                        </TabsHeader>
+                      </Tabs>
+                    </>
+                  ) : (
+                    <></>
+                  )}
+
+                  {tableOpen && userId !== "all" ? (
+                    <>
+                      <DevAssigneeTable
+                        bugType={bugType}
+                        tableData={assigneeTableData}
+                      />
+                    </>
+                  ) : (
+                    <>
                       <HighchartsReact
                         highcharts={Highcharts}
                         options={segmentChartOptions}
                       />
-                    </Card>
+                    </>
+                  )}
+                </Card>
+                {tableOpen ? (
+                  <>
+                    <div className="flex bg-gray-100 p-4 rounded-lg flex-col items-center space-y-3">
+                      <DevMetricsTypeRadio
+                        value={bugType}
+                        selectBugType={selectBugType}
+                      />
+                    </div>
                   </>
                 ) : (
-                  <>
-                    <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-full font-bold text-lg text-green-800 ">
-                      {" "}
-                      {segmentFullNameMap.get(bugSegment)}
-                      {" : "}
-                      {contextData.devMetricsTable[bugSegment]
-                        ? contextData.devMetricsTable[bugSegment]["lower limit"]
-                        : ""}
-                      {" - "}
-                      {contextData.devMetricsTable[bugSegment]
-                        ? contextData.devMetricsTable[bugSegment]["upper limit"]
-                        : ""}{" "}
-                    </Card>
-                  </>
-                )} */}
-                <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
-                  <HighchartsReact
-                    highcharts={Highcharts}
-                    options={segmentChartOptions}
-                  />
-                </Card>
+                  <></>
+                )}
+
                 <div className="w-full flex flex-row space-x-3 justify-evenly pt-1 px-8">
                   {userId !== "all" ? (
                     <>
@@ -787,6 +918,18 @@ const DevMetricsViewPage = (props) => {
                     <></>
                   )}
                 </div>
+                <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-full font-bold text-lg text-green-800 ">
+                  {" "}
+                  {segmentFullNameMap.get(bugSegment)}
+                  {" : "}
+                  {contextData.devMetricsTable[bugSegment]
+                    ? contextData.devMetricsTable[bugSegment]["lower limit"]
+                    : ""}
+                  {" - "}
+                  {contextData.devMetricsTable[bugSegment]
+                    ? contextData.devMetricsTable[bugSegment]["upper limit"]
+                    : ""}{" "}
+                </Card>
               </div>
 
               {/* table block */}

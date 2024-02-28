@@ -20,7 +20,7 @@ const DevMetricsSegmentTypeRadio = (props) => {
         onChange={selectType}
       >
       <RadioLabel>Segment: </RadioLabel>
-        <Radio value="annual">Annually (All)</Radio>
+        <Radio value="annual">Annually</Radio>
         <Radio value="semi">Semi Annually</Radio>
         <Radio value="quarter">Quarterly</Radio>
         <Radio value="week-4">Week 4</Radio>

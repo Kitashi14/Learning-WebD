@@ -76,6 +76,7 @@ export const DataContextProvider = (props) => {
       feature: null,
       order: null,
     },
+    tableOpen: false,
   });
 
   const setLoading = (value) => {
