@@ -519,7 +519,7 @@ const ActiveViewPage = (props) => {
     });
     return assignees.filter((x, i, a) => a.indexOf(x) === i);
   };
-  //assignment chart parameters
+  //distribution chart parameters
   var diffAssign = userId !== "all" ? findDifferentAssignees(viewData) : [];
 
   var diffAssignCount =
@@ -557,7 +557,7 @@ const ActiveViewPage = (props) => {
       width: 1300,
     },
     title: {
-      text: "Assignment Chart",
+      text: "Distribution Chart",
     },
     colors: ["#15803d"],
     plotOptions: {

@@ -22,7 +22,7 @@ export default function DevMetricsTable(props) {
   //table rows passed through props (viewTableData)
   const TABLE_ROWS = props.data;
   const typeColors = ["#D789D7", "#9D65C9", "#5D54A4", "#2A3D66"];
-  const stateOrder = ["N","OAI", "RMV", "JDCU"];
+  const stateOrder = ["N", "OAI", "RMV", "JDCU"];
 
   //features with sorting option
   const featuresToSort = new Map([
@@ -32,11 +32,16 @@ export default function DevMetricsTable(props) {
     ["Age", "age"],
     ["State", "state"],
     ["Employee ID", "emp_id"],
+    ["Bug under", "assigned_under"],
+    ["Engineer", "emp_id"],
+    ["Manager", "mgr_id"],
+    ["Component", "component"],
+    ["Found At", "found_at"],
   ]);
 
   //for navigating to different routes
   if (props.userId !== "all") {
-    TABLE_HEAD.splice(3, 0, "Assigned under");
+    TABLE_HEAD.splice(3, 0, "Bug under");
   }
 
   return (

@@ -28,7 +28,7 @@ const Navbar = (props) => {
             >
               Dashboard
             </Nav.Item>
-            <Nav.Item
+            {/* <Nav.Item
               eventKey="2"
               icon={<DashboardIcon />}
               style={
@@ -55,7 +55,7 @@ const Navbar = (props) => {
               }}
             >
               Active Releases
-            </Nav.Item>
+            </Nav.Item> */}
             <Nav.Item
               eventKey="4"
               icon={<PeopleBranchIcon />}

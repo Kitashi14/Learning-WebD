@@ -289,7 +289,7 @@ const ProfileViewPage = (props) => {
     ],
   };
 
-  //assignment chart parameters
+  //distribution chart parameters
   var diffAssign =
     userId !== "all"
       ? viewData
@@ -328,7 +328,7 @@ const ProfileViewPage = (props) => {
       width: 400,
     },
     title: {
-      text: "Assignment Chart",
+      text: "Distribution Chart",
     },
     plotOptions: {
       series: {

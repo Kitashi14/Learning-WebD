@@ -48,9 +48,9 @@ export const DataContextProvider = (props) => {
   const [childParentMap, setChildParentMap] = useState(new Map());
   const [parentChildMap, setParentChildMap] = useState(new Map());
   const [userFullNameMap, setUserFullNameMap] = useState(new Map());
-  const [dpl_currentUser, setDplCurrentUser] = useState("all");
-  const [active_currentUser, setActiveCurrentUser] = useState("all");
-  const [devMetrics_currentUser, setDevMetricsCurrentUser] = useState("all");
+  const [dpl_currentUser, setDplCurrentUser] = useState("psesham");
+  const [active_currentUser, setActiveCurrentUser] = useState("psesham");
+  const [devMetrics_currentUser, setDevMetricsCurrentUser] = useState("psesham");
   const [dpl_states, setDplStates] = useState({
     featureRelease: "all",
     featureTag: "all",

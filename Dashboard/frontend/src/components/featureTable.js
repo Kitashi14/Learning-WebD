@@ -32,7 +32,7 @@ export default function FeatureTable(props) {
   //for navigating to different routes
   const navigate = useNavigate();
   if (props.userId !== "all") {
-    TABLE_HEAD.splice(8, 0, "Assigned under");
+    TABLE_HEAD.splice(8, 0, "Feature under");
   }
 
   return (

@@ -16,6 +16,9 @@ const DevAssigneeTable = (props) => {
   return (
     <>
       <table className="w-fit  table-auto items-center text-center ">
+        <caption className="caption-top font-bold pb-3">
+          Table for : {props.bugSegment}
+        </caption>
         <thead className="bg-blue-gray-50 ">
           <tr>
             <th
@@ -28,7 +31,7 @@ const DevAssigneeTable = (props) => {
                 color="blue-gray"
                 className="font-normal flex flex-row justify-center items-center space-x-2 leading-none opacity-70"
               >
-                <span>Assigned Under</span>
+                <span>Bugs Under</span>
               </Typography>
             </th>
             <th
@@ -288,15 +291,21 @@ const DevAssigneeTable = (props) => {
               <td className="p-4 border-b border-l border-r border-blue-gray-100 w-[300px]">
                 <Typography
                   variant="small"
-                  className="font-bold text-blue-gray-500 hover:cursor-pointer"
+                  className={`font-bold text-blue-gray-500 ${
+                    data.assignee === "self" ? "" : "hover:cursor-pointer"
+                  } `}
                   onClick={() => {
-                    contextData.setIsDevPageLoading(true);
-                    navigate(`/dev/view/${data.assignee}`);
+                    if (data.assignee !== "self") {
+                      contextData.setIsDevPageLoading(true);
+                      navigate(`/dev/view/${data.assignee}`);
+                    }
                   }}
                 >
-                  {contextData.userFullNameMap.get(data.assignee)}
+                  {data.assignee === "self"
+                    ? "Self"
+                    : contextData.userFullNameMap.get(data.assignee)}
                   {" ("}
-                  {data.assignee}
+                  {data.assignee === "self" ? props.userId : data.assignee}
                   {") "}
                 </Typography>
               </td>
@@ -469,6 +478,9 @@ const DevAssigneeTable = (props) => {
             </td>
           </tr>
         </tbody>
+        <caption className="caption-bottom font-bold pt-3">
+          Table for : {props.bugSegment}
+        </caption>
       </table>
     </>
   );

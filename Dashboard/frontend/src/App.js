@@ -42,7 +42,7 @@ function App() {
           ) : (
             <Routes>
               <Route exact path="/" element={<HomePage />}></Route>
-              <Route
+              {/* <Route
                 exact
                 path="/dpl/view/:uid"
                 element={<ProfileViewPage />}
@@ -61,7 +61,7 @@ function App() {
                 exact
                 path="/active/feature/:fid"
                 element={<ActiveFeatureViewPage />}
-              ></Route>
+              ></Route> */}
               <Route
                 exact
                 path="/dev/view/:uid"

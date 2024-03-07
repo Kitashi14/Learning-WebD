@@ -26,8 +26,8 @@ export default function ActiveFeatureTable(props) {
   //for navigating to different routes
   const navigate = useNavigate();
   if (props.userId !== "all") {
-    TABLE_HEAD.splice(4, 0, "Assigned under");
-    featuresToSort.set("Assigned under", "reporteesCount");
+    TABLE_HEAD.splice(4, 0, "Feature under");
+    featuresToSort.set("Feature under", "reporteesCount");
   }
 
   const findAssignedManagers = (elem) => {

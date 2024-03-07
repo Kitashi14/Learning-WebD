@@ -31,7 +31,11 @@ const DevMetricsViewPage = (props) => {
   const [viewData, setViewData] = useState([]); //it will contain all elements after applying level 1 filter, used for showing lvl 1 charts
   const [viewTableData, setViewTableData] = useState([]); //it will contain all elements after applying level 2 filter, used for filling table
   const [assigneeTableData, setAssigneeTableData] = useState([]); // storing assignee table data
-  // getting the feature details that was sorted
+
+  const [showAllAssignees, setShowAllAssignees] = useState(false);
+  const [showAllComponents, setShowAllComponents] = useState(false);
+
+  // getting the bugs details that was sorted
   const sortedFeature = {
     feature: contextData.dev_states.sortedFeature.feature,
     order: contextData.dev_states.sortedFeature.order,
@@ -83,6 +87,7 @@ const DevMetricsViewPage = (props) => {
   const stateOrder = ["N", "OAI", "RMV", "JDCU"];
 
   const [prevUser, setPrevUser] = useState(null);
+  const [prevType, setPrevType] = useState(null);
   const [segmentCount, setSegmentCount] = useState(new Map());
 
   const navigate = useNavigate(); //for navigating to different routes
@@ -158,7 +163,7 @@ const DevMetricsViewPage = (props) => {
               ? contextData.parentChildMap.get(userId)
               : [];
 
-            // filtering features assigned directly to user
+            // filtering bugs assigned directly to user
             const assigneeCountMap = [];
             const selfCount = {
               N: 0,
@@ -241,7 +246,7 @@ const DevMetricsViewPage = (props) => {
             assigneeCountMap.sort(
               (a, b) => b.countDetails.Total - a.countDetails.Total
             );
-            setAssigneeTableData(assigneeCountMap);
+            if (segment === bugSegment) setAssigneeTableData(assigneeCountMap);
           }
 
           //filtering data according to lvl 1 filters
@@ -277,7 +282,7 @@ const DevMetricsViewPage = (props) => {
         }
         var tableToUse;
         //segment will be selected
-        if (userId === prevUser) {
+        if (userId === prevUser && prevType === bugType) {
           tableToUse = contextData.devMetricsTable[bugSegment]
             ? contextData.devMetricsTable[bugSegment].bugs
             : [];
@@ -307,6 +312,7 @@ const DevMetricsViewPage = (props) => {
       }
       if (contextData.isDevTableLoaded) {
         setPrevUser(userId);
+        setPrevType(bugType);
         contextData.setIsDevPageLoading(false);
       }
     },
@@ -346,7 +352,7 @@ const DevMetricsViewPage = (props) => {
   const segmentChartOptions = {
     chart: {
       type: "column",
-      height: userId === "all" ? 520 : 440,
+      height: userId === "all" ? 480 : 400,
       width: 1300,
     },
     title: {
@@ -374,24 +380,14 @@ const DevMetricsViewPage = (props) => {
       },
     },
     credits: {
-      text: `${segmentFullNameMap.get(bugSegment)}: ${
-        contextData.devMetricsTable[bugSegment]
-          ? contextData.devMetricsTable[bugSegment]["lower limit"]
-          : ""
-      } - ${
-        contextData.devMetricsTable[bugSegment]
-          ? contextData.devMetricsTable[bugSegment]["upper limit"]
-          : ""
-      }`,
-      enabled: false,
+      enabled: true,
       href: "#",
+      text: `For: State (${bugType})`,
       style: {
         fontSize: "15px",
-        color: "green",
-        fontWeight: "bold",
       },
       position: {
-        align: "center",
+        align: "right",
       },
     },
 
@@ -416,6 +412,95 @@ const DevMetricsViewPage = (props) => {
         events: {
           click: (e) => {
             selectBugSegment(reverseSegmentMap.get(e.point.name));
+          },
+        },
+      },
+    ],
+  };
+
+  //distribution chart parameters
+  var diffAssign =
+    userId !== "all"
+      ? viewData
+          .map((elem) => elem.assigned_under)
+          .filter((x, i, a) => a.indexOf(x) === i)
+      : [];
+
+  var diffAssignCount =
+    userId !== "all"
+      ? diffAssign.map((assign) => {
+          let count = 0;
+          viewData.forEach((elem) => {
+            if (elem.assigned_under === assign) count++;
+          });
+          return {
+            name: assign,
+            y: count,
+          };
+        })
+      : [];
+  diffAssignCount.sort((a, b) => b.y - a.y);
+  diffAssign = diffAssignCount.map((elem) => elem.name==="self"? userId:elem.name);
+  diffAssignCount = diffAssignCount.map((elem) => {
+    return {
+      name:
+        elem.name === "self"
+          ? "Self"
+          : contextData.userFullNameMap.get(elem.name),
+      y: elem.y,
+    };
+  });
+  const diffAssignNumbers = diffAssign.length;
+  if (diffAssign.length > 10 && !showAllAssignees) {
+    diffAssign = diffAssign.slice(0, 10);
+    diffAssignCount = diffAssignCount.slice(0, 10);
+  }
+  const assignedChartOptions = {
+    chart: {
+      type: "bar",
+      height: 300,
+    },
+    title: {
+      text:
+        diffAssignNumbers > 10 && !showAllAssignees
+          ? "Distribution Chart (Top 10)"
+          : "Distribution Chart",
+    },
+    // colors: ['#D789D7'],
+    plotOptions: {
+      series: {
+        allowPointSelect: true,
+        cursor: "pointer",
+        dataLabels: {
+          enabled: true,
+          format: "<b>{point.name}</b><br>{point.percentage:.1f}",
+          distance: 20,
+        },
+      },
+    },
+    credits: {
+      enabled: true,
+      href: "#",
+      text: `For: ${segmentFullNameMap.get(bugSegment)}, State (${bugType})`,
+      style: {
+        fontSize: "15px",
+      },
+    },
+
+    xAxis: {
+      categories: diffAssign,
+    },
+    series: [
+      {
+        name: "No. of bugs",
+        data: diffAssignCount,
+        innerSize: "50%",
+        events: {
+          click: (e) => {
+            if (e.point.category !== userId) {
+              contextData.setIsDevPageLoading(true);
+              navigate(`/dev/view/${e.point.category}`);
+            }
           },
         },
       },
@@ -457,7 +542,7 @@ const DevMetricsViewPage = (props) => {
     credits: {
       enabled: true,
       href: "#",
-      text: `For: ${segmentFullNameMap.get(bugSegment)}`,
+      text: `For: ${segmentFullNameMap.get(bugSegment)}, State (${bugType})`,
       style: {
         fontSize: "15px",
       },
@@ -481,56 +566,45 @@ const DevMetricsViewPage = (props) => {
     ],
   };
 
-  //assignment chart parameters
-  var diffAssign =
-    userId !== "all"
-      ? viewData
-          .map((elem) => elem.assigned_under)
-          .filter((x, i, a) => a.indexOf(x) === i)
-      : [];
+  //component chart parameters
+  const diffComponent = viewData
+    .map((elem) => elem.component)
+    .filter((x, i, a) => a.indexOf(x) === i);
 
-  var diffAssignCount =
-    userId !== "all"
-      ? diffAssign.map((assign) => {
-          let count = 0;
-          viewData.forEach((elem) => {
-            if (elem.assigned_under === assign) count++;
-          });
-          return {
-            name: assign,
-            y: count,
-          };
-        })
-      : [];
-  diffAssignCount.sort((a, b) => b.y - a.y);
-  diffAssign = diffAssignCount.map((elem) => elem.name);
-  diffAssignCount = diffAssignCount.map((elem) => {
-    return {
-      name:
-        elem.name === "self"
-          ? "self"
-          : contextData.userFullNameMap.get(elem.name),
-      y: elem.y,
-    };
+  var diffComponentCount = diffComponent.map((component) => {
+    let count = 0;
+    viewData.forEach((elem) => {
+      if (elem.component === component) count++;
+    });
+    return { name: component, y: count };
   });
-  const assignedChartOptions = {
+  diffComponentCount.sort((a, b) => b.y - a.y);
+  if (diffComponentCount.length > 10 && !showAllComponents)
+    diffComponentCount = diffComponentCount.slice(0, 10);
+  const componentChartOptions = {
     chart: {
-      type: "bar",
-      height: 300,
+      type: "column",
+      height: 350,
+      width: 1300,
     },
     title: {
-      text: "Assignment Chart",
+      text:
+        diffComponent.length > 10 && !showAllComponents
+          ? "Top 10 Components"
+          : "Top components",
     },
-    // colors: ['#D789D7'],
+    colors: ["#EC610A", "#A40A3C", "#6B0848", "#FFC300"],
+    // colors: ["#6366f1", "#41AEA9", "#213E3B", "#E8FFFF"],
     plotOptions: {
       series: {
-        allowPointSelect: true,
+        allowPointSelect: false,
         cursor: "pointer",
         dataLabels: {
           enabled: true,
           format: "<b>{point.name}</b><br>{point.percentage:.1f}",
           distance: 20,
         },
+        colorByPoint: false,
       },
     },
     credits: {
@@ -543,21 +617,12 @@ const DevMetricsViewPage = (props) => {
     },
 
     xAxis: {
-      categories: diffAssign,
+      categories: diffComponentCount.map((elem) => ""),
     },
     series: [
       {
         name: "No. of bugs",
-        data: diffAssignCount,
-        innerSize: "50%",
-        events: {
-          click: (e) => {
-            if (e.point.category !== "self") {
-              contextData.setIsDevPageLoading(true);
-              navigate(`/dev/view/${e.point.category}`);
-            }
-          },
-        },
+        data: diffComponentCount,
       },
     ],
   };
@@ -692,7 +757,7 @@ const DevMetricsViewPage = (props) => {
                               className={
                                 bugType !== char
                                   ? "underline hover:cursor-pointer"
-                                  : ""
+                                  : "font-bold"
                               }
                               onClick={() => {
                                 if (bugType !== char) selectBugType(char);
@@ -835,7 +900,7 @@ const DevMetricsViewPage = (props) => {
                           <Tab
                             className={`${
                               tableOpen ? "font-normal" : " font-bold"
-                            } text-blue-600`}
+                            } text-blue-600 z-10`}
                             key={"graph"}
                             value={"graph"}
                             onClick={() => {
@@ -847,7 +912,7 @@ const DevMetricsViewPage = (props) => {
                           <Tab
                             className={`${
                               tableOpen ? "font-bold" : " font-normal"
-                            } text-blue-600`}
+                            } text-blue-600 z-10`}
                             key={"table"}
                             value={"table"}
                             onClick={() => {
@@ -868,6 +933,8 @@ const DevMetricsViewPage = (props) => {
                       <DevAssigneeTable
                         bugType={bugType}
                         tableData={assigneeTableData}
+                        userId={userId}
+                        bugSegment={segmentFullNameMap.get(bugSegment)}
                       />
                     </>
                   ) : (
@@ -879,23 +946,57 @@ const DevMetricsViewPage = (props) => {
                     </>
                   )}
                 </Card>
-                {tableOpen ? (
+                {tableOpen && userId !== "all" ? (
                   <>
                     <div className="flex bg-gray-100 p-4 rounded-lg flex-col items-center space-y-3">
                       <DevMetricsTypeRadio
                         value={bugType}
                         selectBugType={selectBugType}
                       />
+                      <Typography variant="medium" className="pl-4 text-center">
+                        {" "}
+                        Bug Count : <span>{viewData.length}</span>{" "}
+                      </Typography>
                     </div>
                   </>
                 ) : (
                   <></>
                 )}
 
-                <div className="w-full flex flex-row space-x-3 justify-evenly pt-1 px-8">
+                <div className="w-full flex flex-row space-x-3 justify-evenly items-center pt-1 px-8">
                   {userId !== "all" ? (
                     <>
-                      <Card className=" px-4 py-0 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
+                      <Card className=" p-4  flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
+                        {diffAssignNumbers > 10 && !showAllAssignees ? (
+                          <>
+                            <div className=" w-full flex pr-4 flex-row justify-end mb-[-20px] z-10">
+                              <span
+                                className="underline hover:cursor-pointer"
+                                onClick={() => {
+                                  setShowAllAssignees(true);
+                                }}
+                              >
+                                show all
+                              </span>
+                            </div>
+                          </>
+                        ) : diffAssignNumbers > 10 ? (
+                          <>
+                            <div className=" w-full flex pr-4 flex-row justify-end mb-[-20px] z-10">
+                              <span
+                                className="underline hover:cursor-pointer"
+                                onClick={() => {
+                                  setShowAllAssignees(false);
+                                }}
+                              >
+                                show top 10
+                              </span>
+                            </div>
+                          </>
+                        ) : (
+                          <></>
+                        )}
+
                         <HighchartsReact
                           highcharts={Highcharts}
                           options={assignedChartOptions}
@@ -917,7 +1018,89 @@ const DevMetricsViewPage = (props) => {
                   ) : (
                     <></>
                   )}
+                  {bugType.length === 1 &&
+                  bugType !== "N" &&
+                  userId !== "all" &&
+                  tableOpen ? (
+                    <>
+                      <div className="  bg-gray-100 border-gray-300 border-solid border-[2px] rounded-lg   w-1/5 h-fit flex flex-col justify-evenly space-y-4 py-16 items-center">
+                        {stateOrder[
+                          stateOrder.findIndex((v, i, a) => {
+                            return v.includes(bugType);
+                          })
+                        ]
+                          .split("")
+                          .map((char) => (
+                            <>
+                              <div
+                                style={{
+                                  color:
+                                    typeColors[
+                                      stateOrder[
+                                        stateOrder.findIndex((v, i, a) => {
+                                          return v.includes(char);
+                                        })
+                                      ].indexOf(char)
+                                    ],
+                                }}
+                                className={
+                                  bugType !== char
+                                    ? "underline hover:cursor-pointer "
+                                    : "font-bold"
+                                }
+                                onClick={() => {
+                                  if (bugType !== char) selectBugType(char);
+                                }}
+                              >
+                                {" "}
+                                {char}
+                                {" : "}
+                                {typeFullNameMap.get(char)}
+                              </div>
+                            </>
+                          ))}
+                      </div>
+                    </>
+                  ) : (
+                    <></>
+                  )}
                 </div>
+                <Card className="pb-3 pt-1 px-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
+                  {diffComponent.length > 10 && !showAllComponents ? (
+                    <>
+                      <div className=" w-full flex pr-4 flex-row justify-end mb-[-20px] z-10">
+                        <span
+                          className="underline hover:cursor-pointer"
+                          onClick={() => {
+                            setShowAllComponents(true);
+                          }}
+                        >
+                          show all
+                        </span>
+                      </div>
+                    </>
+                  ) : diffComponent.length > 10 ? (
+                    <>
+                      <div className=" w-full flex pr-4 flex-row justify-end mb-[-20px] z-10">
+                        <span
+                          className="underline hover:cursor-pointer"
+                          onClick={() => {
+                            setShowAllComponents(false);
+                          }}
+                        >
+                          show top 10
+                        </span>
+                      </div>
+                    </>
+                  ) : (
+                    <></>
+                  )}
+                  <HighchartsReact
+                    highcharts={Highcharts}
+                    options={componentChartOptions}
+                  />
+                </Card>
+
                 <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-full font-bold text-lg text-green-800 ">
                   {" "}
                   {segmentFullNameMap.get(bugSegment)}
