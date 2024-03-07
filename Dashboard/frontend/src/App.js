@@ -10,6 +10,7 @@ import { Loader } from "rsuite";
 import ActiveViewPage from "./pages/activeViewPage";
 import ActiveFeatureViewPage from "./pages/activeFeatureViewPage";
 import DevMetricsViewPage from "./pages/devMetricsPage";
+import LocViewPage from "./pages/locViewPage";
 // contains all routes for the client side
 function App() {
   const contextData = useContext(DataContext);
@@ -66,6 +67,11 @@ function App() {
                 exact
                 path="/dev/view/:uid"
                 element={<DevMetricsViewPage />}
+              ></Route>
+              <Route
+                exact
+                path="/loc/view/:uid"
+                element={<LocViewPage />}
               ></Route>
             </Routes>
           )}

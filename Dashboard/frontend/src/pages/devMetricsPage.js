@@ -719,7 +719,9 @@ const DevMetricsViewPage = (props) => {
                 <div className="flex flex-col items-center space-y-3">
                   <DevMetricsSegmentTypeRadio
                     value={bugSegment}
-                    selectBugSegment={selectBugSegment}
+                    selectSegment={selectBugSegment}
+                    data={segmentFullNameMap}
+                    type={"dev"}
                   />
                   <DevMetricsTypeRadio
                     value={bugType}

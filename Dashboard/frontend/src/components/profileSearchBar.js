@@ -33,13 +33,17 @@ const ProfileSearchBar = (props) => {
           .filter((x, i, a) => a.indexOf(x) === i)
           .forEach((manager) => callParent(manager));
       })
-    : props.table.forEach((elem) => {
+    : props.type === "dev"
+    ? props.table.forEach((elem) => {
         if ("OAIRMVJDCUN".includes(elem.state))
           callParent(
             elem.emp_id === "" || !contextData.userFullNameMap.has(elem.emp_id)
               ? elem.mgr_id
               : elem.emp_id
           );
+      })
+    : props.table.forEach((elem) => {
+        callParent(elem.emp_id);
       });
 
   // mapping unique user with their full names

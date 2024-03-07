@@ -12,45 +12,59 @@ import // activeReleaseTable,
 //creating global variables that can be used anywhere inside the react-app
 const DataContext = createContext({
   isLoading: true,
+  isLocTableLoaded:false,
+  isLocPageLoading: true,
   isDevTableLoaded: false,
   isDevPageLoading: true,
+  setIsLocPageLoading: ()=>{},
+  setIsLocTableLoaded: ()=>{},
   setIsDevPageLoading: () => {},
   setIsDevTableLoaded: () => {},
   setLoading: () => {},
   dplTable: [],
   jiraTable: [],
   devMetricsTable: {},
+  locTable: [],
   childParentMap: new Map(),
   parentChildMap: new Map(),
   userFullNameMap: new Map(),
-  dpl_currentUser: "all",
-  active_currentUser: "all",
-  devMetrics_currentUser: "all",
+  dpl_currentUser: "psesham",
+  active_currentUser: "psesham",
+  devMetrics_currentUser: "psesham",
+  loc_currentUser:  "psesham",
   dev_states: {},
   dpl_states: {},
   active_states: {},
+  loc_states: {},
   setDplUser: () => {},
   setActiveUser: () => {},
   setDevMetricsUser: () => {},
+  setLocUser: ()=>{},
   setDpl: () => {},
   setActive: () => {},
   setDevMetricsStates: () => {},
+  setLoc: ()=>{},
   setDevTable: () => {},
+  setLocTable: ()=>{},
 });
 
 export const DataContextProvider = (props) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isDevTableLoaded, setIsDevTableLoaded] = useState(false);
   const [isDevPageLoading, setIsDevPageLoading] = useState(true);
+  const [isLocTableLoaded,setIsLocTableLoaded] = useState(false);
+  const [isLocPageLoading,setIsLocPageLoading] = useState(true);
   const [dplTable, setDplTable] = useState([]);
   const [jiraTable, setJiraTable] = useState([]);
   const [devMetricsTable, setDevMetricsTable] = useState({});
+  const [locTable,setLocTable] = useState([]);
   const [childParentMap, setChildParentMap] = useState(new Map());
   const [parentChildMap, setParentChildMap] = useState(new Map());
   const [userFullNameMap, setUserFullNameMap] = useState(new Map());
   const [dpl_currentUser, setDplCurrentUser] = useState("psesham");
   const [active_currentUser, setActiveCurrentUser] = useState("psesham");
   const [devMetrics_currentUser, setDevMetricsCurrentUser] = useState("psesham");
+  const [loc_currentUser,setLocCurrentUser] = useState("psesham");
   const [dpl_states, setDplStates] = useState({
     featureRelease: "all",
     featureTag: "all",
@@ -78,6 +92,10 @@ export const DataContextProvider = (props) => {
     },
     tableOpen: false,
   });
+  const [loc_states,setLocStates] = useState({
+    locSegment : "semi",
+    tableOpen: false,
+  })
 
   const setLoading = (value) => {
     setIsLoading(value);
@@ -310,30 +328,40 @@ export const DataContextProvider = (props) => {
 
   const context = {
     isLoading,
+    isLocTableLoaded,
+    isLocPageLoading,
     isDevTableLoaded,
     isDevPageLoading,
+    setIsLocPageLoading,
+    setIsLocTableLoaded,
     setIsDevPageLoading,
     setIsDevTableLoaded,
     setLoading,
     dplTable,
     jiraTable,
     devMetricsTable,
+    locTable,
     childParentMap,
     parentChildMap,
     userFullNameMap,
     dpl_currentUser,
     active_currentUser,
     devMetrics_currentUser,
+    loc_currentUser,
     dpl_states,
     active_states,
     dev_states,
+    loc_states,
     setDplUser,
     setActiveUser,
     setDevMetricsUser: setDevMetricsCurrentUser,
+    setLocUser: setLocCurrentUser,
     setDpl,
     setActive,
     setDevMetricsStates: setDevStates,
+    setLoc: setLocStates,
     setDevTable,
+    setLocTable,
   };
 
   return (

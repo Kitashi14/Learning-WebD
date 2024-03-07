@@ -1,9 +1,9 @@
 import { Sidenav, Nav } from "rsuite";
 import DashboardIcon from "@rsuite/icons/legacy/Dashboard";
 import GroupIcon from "@rsuite/icons/legacy/Group";
-import PeopleBranchIcon from '@rsuite/icons/PeopleBranch';
+import PeopleBranchIcon from "@rsuite/icons/PeopleBranch";
 import PinIcon from "@rsuite/icons/Pin";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import DataContext from "../context/dataContext";
 
@@ -12,6 +12,7 @@ const Navbar = (props) => {
   // react-hook/function for navigating to different routes
   const navigate = useNavigate();
   const contextData = useContext(DataContext);
+  const location = useLocation();
 
   return (
     <div className="w-1/5">
@@ -65,11 +66,38 @@ const Navbar = (props) => {
                   : { background: "#3498FE" }
               }
               onClick={() => {
-                contextData.setIsDevPageLoading(true);
-                navigate(`/dev/view/${contextData.devMetrics_currentUser}`);
+                if (
+                  !location.pathname.includes(
+                    `/dev/view/${contextData.devMetrics_currentUser}`
+                  )
+                ) {
+                  contextData.setIsDevPageLoading(true);
+                  navigate(`/dev/view/${contextData.devMetrics_currentUser}`);
+                }
               }}
             >
               Dev Metrics
+            </Nav.Item>
+            <Nav.Item
+              eventKey="5"
+              icon={<PinIcon />}
+              style={
+                props.currentTab === "loc"
+                  ? { background: "#2589F4" }
+                  : { background: "#3498FE" }
+              }
+              onClick={() => {
+                if (
+                  !location.pathname.includes(
+                    `/loc/view/${contextData.loc_currentUser}`
+                  )
+                ) {
+                  contextData.setIsLocPageLoading(true);
+                  navigate(`/loc/view/${contextData.loc_currentUser}`);
+                }
+              }}
+            >
+              Loc Metrics
             </Nav.Item>
           </Nav>
         </Sidenav.Body>
