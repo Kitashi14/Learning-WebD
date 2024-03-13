@@ -17,7 +17,7 @@ const DevAssigneeTable = (props) => {
     <>
       <table className="w-fit  table-auto items-center text-center ">
         <caption className="caption-top font-bold pb-3">
-          Table for : {props.bugSegment}
+          Table for : {props.bugSegment}, Category ({contextData.dev_states.bugCategory})
         </caption>
         <thead className="bg-blue-gray-50 ">
           <tr>
@@ -479,7 +479,7 @@ const DevAssigneeTable = (props) => {
           </tr>
         </tbody>
         <caption className="caption-bottom font-bold pt-3">
-          Table for : {props.bugSegment}
+          Table for : {props.bugSegment}, Category ({contextData.dev_states.bugCategory})
         </caption>
       </table>
     </>

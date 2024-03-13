@@ -26,7 +26,9 @@ const LocViewPage = (props) => {
 
   const [viewData, setViewData] = useState([]); //it will contain all elements after applying level 1 filter, used for showing lvl 1 charts
 
-  const [showAllAssignees, setShowAllAssignees] = useState(false);
+  const [showAllLocAssignees, setShowAllLocAssignees] = useState(false);
+  const [showAllPrAssignees, setShowAllPrAssignees] = useState(false);
+  const tableSortBy = contextData.loc_states.tableSortBy;
 
   const segmentFullNameMap = new Map([
     ["month", "Monthly"],
@@ -166,11 +168,19 @@ const LocViewPage = (props) => {
                   )
                 : 0,
             };
-            // if ((selfCount.loc_month+selfCount.loc_quarter+selfCount.loc_semi+selfCount.pr_month+selfCount.pr_quarter+selfCount.pr_semi) > 0)
-            assigneeCountMap.push({
-              assignee: "self",
-              countDetails: selfCount,
-            });
+            if (
+              selfCount.loc_month +
+                selfCount.loc_quarter +
+                selfCount.loc_semi +
+                selfCount.pr_month +
+                selfCount.pr_quarter +
+                selfCount.pr_semi >
+              0
+            )
+              assigneeCountMap.push({
+                assignee: "self",
+                countDetails: selfCount,
+              });
 
             // dfs search in the tree
             const dfs_search = (curr, ultimate_parent, assigneeObj) => {
@@ -251,12 +261,19 @@ const LocViewPage = (props) => {
                 pr_semi: 0,
               };
               dfs_search(child, child, assigneeCount);
-              console.log(child, assigneeCount);
-              //   if ((assigneeCount.loc_month+assigneeCount.loc_quarter+assigneeCount.loc_semi+assigneeCount.pr_month+assigneeCount.pr_quarter+assigneeCount.pr_semi>0))
-              assigneeCountMap.push({
-                assignee: child,
-                countDetails: assigneeCount,
-              });
+              if (
+                assigneeCount.loc_month +
+                  assigneeCount.loc_quarter +
+                  assigneeCount.loc_semi +
+                  assigneeCount.pr_month +
+                  assigneeCount.pr_quarter +
+                  assigneeCount.pr_semi >
+                0
+              )
+                assigneeCountMap.push({
+                  assignee: child,
+                  countDetails: assigneeCount,
+                });
             });
 
             data = assigneeCountMap;
@@ -272,7 +289,6 @@ const LocViewPage = (props) => {
             );
             const responseData = await response.json();
             contextData.setLocTable(responseData.data);
-            console.log(responseData);
           } catch (err) {
             console.log(err);
             alert("Can't fetch loc metrics details at the moment");
@@ -296,7 +312,6 @@ const LocViewPage = (props) => {
       } catch (err) {
         console.log(err);
       }
-      console.log(contextData);
       if (contextData.isLocTableLoaded) {
         contextData.setIsLocPageLoading(false);
       }
@@ -332,7 +347,6 @@ const LocViewPage = (props) => {
       total_pr_count = total_pr_count + elem.countDetails.pr_semi;
     }
   });
-  console.log(viewData);
 
   //   segment chart parameters
   const diffSegment = ["month", "quarter", "semi"];
@@ -340,7 +354,7 @@ const LocViewPage = (props) => {
   const segmentChartOptions = {
     chart: {
       type: "line",
-      height: 605,
+      height: 600,
       width: 1300,
     },
     title: {
@@ -393,51 +407,66 @@ const LocViewPage = (props) => {
     ],
   };
 
-  const getAssigneeCount = () => {
+  const getAssigneeCount = (sortBy) => {
     const loc = [];
     const pr = [];
 
     if (locSegment === "month") {
-      viewData.sort(
-        (a, b) => b.countDetails.loc_month - a.countDetails.loc_month
-      );
+      if (sortBy === "loc")
+        viewData.sort(
+          (a, b) => b.countDetails.loc_month - a.countDetails.loc_month
+        );
+      else
+        viewData.sort(
+          (a, b) => b.countDetails.pr_month - a.countDetails.pr_month
+        );
       viewData.forEach((elem) => {
         loc.push({
-          name:
-            elem.assignee === "self"
-              ? "Self"
-              : contextData.userFullNameMap.get(elem.assignee),
+          name: elem.countDetails.loc_month,
           y: elem.countDetails.loc_month,
         });
-        pr.push(elem.countDetails.pr_month);
+        pr.push({
+          name: elem.countDetails.pr_month,
+          y: elem.countDetails.pr_month,
+        });
       });
     } else if (locSegment === "quarter") {
-      viewData.sort(
-        (a, b) => b.countDetails.loc_quarter - a.countDetails.loc_quarter
-      );
+      if (sortBy === "loc")
+        viewData.sort(
+          (a, b) => b.countDetails.loc_quarter - a.countDetails.loc_quarter
+        );
+      else
+        viewData.sort(
+          (a, b) => b.countDetails.pr_quarter - a.countDetails.pr_quarter
+        );
       viewData.forEach((elem) => {
         loc.push({
-          name:
-            elem.assignee === "self"
-              ? "Self"
-              : contextData.userFullNameMap.get(elem.assignee),
+          name: elem.countDetails.loc_quarter,
           y: elem.countDetails.loc_quarter,
         });
-        pr.push(elem.countDetails.pr_quarter);
+        pr.push({
+          name: elem.countDetails.pr_quarter,
+          y: elem.countDetails.pr_quarter,
+        });
       });
     } else {
-      viewData.sort(
-        (a, b) => b.countDetails.loc_semi - a.countDetails.loc_semi
-      );
+      if (sortBy === "loc")
+        viewData.sort(
+          (a, b) => b.countDetails.loc_semi - a.countDetails.loc_semi
+        );
+      else
+        viewData.sort(
+          (a, b) => b.countDetails.pr_semi - a.countDetails.pr_semi
+        );
       viewData.forEach((elem) => {
         loc.push({
-          name:
-            elem.assignee === "self"
-              ? "Self"
-              : contextData.userFullNameMap.get(elem.assignee),
+          name: elem.countDetails.loc_semi,
           y: elem.countDetails.loc_semi,
         });
-        pr.push(elem.countDetails.pr_semi);
+        pr.push({
+          name: elem.countDetails.pr_semi,
+          y: elem.countDetails.pr_semi,
+        });
       });
     }
 
@@ -447,35 +476,32 @@ const LocViewPage = (props) => {
     };
   };
 
-  //distribution chart parameters
-
-  var diffAssignCount =
+  //loc distribution chart parameters
+  var diffLocAssignCount =
     userId !== "all"
-      ? getAssigneeCount()
+      ? getAssigneeCount("loc")
       : {
           loc: [],
           pr: [],
         };
-  var diffAssign = viewData.map((elem) => elem.assignee);
-  const diffAssignNumbers = diffAssign.length;
-  if (diffAssign.length > 10 && !showAllAssignees) {
-    diffAssign = diffAssign.slice(0, 10);
-    diffAssignCount = {
-      loc: diffAssignCount.loc.slice(0, 10),
-      pr: diffAssignCount.pr.slice(0, 10),
-    };
+  diffLocAssignCount = diffLocAssignCount.loc;
+  var diffLocAssign = viewData.map((elem) => elem.assignee);
+  const diffLocAssignNumbers = diffLocAssign.length;
+  if (diffLocAssign.length > 10 && !showAllLocAssignees) {
+    diffLocAssign = diffLocAssign.slice(0, 10);
+    diffLocAssignCount = diffLocAssignCount.slice(0, 10);
   }
-  const assignedChartOptions = {
+  const locAssignedChartOptions = {
     chart: {
-      type: "column",
-      height: 450,
-      width: 1300,
+      type: "bar",
+      height: 430,
+      width: 630,
     },
     title: {
       text:
-        diffAssignNumbers > 10 && !showAllAssignees
-          ? "Distribution Chart (Top 10)"
-          : "Distribution Chart",
+        diffLocAssignNumbers > 10 && !showAllLocAssignees
+          ? "LOC Distribution Chart (Top 10)"
+          : "LOC Distribution Chart",
     },
     // colors: ['#D789D7'],
     plotOptions: {
@@ -490,7 +516,7 @@ const LocViewPage = (props) => {
       },
     },
     credits: {
-      enabled: false,
+      enabled: true,
       href: "#",
       text: `For: ${segmentFullNameMap.get(locSegment)}`,
       style: {
@@ -499,12 +525,12 @@ const LocViewPage = (props) => {
     },
 
     xAxis: {
-      categories: diffAssign,
+      categories: diffLocAssign,
     },
     series: [
       {
         name: "No. of LOC",
-        data: diffAssignCount.loc,
+        data: diffLocAssignCount,
         innerSize: "50%",
         events: {
           click: (e) => {
@@ -515,13 +541,78 @@ const LocViewPage = (props) => {
           },
         },
       },
+    ],
+    tooltip: {
+      shared: true,
+      formatter() {
+        let s = `<strong>${
+          this.x === "self" ? "Self" : contextData.userFullNameMap.get(this.x)
+        }</strong>`;
+        s += `<br>No. of LOC: ${this.points[0].y}`;
+        return s;
+      },
+    },
+  };
+
+  //pr distribution chart parameters
+  var diffPrAssignCount =
+    userId !== "all"
+      ? getAssigneeCount("pr")
+      : {
+          loc: [],
+          pr: [],
+        };
+  diffPrAssignCount = diffPrAssignCount.pr;
+  var diffPrAssign = viewData.map((elem) => elem.assignee);
+  const diffPrAssignNumbers = diffPrAssign.length;
+  if (diffPrAssign.length > 10 && !showAllPrAssignees) {
+    diffPrAssign = diffPrAssign.slice(0, 10);
+    diffPrAssignCount = diffPrAssignCount.slice(0, 10);
+  }
+  const prAssignedChartOptions = {
+    chart: {
+      type: "bar",
+      height: 430,
+      width: 630,
+    },
+    title: {
+      text:
+        diffPrAssignNumbers > 10 && !showAllPrAssignees
+          ? "PRs Distribution Chart (Top 10)"
+          : "PRs Distribution Chart",
+    },
+    colors: ["#8E24AA"],
+    plotOptions: {
+      series: {
+        allowPointSelect: true,
+        cursor: "pointer",
+        dataLabels: {
+          enabled: true,
+          format: "<b>{point.name}</b><br>{point.percentage:.1f}",
+          distance: 20,
+        },
+      },
+    },
+    credits: {
+      enabled: true,
+      href: "#",
+      text: `For: ${segmentFullNameMap.get(locSegment)}`,
+      style: {
+        fontSize: "15px",
+      },
+    },
+
+    xAxis: {
+      categories: diffPrAssign,
+    },
+    series: [
       {
         name: "No. of PRs",
-        data: diffAssignCount.pr,
+        data: diffPrAssignCount,
         innerSize: "50%",
         events: {
           click: (e) => {
-            if (e.point.category !== userId) {
+            if (e.point.category !== "self") {
               contextData.setIsLocPageLoading(true);
               navigate(`/loc/view/${e.point.category}`);
             }
@@ -529,6 +620,16 @@ const LocViewPage = (props) => {
         },
       },
     ],
+    tooltip: {
+      shared: true,
+      formatter() {
+        let s = `<strong>${
+          this.x === "self" ? "Self" : contextData.userFullNameMap.get(this.x)
+        }</strong>`;
+        s += `<br>No. of PRs: ${this.points[0].y}`;
+        return s;
+      },
+    },
   };
 
   // wrappers function for selecting user from the user search bar
@@ -545,6 +646,7 @@ const LocViewPage = (props) => {
     contextData.setLoc({
       locSegment: currentLocStatus.locSegment,
       tableOpen: value,
+      tableSortBy: currentLocStatus.tableSortBy,
     });
   };
 
@@ -554,8 +656,24 @@ const LocViewPage = (props) => {
     contextData.setLoc({
       locSegment: segment,
       tableOpen: currentLocStatus.tableOpen,
+      tableSortBy: currentLocStatus.tableSortBy,
     });
   };
+
+  const selectTableSortBy = (sortBy) => {
+    const currentLocStatus = contextData.loc_states;
+    contextData.setLoc({
+      locSegment: currentLocStatus.locSegment,
+      tableOpen: currentLocStatus.tableOpen,
+      tableSortBy: sortBy,
+    });
+  };
+
+  if (tableSortBy === "loc") {
+    getAssigneeCount("loc");
+  } else {
+    getAssigneeCount("pr");
+  }
   return (
     <>
       {contextData.isLocPageLoading || !contextData.isLocTableLoaded ? (
@@ -571,7 +689,7 @@ const LocViewPage = (props) => {
             <div className="flex flex-row justify-center mb-[-20px]">
               {" "}
               <span className=" bg-blue-600 py-2 px-3 rounded-lg text-white font-bold text-lg">
-                Loc Metrics
+                LOC Metrics
               </span>
             </div>
             <ProfileSearchBar
@@ -610,7 +728,8 @@ const LocViewPage = (props) => {
                       </Typography>
                       <Typography variant="h5" className="pl-4 text-center">
                         {" "}
-                        Total no. of PRs Reviewed : <span>{total_pr_count}</span>{" "}
+                        Total no. of PRs Reviewed :{" "}
+                        <span>{total_pr_count}</span>{" "}
                       </Typography>
                     </div>
                   </>
@@ -646,19 +765,22 @@ const LocViewPage = (props) => {
             ) : (
               <></>
             )}
+            <hr className="border-[1px] border-blue-gray-200" />
             {userId !== "all" ? (
               <>
                 <div className="w-full  h-16 flex flex-row justify-evenly items-center pt-1">
                   <div className="w-1/5 h-full  flex flex-col">
-                    <div
-                      className={`h-3/10 w-full text-center  ${
-                        locSegment === "month"
-                          ? "font-bold text-blue-500"
-                          : "font-semibold text-blue-gray-500"
-                      } `}
-                    >
+                    <div className={`h-3/10 w-full text-center `}>
                       {" "}
-                      Monthly
+                      <span
+                        className={
+                          locSegment === "month"
+                            ? "font-bold text-white bg-green-700 px-2 py-[3px] rounded-md"
+                            : "font-semibold text-blue-gray-500"
+                        }
+                      >
+                        Monthly
+                      </span>
                     </div>
                     <div className="h-7/10 w-full flex flex-col justify-center">
                       <div className="flex w-full flex-row  justify-center space-x-6 items-center ">
@@ -666,7 +788,13 @@ const LocViewPage = (props) => {
                           <div className="w-[10px] h-[10px] bg-blue-600 rounded-full"></div>
                         </div>
                         <div className="h-fit w-1/2 flex flex-row justify-start ">
-                          <span>{monthly_loc}</span>
+                          <span
+                            className={
+                              locSegment === "month" ? "font-bold" : ""
+                            }
+                          >
+                            {monthly_loc}
+                          </span>
                         </div>
                       </div>
                       <div className="flex w-full flex-row  justify-center space-x-6 items-center ">
@@ -674,22 +802,30 @@ const LocViewPage = (props) => {
                           <div className="w-[10px] h-[10px] bg-purple-600 rounded-full"></div>
                         </div>
                         <div className="h-fit w-1/2 flex flex-row justify-start ">
-                          <span>{monthly_pr}</span>
+                          <span
+                            className={
+                              locSegment === "month" ? "font-bold" : ""
+                            }
+                          >
+                            {monthly_pr}
+                          </span>
                         </div>
                       </div>
                     </div>
                   </div>
 
                   <div className="w-1/5 h-full  flex flex-col">
-                    <div
-                      className={`h-3/10 w-full text-center  ${
-                        locSegment === "quarter"
-                          ? "font-bold text-blue-500"
-                          : "font-semibold text-blue-gray-500"
-                      } `}
-                    >
+                    <div className={`h-3/10 w-full text-center `}>
                       {" "}
-                      Quarterly
+                      <span
+                        className={
+                          locSegment === "quarter"
+                            ? "font-bold text-white bg-green-700 px-2 py-[3px] rounded-md"
+                            : "font-semibold text-blue-gray-500"
+                        }
+                      >
+                        Quarterly
+                      </span>
                     </div>
                     <div className="h-7/10 w-full flex flex-col justify-center">
                       <div className="flex w-full flex-row  justify-center space-x-6 items-center ">
@@ -697,7 +833,13 @@ const LocViewPage = (props) => {
                           <div className="w-[10px] h-[10px] bg-blue-600 rounded-full"></div>
                         </div>
                         <div className="h-fit w-1/2 flex flex-row justify-start ">
-                          <span>{quarter_loc}</span>
+                          <span
+                            className={
+                              locSegment === "quarter" ? "font-bold" : ""
+                            }
+                          >
+                            {quarter_loc}
+                          </span>
                         </div>
                       </div>
                       <div className="flex w-full flex-row  justify-center space-x-6 items-center ">
@@ -705,21 +847,29 @@ const LocViewPage = (props) => {
                           <div className="w-[10px] h-[10px] bg-purple-600 rounded-full"></div>
                         </div>
                         <div className="h-fit w-1/2 flex flex-row justify-start ">
-                          <span>{quarter_pr}</span>
+                          <span
+                            className={
+                              locSegment === "quarter" ? "font-bold" : ""
+                            }
+                          >
+                            {quarter_pr}
+                          </span>
                         </div>
                       </div>
                     </div>
                   </div>
                   <div className="w-1/5 h-full  flex flex-col">
-                    <div
-                      className={`h-3/10 w-full text-center  ${
-                        locSegment === "semi"
-                          ? "font-bold text-blue-500"
-                          : "font-semibold text-blue-gray-500"
-                      } `}
-                    >
+                    <div className={`h-3/10 w-full text-center `}>
                       {" "}
-                      Semi Annually
+                      <span
+                        className={
+                          locSegment === "semi"
+                            ? "font-bold text-white bg-green-700 px-2 py-[3px] rounded-md"
+                            : "font-semibold text-blue-gray-500"
+                        }
+                      >
+                        Semi Annually
+                      </span>
                     </div>
                     <div className="h-7/10 w-full flex flex-col justify-center">
                       <div className="flex w-full flex-row  justify-center space-x-6 items-center ">
@@ -727,7 +877,11 @@ const LocViewPage = (props) => {
                           <div className="w-[10px] h-[10px] bg-blue-600 rounded-full"></div>
                         </div>
                         <div className="h-fit w-1/2 flex flex-row justify-start ">
-                          <span>{semi_loc}</span>
+                          <span
+                            className={locSegment === "semi" ? "font-bold" : ""}
+                          >
+                            {semi_loc}
+                          </span>
                         </div>
                       </div>
                       <div className="flex w-full flex-row  justify-center space-x-6 items-center ">
@@ -735,7 +889,11 @@ const LocViewPage = (props) => {
                           <div className="w-[10px] h-[10px] bg-purple-600 rounded-full"></div>
                         </div>
                         <div className="h-fit w-1/2 flex flex-row justify-start ">
-                          <span>{semi_pr}</span>
+                          <span
+                            className={locSegment === "semi" ? "font-bold" : ""}
+                          >
+                            {semi_pr}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -835,84 +993,172 @@ const LocViewPage = (props) => {
                         ? contextData.locTable.dates[locSegment]["upper limit"]
                         : ""}{" "}
                     </Card>
-                    <Card className="pb-3 pt-1 px-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
-                      <Tabs value={tableOpen ? "table" : "graph"}>
-                        <TabsHeader>
-                          <Tab
-                            className={`${
-                              tableOpen ? "font-normal" : " font-bold"
-                            } text-blue-600 z-10`}
-                            key={"graph"}
-                            value={"graph"}
-                            onClick={() => {
-                              setTableOpen(false);
-                            }}
-                          >
-                            {"Graph"}
-                          </Tab>
-                          <Tab
-                            className={`${
-                              tableOpen ? "font-bold" : " font-normal"
-                            } text-blue-600 z-10`}
-                            key={"table"}
-                            value={"table"}
-                            onClick={() => {
-                              setTableOpen(true);
-                            }}
-                          >
-                            {"Table"}
-                          </Tab>
-                        </TabsHeader>
-                      </Tabs>
-                      {tableOpen && userId !== "all" ? (
-                        <>
-                          <LocAssigneeTable
-                        locSegment={locSegment}
-                        tableData={viewData}
-                        userId={userId}
-                        monthly_loc={monthly_loc}
-                        monthly_pr={monthly_pr}
-                        quarter_loc={quarter_loc}
-                        quarter_pr={quarter_loc}
-                        semi_loc={semi_loc}
-                        semi_pr={semi_pr}
-                      />
-                        </>
-                      ) : (
-                        <>
-                          {diffAssignNumbers > 10 && !showAllAssignees ? (
-                            <>
-                              <div className=" w-full flex pr-4 flex-row justify-end mb-[-20px] z-10">
-                                <span
-                                  className="underline hover:cursor-pointer"
+                    <Card
+                      className={`pb-3 pt-1 px-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ${
+                        tableOpen ? "bg-white" : "bg-gray-300"
+                      } `}
+                    >
+                      <div className=" w-full flex flex-row">
+                        <div className="w-1/3"></div>
+                        <div className="w-1/3 flex flex-row justify-center">
+                          <div className="w-fit ">
+                            <Tabs value={tableOpen ? "table" : "graph"}>
+                              <TabsHeader
+                                className={
+                                  tableOpen ? "bg-gray-200" : "bg-gray-400"
+                                }
+                              >
+                                <Tab
+                                  className={`${
+                                    tableOpen ? "font-normal" : " font-bold"
+                                  } text-blue-600 z-10`}
+                                  key={"graph"}
+                                  value={"graph"}
                                   onClick={() => {
-                                    setShowAllAssignees(true);
+                                    setTableOpen(false);
                                   }}
                                 >
-                                  show all
-                                </span>
-                              </div>
-                            </>
-                          ) : diffAssignNumbers > 10 ? (
-                            <>
-                              <div className=" w-full flex pr-4 flex-row justify-end mb-[-20px] z-10">
-                                <span
-                                  className="underline hover:cursor-pointer"
+                                  {"Graph"}
+                                </Tab>
+                                <Tab
+                                  className={`${
+                                    tableOpen ? "font-bold" : " font-normal"
+                                  } text-blue-600 z-10`}
+                                  key={"table"}
+                                  value={"table"}
                                   onClick={() => {
-                                    setShowAllAssignees(false);
+                                    setTableOpen(true);
                                   }}
                                 >
-                                  show top 10
-                                </span>
-                              </div>
+                                  {"Table"}
+                                </Tab>
+                              </TabsHeader>
+                            </Tabs>
+                          </div>
+                        </div>
+                        <div className="w-1/3  flex flex-row items-center justify-end pr-8">
+                          {tableOpen ? (
+                            <>
+                              {tableSortBy === "loc" ? (
+                                <>
+                                  <span
+                                    className="underline hover:cursor-pointer"
+                                    onClick={() => {
+                                      selectTableSortBy("pr");
+                                    }}
+                                  >
+                                    sort by PRs
+                                  </span>
+                                </>
+                              ) : (
+                                <>
+                                  <span
+                                    className="underline hover:cursor-pointer"
+                                    onClick={() => {
+                                      selectTableSortBy("loc");
+                                    }}
+                                  >
+                                    sort by LOC
+                                  </span>
+                                </>
+                              )}
                             </>
                           ) : (
                             <></>
                           )}
-                          <HighchartsReact
-                            highcharts={Highcharts}
-                            options={assignedChartOptions}
+                        </div>
+                      </div>
+
+                      {tableOpen && userId !== "all" ? (
+                        <>
+                          <LocAssigneeTable
+                            locSegment={locSegment}
+                            tableData={viewData}
+                            userId={userId}
+                            monthly_loc={monthly_loc}
+                            monthly_pr={monthly_pr}
+                            quarter_loc={quarter_loc}
+                            quarter_pr={quarter_pr}
+                            semi_loc={semi_loc}
+                            semi_pr={semi_pr}
                           />
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex flex-row space-x-4">
+                            <Card className="pb-3 pt-1 px-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
+                              {diffLocAssignNumbers > 10 &&
+                              !showAllLocAssignees ? (
+                                <>
+                                  <div className=" w-full flex pr-4 flex-row justify-end mb-[-20px] z-10">
+                                    <span
+                                      className="underline hover:cursor-pointer"
+                                      onClick={() => {
+                                        setShowAllLocAssignees(true);
+                                      }}
+                                    >
+                                      show all
+                                    </span>
+                                  </div>
+                                </>
+                              ) : diffLocAssignNumbers > 10 ? (
+                                <>
+                                  <div className=" w-full flex pr-4 flex-row justify-end mb-[-20px] z-10">
+                                    <span
+                                      className="underline hover:cursor-pointer"
+                                      onClick={() => {
+                                        setShowAllLocAssignees(false);
+                                      }}
+                                    >
+                                      show top 10
+                                    </span>
+                                  </div>
+                                </>
+                              ) : (
+                                <></>
+                              )}
+                              <HighchartsReact
+                                highcharts={Highcharts}
+                                options={locAssignedChartOptions}
+                              />
+                            </Card>
+                            <Card className="pb-3 pt-1 px-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
+                              {diffPrAssignNumbers > 10 &&
+                              !showAllPrAssignees ? (
+                                <>
+                                  <div className=" w-full flex pr-4 flex-row justify-end mb-[-20px] z-10">
+                                    <span
+                                      className="underline hover:cursor-pointer"
+                                      onClick={() => {
+                                        setShowAllPrAssignees(true);
+                                      }}
+                                    >
+                                      show all
+                                    </span>
+                                  </div>
+                                </>
+                              ) : diffPrAssignNumbers > 10 ? (
+                                <>
+                                  <div className=" w-full flex pr-4 flex-row justify-end mb-[-20px] z-10">
+                                    <span
+                                      className="underline hover:cursor-pointer"
+                                      onClick={() => {
+                                        setShowAllPrAssignees(false);
+                                      }}
+                                    >
+                                      show top 10
+                                    </span>
+                                  </div>
+                                </>
+                              ) : (
+                                <></>
+                              )}
+                              <HighchartsReact
+                                highcharts={Highcharts}
+                                options={prAssignedChartOptions}
+                              />
+                            </Card>
+                          </div>
                         </>
                       )}
                     </Card>

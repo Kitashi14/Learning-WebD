@@ -17,6 +17,7 @@ import DevMetricsSegmentTypeRadio from "../components/devMetricsSegmentTypeRadio
 import DevMetricsTable from "../components/devMetricsTable";
 import { Loader } from "rsuite";
 import DevAssigneeTable from "../components/devAssigneeTable";
+import DevMetricsCategoryRadio from "../components/devMetricsCategoryRadio";
 
 // dashboard view page for any user
 const DevMetricsViewPage = (props) => {
@@ -26,6 +27,7 @@ const DevMetricsViewPage = (props) => {
   // level 1 filters
   const bugSegment = contextData.dev_states.bugSegment;
   const bugType = contextData.dev_states.bugType;
+  const bugCategory = contextData.dev_states.bugCategory;
   const tableOpen = contextData.dev_states.tableOpen;
 
   const [viewData, setViewData] = useState([]); //it will contain all elements after applying level 1 filter, used for showing lvl 1 charts
@@ -88,6 +90,7 @@ const DevMetricsViewPage = (props) => {
 
   const [prevUser, setPrevUser] = useState(null);
   const [prevType, setPrevType] = useState(null);
+  const [prevCategory, setPrevCategory] = useState(null);
   const [segmentCount, setSegmentCount] = useState(new Map());
 
   const navigate = useNavigate(); //for navigating to different routes
@@ -125,6 +128,7 @@ const DevMetricsViewPage = (props) => {
       contextData.setDevMetricsStates({
         bugSegment: currentDevStatus.bugSegment,
         bugType: currentDevStatus.bugType,
+        bugCategory: currentDevStatus.bugCategory,
         sortedFeature: {
           feature,
           order,
@@ -153,6 +157,13 @@ const DevMetricsViewPage = (props) => {
         const segmentMap = new Map();
         const loadData = async (table, segment) => {
           let data = [];
+
+          table = table.filter(
+            (e) =>
+              bugCategory === "all" ||
+              (bugCategory === "IFD" && e.found_at.trim() === "customer-use") ||
+              (bugCategory === "CFD" && e.found_at.trim() !== "customer-use")
+          );
 
           //condition check is a valid is selected
           if (userId === "all") {
@@ -282,7 +293,11 @@ const DevMetricsViewPage = (props) => {
         }
         var tableToUse;
         //segment will be selected
-        if (userId === prevUser && prevType === bugType) {
+        if (
+          userId === prevUser &&
+          prevType === bugType &&
+          prevCategory === bugCategory
+        ) {
           tableToUse = contextData.devMetricsTable[bugSegment]
             ? contextData.devMetricsTable[bugSegment].bugs
             : [];
@@ -313,11 +328,12 @@ const DevMetricsViewPage = (props) => {
       if (contextData.isDevTableLoaded) {
         setPrevUser(userId);
         setPrevType(bugType);
+        setPrevCategory(bugCategory);
         contextData.setIsDevPageLoading(false);
       }
     },
     // eslint-disable-next-line
-    [userId, bugSegment, contextData.isDevTableLoaded, bugType] // dependency array
+    [userId, bugSegment, contextData.isDevTableLoaded, bugType, bugCategory] // dependency array
   );
 
   //segment chart parameters
@@ -382,7 +398,7 @@ const DevMetricsViewPage = (props) => {
     credits: {
       enabled: true,
       href: "#",
-      text: `For: State (${bugType})`,
+      text: `For: State (${bugType}), Category (${bugCategory})`,
       style: {
         fontSize: "15px",
       },
@@ -440,7 +456,9 @@ const DevMetricsViewPage = (props) => {
         })
       : [];
   diffAssignCount.sort((a, b) => b.y - a.y);
-  diffAssign = diffAssignCount.map((elem) => elem.name==="self"? userId:elem.name);
+  diffAssign = diffAssignCount.map((elem) =>
+    elem.name === "self" ? userId : elem.name
+  );
   diffAssignCount = diffAssignCount.map((elem) => {
     return {
       name:
@@ -459,6 +477,7 @@ const DevMetricsViewPage = (props) => {
     chart: {
       type: "bar",
       height: 300,
+      width: bugCategory==="all"?400:600,
     },
     title: {
       text:
@@ -481,7 +500,9 @@ const DevMetricsViewPage = (props) => {
     credits: {
       enabled: true,
       href: "#",
-      text: `For: ${segmentFullNameMap.get(bugSegment)}, State (${bugType})`,
+      text: `For: ${segmentFullNameMap.get(
+        bugSegment
+      )}, State (${bugType}), Category (${bugCategory})`,
       style: {
         fontSize: "15px",
       },
@@ -523,6 +544,7 @@ const DevMetricsViewPage = (props) => {
     chart: {
       type: "pie",
       height: 300,
+      width: bugCategory==="all"?400:600,
     },
     title: {
       text: "State Chart",
@@ -542,7 +564,9 @@ const DevMetricsViewPage = (props) => {
     credits: {
       enabled: true,
       href: "#",
-      text: `For: ${segmentFullNameMap.get(bugSegment)}, State (${bugType})`,
+      text: `For: ${segmentFullNameMap.get(
+        bugSegment
+      )}, State (${bugType}), Category (${bugCategory})`,
       style: {
         fontSize: "15px",
       },
@@ -562,6 +586,65 @@ const DevMetricsViewPage = (props) => {
             selectBugType(e.point.name);
           },
         },
+      },
+    ],
+  };
+
+  //category chart parameters
+  const diffCategory = ["IFD", "CFD"];
+
+  const diffCategoryCount = diffCategory.map((category) => {
+    let count = 0;
+    viewData.forEach((elem) => {
+      if (
+        (elem.found_at.trim() === "customer-use" && category === "IFD") ||
+        (elem.found_at.trim() !== "customer-use" && category === "CFD")
+      )
+        count++;
+    });
+    return { name: category, y: count };
+  });
+  const categoryChartOptions = {
+    chart: {
+      type: "pie",
+      height: 300,
+      width: 400,
+    },
+    title: {
+      text: "IFD-CFD Chart",
+    },
+    colors: ["#A40A3C", "#FFC300"],
+    // colors: ["#6366f1", "#41AEA9", "#213E3B", "#E8FFFF"],
+    plotOptions: {
+      series: {
+        allowPointSelect: false,
+        cursor: "pointer",
+        dataLabels: {
+          enabled: true,
+          format: "<b>{point.name}</b><br>{point.percentage:.1f}",
+          distance: 20,
+        },
+        colorByPoint: true,
+      },
+    },
+    credits: {
+      enabled: true,
+      href: "#",
+      text: `For: ${segmentFullNameMap.get(
+        bugSegment
+      )}, State (${bugType}), Category (${bugCategory})`,
+      style: {
+        fontSize: "15px",
+      },
+    },
+
+    xAxis: {
+      categories: diffCategory,
+    },
+    series: [
+      {
+        name: "No. of bugs",
+        data: diffCategoryCount,
       },
     ],
   };
@@ -610,7 +693,9 @@ const DevMetricsViewPage = (props) => {
     credits: {
       enabled: true,
       href: "#",
-      text: `For: ${segmentFullNameMap.get(bugSegment)}, State (${bugType})`,
+      text: `For: ${segmentFullNameMap.get(
+        bugSegment
+      )}, State (${bugType}), Category (${bugCategory})`,
       style: {
         fontSize: "15px",
       },
@@ -627,6 +712,8 @@ const DevMetricsViewPage = (props) => {
     ],
   };
 
+  
+
   // wrappers function for selecting user from the user search bar
   const selectUserId = (user) => {
     if (user !== userId) {
@@ -635,12 +722,25 @@ const DevMetricsViewPage = (props) => {
     }
   };
 
-  // filtering data according to release (lvl 1 filter)
+  // filtering data according to type (lvl 1 filter)
   const selectBugType = (type) => {
     const currentDevStatus = contextData.dev_states;
     contextData.setDevMetricsStates({
       bugSegment: currentDevStatus.bugSegment,
       bugType: type,
+      bugCategory: currentDevStatus.bugCategory,
+      sortedFeature: currentDevStatus.sortedFeature,
+      tableOpen: currentDevStatus.tableOpen,
+    });
+  };
+
+  // filtering data according to category (lvl 1 filter)
+  const selectBugCategory = (category) => {
+    const currentDevStatus = contextData.dev_states;
+    contextData.setDevMetricsStates({
+      bugSegment: currentDevStatus.bugSegment,
+      bugType: currentDevStatus.bugType,
+      bugCategory: category,
       sortedFeature: currentDevStatus.sortedFeature,
       tableOpen: currentDevStatus.tableOpen,
     });
@@ -652,6 +752,7 @@ const DevMetricsViewPage = (props) => {
     contextData.setDevMetricsStates({
       bugSegment: currentDevStatus.bugSegment,
       bugType: currentDevStatus.bugType,
+      bugCategory: currentDevStatus.bugCategory,
       sortedFeature: currentDevStatus.sortedFeature,
       tableOpen: value,
     });
@@ -663,6 +764,7 @@ const DevMetricsViewPage = (props) => {
     contextData.setDevMetricsStates({
       bugSegment: segment,
       bugType: currentDevStatus.bugType,
+      bugCategory: currentDevStatus.bugCategory,
       sortedFeature: currentDevStatus.sortedFeature,
       tableOpen: currentDevStatus.tableOpen,
     });
@@ -723,17 +825,23 @@ const DevMetricsViewPage = (props) => {
                     data={segmentFullNameMap}
                     type={"dev"}
                   />
-                  <DevMetricsTypeRadio
-                    value={bugType}
-                    selectBugType={selectBugType}
-                  />
+                  <div className="flex flex-row space-x-8">
+                    <DevMetricsTypeRadio
+                      value={bugType}
+                      selectBugType={selectBugType}
+                    />
+                    <DevMetricsCategoryRadio
+                      value={bugCategory}
+                      selectBugCategory={selectBugCategory}
+                    />
+                  </div>
                 </div>
                 <Typography variant="h5" className="pl-4 text-center">
                   {" "}
                   Total no. of Bugs : <span>{viewData.length}</span>{" "}
                 </Typography>
               </div>
-              <div className="   w-1/5 flex flex-col justify-evenly items-center  pr-8">
+              <div className="  w-1/5 flex flex-col justify-evenly items-center">
                 {bugType !== "all" ? (
                   <>
                     <div className="  bg-gray-100 border-gray-300 border-solid border-[2px] rounded-lg   w-4/5 h-full flex flex-col justify-evenly items-center">
@@ -815,7 +923,7 @@ const DevMetricsViewPage = (props) => {
                       ? "#16803B"
                       : "",
                   }}
-                  className="rounded-l-md  w-[50%]"
+                  className="rounded-l-md border-solid border-r-[1px] border-gray-300 w-[50%]"
                 ></div>
                 <div
                   style={{
@@ -873,7 +981,7 @@ const DevMetricsViewPage = (props) => {
                       ? "#16803B"
                       : "",
                   }}
-                  className=" rounded-r-md border-solid border-r-[1px] border-gray-300 w-[2%]"
+                  className=" rounded-r-md  w-[2%]"
                 ></div>
               </div>
             </div>
@@ -951,10 +1059,17 @@ const DevMetricsViewPage = (props) => {
                 {tableOpen && userId !== "all" ? (
                   <>
                     <div className="flex bg-gray-100 p-4 rounded-lg flex-col items-center space-y-3">
-                      <DevMetricsTypeRadio
-                        value={bugType}
-                        selectBugType={selectBugType}
-                      />
+                      <div className="flex flex-row space-x-8">
+                        <DevMetricsTypeRadio
+                          value={bugType}
+                          selectBugType={selectBugType}
+                        />
+                        <DevMetricsCategoryRadio
+                          value={bugCategory}
+                          selectBugCategory={selectBugCategory}
+                        />
+                      </div>
+
                       <Typography variant="medium" className="pl-4 text-center">
                         {" "}
                         Bug Count : <span>{viewData.length}</span>{" "}
@@ -1014,6 +1129,18 @@ const DevMetricsViewPage = (props) => {
                         <HighchartsReact
                           highcharts={Highcharts}
                           options={typeChartOptions}
+                        />
+                      </Card>
+                    </>
+                  ) : (
+                    <></>
+                  )}
+                  {bugCategory === "all" ? (
+                    <>
+                      <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit">
+                        <HighchartsReact
+                          highcharts={Highcharts}
+                          options={categoryChartOptions}
                         />
                       </Card>
                     </>

@@ -18,7 +18,7 @@ const Navbar = (props) => {
     <div className="w-1/5">
       <Sidenav appearance="inverse">
         <Sidenav.Body className="h-screen">
-          <Nav activeKey="1">
+          <Nav activeKey="6">
             <Nav.Item
               eventKey="1"
               icon={<GroupIcon />}
@@ -97,8 +97,9 @@ const Navbar = (props) => {
                 }
               }}
             >
-              Loc Metrics
+              LOC Metrics
             </Nav.Item>
+            
           </Nav>
         </Sidenav.Body>
       </Sidenav>

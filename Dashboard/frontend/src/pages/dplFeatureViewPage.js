@@ -6,7 +6,7 @@ import { useContext } from "react";
 import DataContext from "../context/dataContext";
 
 //page for a particular feature
-const FeatureViewPage = (props) => {
+const DplFeatureViewPage = (props) => {
   const contextData = useContext(DataContext);
 
   const featureId = useParams().fid; //extracting feature reference and storing it as feature-id
@@ -126,4 +126,4 @@ const FeatureViewPage = (props) => {
   );
 };
 
-export default FeatureViewPage;
+export default DplFeatureViewPage;

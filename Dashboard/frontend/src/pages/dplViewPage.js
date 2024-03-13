@@ -13,7 +13,7 @@ import DataContext from "../context/dataContext";
 import { SelectPicker } from "rsuite";
 
 // dashboard view page for any user
-const ProfileViewPage = (props) => {
+const DplViewPage = (props) => {
   //extracting context global data
   const contextData = useContext(DataContext);
 
@@ -840,4 +840,4 @@ const ProfileViewPage = (props) => {
   );
 };
 
-export default ProfileViewPage;
+export default DplViewPage;

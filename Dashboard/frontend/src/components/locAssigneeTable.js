@@ -6,7 +6,6 @@ const LocAssigneeTable = (props) => {
   const tableData = props.tableData;
   const contextData = useContext(DataContext);
   const navigate = useNavigate();
-  console.log(tableData);
   const locSegment = props.locSegment;
   return (
     <>
@@ -36,7 +35,27 @@ const LocAssigneeTable = (props) => {
                 color="blue-gray"
                 className="font-normal flex flex-row justify-center items-center space-x-2 leading-none opacity-70"
               >
-                <span>Total LOC</span>
+                <span>Total LOC</span>{" "}
+                {contextData.loc_states.tableSortBy === "loc" ? (
+                  <>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={2}
+                      stroke="currentColor"
+                      className="w-4 h-4"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M8.25 6.75 12 3m0 0 3.75 3.75M12 3v18"
+                      />
+                    </svg>
+                  </>
+                ) : (
+                  <></>
+                )}
               </Typography>
             </th>
             <th
@@ -50,6 +69,26 @@ const LocAssigneeTable = (props) => {
                 className="font-normal flex flex-row justify-center items-center space-x-2 leading-none opacity-70"
               >
                 <span>Total PRs Reviewed</span>
+                {contextData.loc_states.tableSortBy === "loc" ? (
+                  <></>
+                ) : (
+                  <>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={2}
+                      stroke="currentColor"
+                      className="w-4 h-4"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M8.25 6.75 12 3m0 0 3.75 3.75M12 3v18"
+                      />
+                    </svg>
+                  </>
+                )}
               </Typography>
             </th>
           </tr>
@@ -233,7 +272,7 @@ const LocAssigneeTable = (props) => {
                     className={` ${
                       data.countDetails["pr_month"] === 0
                         ? "text-blue-gray-800 font-normal"
-                        : "text-blue-500 font-bold"
+                        : "text-purple-500 font-bold"
                     } `}
                   >
                     {data.countDetails["pr_month"]}
@@ -250,7 +289,7 @@ const LocAssigneeTable = (props) => {
                     className={` ${
                       data.countDetails["pr_quarter"] === 0
                         ? "text-blue-gray-800 font-normal"
-                        : "text-blue-500 font-bold"
+                        : "text-purple-500 font-bold"
                     } `}
                   >
                     {data.countDetails["pr_quarter"]}
@@ -267,7 +306,7 @@ const LocAssigneeTable = (props) => {
                     className={` ${
                       data.countDetails["pr_semi"] === 0
                         ? "text-blue-gray-800 font-normal"
-                        : "text-blue-500 font-bold"
+                        : "text-purple-500 font-bold"
                     } `}
                   >
                     {data.countDetails["pr_semi"]}
@@ -292,11 +331,10 @@ const LocAssigneeTable = (props) => {
               }}
               className="py-4 w-[160px] border-b  border-r border-blue-gray-100"
             >
-              <Typography
-                variant="small"
-                className="font-bold text-blue-gray-800"
-              >
-                {props.monthly_loc}
+              <Typography variant="small" className="font-bold text-white">
+                <span className="bg-blue-500 py-1 px-2 rounded-lg">
+                  {props.monthly_loc}
+                </span>
               </Typography>
             </td>
             <td
@@ -305,11 +343,10 @@ const LocAssigneeTable = (props) => {
               }}
               className="py-4 w-[160px] border-b  border-r border-blue-gray-100"
             >
-              <Typography
-                variant="small"
-                className="font-bold text-blue-gray-800"
-              >
-                {props.quarter_loc}
+              <Typography variant="small" className="font-bold text-white">
+                <span className="bg-blue-500 py-1 px-2 rounded-lg">
+                  {props.quarter_loc}
+                </span>
               </Typography>
             </td>
             <td
@@ -318,11 +355,10 @@ const LocAssigneeTable = (props) => {
               }}
               className="py-4 w-[160px] border-b  border-r border-blue-gray-100"
             >
-              <Typography
-                variant="small"
-                className="font-bold text-blue-gray-800"
-              >
-                {props.semi_loc}
+              <Typography variant="small" className="font-bold text-white">
+                <span className="bg-blue-500 py-1 px-2 rounded-lg">
+                  {props.semi_loc}
+                </span>
               </Typography>
             </td>
             <td
@@ -331,11 +367,10 @@ const LocAssigneeTable = (props) => {
               }}
               className="py-4 w-[160px] border-b  border-r border-blue-gray-100"
             >
-              <Typography
-                variant="small"
-                className="font-bold text-blue-gray-800"
-              >
-                {props.monthly_pr}
+              <Typography variant="small" className="font-bold text-white">
+                <span className="bg-purple-500 py-1 px-2 rounded-lg">
+                  {props.monthly_pr}
+                </span>
               </Typography>
             </td>
             <td
@@ -344,11 +379,10 @@ const LocAssigneeTable = (props) => {
               }}
               className="py-4 w-[160px] border-b  border-r border-blue-gray-100"
             >
-              <Typography
-                variant="small"
-                className="font-bold text-blue-gray-800"
-              >
-                {props.quarter_pr}
+              <Typography variant="small" className="font-bold text-white">
+                <span className="bg-purple-500 py-1 px-2 rounded-lg">
+                  {props.quarter_pr}
+                </span>
               </Typography>
             </td>
             <td
@@ -357,11 +391,10 @@ const LocAssigneeTable = (props) => {
               }}
               className="py-4 w-[160px] border-b  border-r border-blue-gray-100"
             >
-              <Typography
-                variant="small"
-                className="font-bold text-blue-gray-800"
-              >
-                {props.semi_pr}
+              <Typography variant="small" className="font-bold text-white">
+                <span className="bg-purple-500 py-1 px-2 rounded-lg">
+                  {props.semi_pr}
+                </span>
               </Typography>
             </td>
           </tr>

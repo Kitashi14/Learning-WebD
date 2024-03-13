@@ -1,9 +1,9 @@
 import Navbar from "./components/navbar";
 import "rsuite/dist/rsuite.min.css";
-import ProfileViewPage from "./pages/profileViewPage";
+import DplViewPage from "./pages/dplViewPage";
 import { Route, Routes, useLocation } from "react-router-dom";
 import HomePage from "./pages/homePage";
-import FeatureViewPage from "./pages/featureViewPage";
+import DplFeatureViewPage from "./pages/dplFeatureViewPage";
 import { useContext, useEffect, useState } from "react";
 import DataContext from "./context/dataContext";
 import { Loader } from "rsuite";
@@ -24,6 +24,8 @@ function App() {
       setCurrentTab("dpl");
     } else if (location.pathname.includes("active")) setCurrentTab("active");
     else if (location.pathname.includes("dev")) setCurrentTab("dev");
+    else if (location.pathname.includes("loc")) setCurrentTab("loc");
+    else if (location.pathname.includes("autons")) setCurrentTab("autons");
     else {
       setCurrentTab(null);
     }

@@ -86,6 +86,7 @@ export const DataContextProvider = (props) => {
   const [dev_states, setDevStates] = useState({
     bugSegment: "annual",
     bugType: "all",
+    bugCategory: "all",
     sortedFeature: {
       feature: null,
       order: null,
@@ -95,6 +96,7 @@ export const DataContextProvider = (props) => {
   const [loc_states,setLocStates] = useState({
     locSegment : "semi",
     tableOpen: false,
+    tableSortBy: "loc",
   })
 
   const setLoading = (value) => {
