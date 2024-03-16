@@ -42,6 +42,15 @@ const ProfileSearchBar = (props) => {
               : elem.emp_id
           );
       })
+    : props.type === "autons"
+    ? props.table.forEach((elem) => {
+        elem=elem.bug_info;
+        callParent(
+          elem.emp_id === "" || !contextData.userFullNameMap.has(elem.emp_id)
+            ? elem.mgr_id
+            : elem.emp_id
+        );
+      })
     : props.table.forEach((elem) => {
         callParent(elem.emp_id);
       });

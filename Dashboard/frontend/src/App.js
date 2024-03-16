@@ -11,6 +11,7 @@ import ActiveViewPage from "./pages/activeViewPage";
 import ActiveFeatureViewPage from "./pages/activeFeatureViewPage";
 import DevMetricsViewPage from "./pages/devMetricsPage";
 import LocViewPage from "./pages/locViewPage";
+import AutonsViewPage from "./pages/autonsViewPage";
 // contains all routes for the client side
 function App() {
   const contextData = useContext(DataContext);
@@ -74,6 +75,11 @@ function App() {
                 exact
                 path="/loc/view/:uid"
                 element={<LocViewPage />}
+              ></Route>
+              <Route
+                exact
+                path="/autons/view/:uid"
+                element={<AutonsViewPage />}
               ></Route>
             </Routes>
           )}

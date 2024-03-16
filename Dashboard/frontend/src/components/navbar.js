@@ -2,6 +2,7 @@ import { Sidenav, Nav } from "rsuite";
 import DashboardIcon from "@rsuite/icons/legacy/Dashboard";
 import GroupIcon from "@rsuite/icons/legacy/Group";
 import PeopleBranchIcon from "@rsuite/icons/PeopleBranch";
+import TableColumnIcon from "@rsuite/icons/TableColumn";
 import PinIcon from "@rsuite/icons/Pin";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useContext } from "react";
@@ -78,6 +79,44 @@ const Navbar = (props) => {
             >
               Dev Metrics
             </Nav.Item>
+
+            <hr className="my-1 border-blue-300" />
+            <Nav.Item
+              eventKey={6}
+              icon={<DashboardIcon />}
+              // style={
+              //   props.currentTab === "autons"
+              //     ? { background: "#2589F4" }
+              //     : { background: "#3498FE" }
+              // }
+              title="Test Metrics"
+              panel
+              className="pl-4 pt-1"
+            >
+              Test Metrics
+            </Nav.Item>
+            <Nav.Item
+              eventKey="5-1"
+              icon={<TableColumnIcon />}
+              style={
+                props.currentTab === "autons"
+                  ? { background: "#2589F4" }
+                  : { background: "#3498FE" }
+              }
+              onClick={() => {
+                if (
+                  !location.pathname.includes(
+                    `/autons/view/${contextData.autons_currentUser}`
+                  )
+                ) {
+                  contextData.setIsAutonsPageLoading(true);
+                  navigate(`/autons/view/${contextData.autons_currentUser}`);
+                }
+              }}
+            >
+              Autons
+            </Nav.Item>
+            <hr className="mt-1 mb-0 border-blue-300" />
             <Nav.Item
               eventKey="5"
               icon={<PinIcon />}
@@ -99,7 +138,7 @@ const Navbar = (props) => {
             >
               LOC Metrics
             </Nav.Item>
-            
+            <hr className="mt-1 mb-0 border-blue-300" />
           </Nav>
         </Sidenav.Body>
       </Sidenav>

@@ -351,17 +351,16 @@ const LocViewPage = (props) => {
   //   segment chart parameters
   const diffSegment = ["month", "quarter", "semi"];
 
-  const segmentChartOptions = {
+  const locSegmentChartOptions = {
     chart: {
       type: "line",
-      height: 600,
+      height: 350,
       width: 1300,
     },
     title: {
-      text: "Segment Chart",
+      text: "Loc Segment Chart",
     },
-    // colors: ["#FFC300", "#EC610A", "#A40A3C", "#6B0848"],
-    //   colors: ["#16803C", "#41AEA9", "#213E3B", "#E8FFFF"],
+    // colors: ["#16803C", "#41AEA9", "#213E3B", "#E8FFFF"],
     plotOptions: {
       series: {
         allowPointSelect: true,
@@ -395,8 +394,45 @@ const LocViewPage = (props) => {
           },
         },
       },
+    ],
+  };
+
+  const prSegmentChartOptions = {
+    chart: {
+      type: "line",
+      height: 350,
+      width: 1300,
+    },
+    title: {
+      text: "PRs Segment Chart",
+    },
+    colors: ["#8E24AA", "#41AEA9", "#213E3B", "#E8FFFF"],
+    plotOptions: {
+      series: {
+        allowPointSelect: true,
+        cursor: "pointer",
+        dataLabels: {
+          enabled: true,
+          format: "<b>{point.name}</b><br>{point.percentage:.1f}",
+          distance: 20,
+        },
+        states: {
+          select: {
+            colorIndex: "#D789D7",
+            color: "#6CE890",
+            borderWidth: 0,
+            borderColor: "#6CE890",
+          },
+        },
+      },
+    },
+
+    xAxis: {
+      categories: diffSegment.map((elem) => segmentFullNameMap.get(elem)),
+    },
+    series: [
       {
-        name: "No. of PR",
+        name: "No. of PRs",
         data: [monthly_pr, quarter_pr, semi_pr],
         events: {
           click: (e) => {
@@ -765,9 +801,10 @@ const LocViewPage = (props) => {
             ) : (
               <></>
             )}
-            <hr className="border-[1px] border-blue-gray-200" />
+
             {userId !== "all" ? (
               <>
+                <hr className="border-[1px] border-blue-gray-200" />
                 <div className="w-full  h-16 flex flex-row justify-evenly items-center pt-1">
                   <div className="w-1/5 h-full  flex flex-col">
                     <div className={`h-3/10 w-full text-center `}>
@@ -1168,7 +1205,13 @@ const LocViewPage = (props) => {
                     <Card className="pb-3 pt-1 px-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
                       <HighchartsReact
                         highcharts={Highcharts}
-                        options={segmentChartOptions}
+                        options={locSegmentChartOptions}
+                      />
+                    </Card>
+                    <Card className="pb-3 pt-1 px-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
+                      <HighchartsReact
+                        highcharts={Highcharts}
+                        options={prSegmentChartOptions}
                       />
                     </Card>
                   </>

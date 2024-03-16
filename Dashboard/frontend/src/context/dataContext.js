@@ -14,10 +14,22 @@ const DataContext = createContext({
   isLoading: true,
   isLocTableLoaded:false,
   isLocPageLoading: true,
+  isAutonsTableLoaded:false,
+  isAutonsPageLoading: true,
+  isTeacatsTableLoaded:false,
+  isTeacatsPageLoading: true,
+  isTestbugsTableLoaded:false,
+  isTestbugsPageLoading: true,
   isDevTableLoaded: false,
   isDevPageLoading: true,
   setIsLocPageLoading: ()=>{},
   setIsLocTableLoaded: ()=>{},
+  setIsAutonsPageLoading: ()=>{},
+  setIsAutonsTableLoaded: ()=>{},
+  setIsTeacatsPageLoading: ()=>{},
+  setIsTeacatsTableLoaded: ()=>{},
+  setIsTestbugsPageLoading: ()=>{},
+  setIsTestbugsTableLoaded: ()=>{},
   setIsDevPageLoading: () => {},
   setIsDevTableLoaded: () => {},
   setLoading: () => {},
@@ -25,6 +37,9 @@ const DataContext = createContext({
   jiraTable: [],
   devMetricsTable: {},
   locTable: [],
+  autonsTable:[],
+  teacatsTable:[],
+  testbugsTable:[],
   childParentMap: new Map(),
   parentChildMap: new Map(),
   userFullNameMap: new Map(),
@@ -32,20 +47,36 @@ const DataContext = createContext({
   active_currentUser: "psesham",
   devMetrics_currentUser: "psesham",
   loc_currentUser:  "psesham",
+  autons_currentUser: "psesham",
+  teacats_currentUser: "psesham",
+  testbugs_currentUser: "psesham",
   dev_states: {},
   dpl_states: {},
   active_states: {},
   loc_states: {},
+  autons_states: {},
+  teacats_states: {},
+  testbugs_states: {},
   setDplUser: () => {},
   setActiveUser: () => {},
   setDevMetricsUser: () => {},
   setLocUser: ()=>{},
+  setAutonsUser: ()=>{},
+  setTeacatsUser: ()=>{},
+  setTestbugsUser: ()=>{},
   setDpl: () => {},
   setActive: () => {},
   setDevMetricsStates: () => {},
   setLoc: ()=>{},
+  setAutonsStates: ()=>{},
+  setTeacatsStates: ()=>{},
+  setTestbugsStates: ()=>{},
   setDevTable: () => {},
   setLocTable: ()=>{},
+  setAutonsTable: ()=>{},
+  setTeacatsTable: ()=>{},
+  setTestbugsTable: ()=>{},
+
 });
 
 export const DataContextProvider = (props) => {
@@ -54,10 +85,19 @@ export const DataContextProvider = (props) => {
   const [isDevPageLoading, setIsDevPageLoading] = useState(true);
   const [isLocTableLoaded,setIsLocTableLoaded] = useState(false);
   const [isLocPageLoading,setIsLocPageLoading] = useState(true);
+  const [isAutonsTableLoaded,setIsAutonsTableLoaded] = useState(false);
+  const [isAutonsPageLoading,setIsAutonsPageLoading] = useState(true);
+  const [isTeacatsTableLoaded,setIsTeacatsTableLoaded] = useState(false);
+  const [isTeacatsPageLoading,setIsTeacatsPageLoading] = useState(true);
+  const [isTestbugsTableLoaded,setIsTestbugsTableLoaded] = useState(false);
+  const [isTestbugsPageLoading,setIsTestbugsPageLoading] = useState(true);
   const [dplTable, setDplTable] = useState([]);
   const [jiraTable, setJiraTable] = useState([]);
   const [devMetricsTable, setDevMetricsTable] = useState({});
   const [locTable,setLocTable] = useState([]);
+  const [autonsTable,setAutonsTable] = useState([]);
+  const [teacatsTable,setTeacatsTable] = useState([]);
+  const [testbugsTable,setTestbugsTable] = useState([]);
   const [childParentMap, setChildParentMap] = useState(new Map());
   const [parentChildMap, setParentChildMap] = useState(new Map());
   const [userFullNameMap, setUserFullNameMap] = useState(new Map());
@@ -65,6 +105,9 @@ export const DataContextProvider = (props) => {
   const [active_currentUser, setActiveCurrentUser] = useState("psesham");
   const [devMetrics_currentUser, setDevMetricsCurrentUser] = useState("psesham");
   const [loc_currentUser,setLocCurrentUser] = useState("psesham");
+  const [autons_currentUser,setAutonsCurrentUser] = useState("psesham");
+  const [teacats_currentUser,setTeacatsCurrentUser] = useState("psesham");
+  const [testbugs_currentUser,setTestbugsCurrentUser] = useState("psesham");
   const [dpl_states, setDplStates] = useState({
     featureRelease: "all",
     featureTag: "all",
@@ -97,6 +140,26 @@ export const DataContextProvider = (props) => {
     locSegment : "semi",
     tableOpen: false,
     tableSortBy: "loc",
+  })
+  const [autons_states,setAutonsStates] = useState({
+    bugSegment : "semi",
+    bugType: "all",
+    sortedFeature: {
+      feature: null,
+      order: null,
+    },
+    tableOpen: false,
+  })
+  const [teacats_states,setTeacatsStates] = useState({
+    teacatsSegment : "semi",
+    bugType: "all",
+    sortedFeature: {
+      feature: null,
+      order: null,
+    },
+    tableOpen: false,
+  })
+  const [testbugs_states,setTestbugsStates] = useState({
   })
 
   const setLoading = (value) => {
@@ -332,10 +395,22 @@ export const DataContextProvider = (props) => {
     isLoading,
     isLocTableLoaded,
     isLocPageLoading,
+    isAutonsTableLoaded,
+    isAutonsPageLoading,
+    isTeacatsTableLoaded,
+    isTeacatsPageLoading,
+    isTestbugsTableLoaded,
+    isTestbugsPageLoading,
     isDevTableLoaded,
     isDevPageLoading,
     setIsLocPageLoading,
     setIsLocTableLoaded,
+    setIsAutonsPageLoading,
+    setIsAutonsTableLoaded,
+    setIsTeacatsPageLoading,
+    setIsTeacatsTableLoaded,
+    setIsTestbugsPageLoading,
+    setIsTestbugsTableLoaded,
     setIsDevPageLoading,
     setIsDevTableLoaded,
     setLoading,
@@ -343,6 +418,9 @@ export const DataContextProvider = (props) => {
     jiraTable,
     devMetricsTable,
     locTable,
+    autonsTable,
+    teacatsTable,
+    testbugsTable,
     childParentMap,
     parentChildMap,
     userFullNameMap,
@@ -350,20 +428,35 @@ export const DataContextProvider = (props) => {
     active_currentUser,
     devMetrics_currentUser,
     loc_currentUser,
+    autons_currentUser,
+    teacats_currentUser,
+    testbugs_currentUser,
     dpl_states,
     active_states,
     dev_states,
     loc_states,
+    autons_states,
+    teacats_states,
+    testbugs_states,
     setDplUser,
     setActiveUser,
     setDevMetricsUser: setDevMetricsCurrentUser,
     setLocUser: setLocCurrentUser,
+    setAutonsUser: setAutonsCurrentUser,
+    setTeacatssUser: setTeacatsCurrentUser,
+    setTestbugsUser: setTestbugsCurrentUser,
     setDpl,
     setActive,
     setDevMetricsStates: setDevStates,
     setLoc: setLocStates,
+    setAutonsStates,
+    setTeacatsStates,
+    setTestbugsStates,
     setDevTable,
     setLocTable,
+    setAutonsTable,
+    setTeacatsTable,
+    setTestbugsTable,
   };
 
   return (

@@ -161,8 +161,8 @@ const DevMetricsViewPage = (props) => {
           table = table.filter(
             (e) =>
               bugCategory === "all" ||
-              (bugCategory === "IFD" && e.found_at.trim() === "customer-use") ||
-              (bugCategory === "CFD" && e.found_at.trim() !== "customer-use")
+              (bugCategory === "IFD" && e.found_at.trim() !== "customer-use") ||
+              (bugCategory === "CFD" && e.found_at.trim() === "customer-use")
           );
 
           //condition check is a valid is selected
@@ -597,8 +597,8 @@ const DevMetricsViewPage = (props) => {
     let count = 0;
     viewData.forEach((elem) => {
       if (
-        (elem.found_at.trim() === "customer-use" && category === "IFD") ||
-        (elem.found_at.trim() !== "customer-use" && category === "CFD")
+        (elem.found_at.trim() !== "customer-use" && category === "IFD") ||
+        (elem.found_at.trim() === "customer-use" && category === "CFD")
       )
         count++;
     });
@@ -1255,7 +1255,7 @@ const DevMetricsViewPage = (props) => {
                       : "All"}
                   </span>
                   <br />
-                  {bugSegment !== "annual" || bugType !== "all" ? (
+                  {bugSegment !== "annual" || bugType !== "all" || bugCategory!=="all" ? (
                     <>
                       {" "}
                       {bugSegment !== "annual" ? (
@@ -1283,6 +1283,22 @@ const DevMetricsViewPage = (props) => {
                               className="fill-gray-500 hover:fill-red-500 hover:cursor-pointer"
                               onClick={() => {
                                 selectBugType("all");
+                              }}
+                            />
+                          </span>
+                        </>
+                      ) : (
+                        <></>
+                      )}
+                      {bugCategory !== "all" ? (
+                        <>
+                          <span className=" bg-gray-100 py-2 pl-3 ml-3 rounded-md drop-shadow-md text-blue-500 font-medium font-mono text-base">
+                            {bugCategory}{" "}
+                            <CloseIcon
+                              style={{ marginRight: 10, fontSize: "0.8em" }}
+                              className="fill-gray-500 hover:fill-red-500 hover:cursor-pointer"
+                              onClick={() => {
+                                selectBugCategory("all");
                               }}
                             />
                           </span>
