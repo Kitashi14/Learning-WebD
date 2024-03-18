@@ -4,14 +4,14 @@ import { useNavigate } from "react-router-dom";
 import DataContext from "../context/dataContext";
 
 // table heads
-export default function AutonsTable(props) {
+export default function TeacatsTable(props) {
   const TABLE_HEAD = [
     "Bug ID",
     "Headline",
     "State",
     "Engineer",
     "Manager",
-    "Component",
+    // "Component",
   ];
 
   const navigate = useNavigate();
@@ -31,7 +31,7 @@ export default function AutonsTable(props) {
     ["Bug under", "assigned_under"],
     ["Engineer", "emp_id"],
     ["Manager", "mgr_id"],
-    ["Component", "component"],
+    // ["Component", "component"],
   ]);
 
   //for navigating to different routes
@@ -213,10 +213,10 @@ export default function AutonsTable(props) {
                       className="font-normal hover:cursor-pointer"
                       onClick={() => {
                         if (
-                          contextData.autons_currentUser !== data.assigned_under
+                          contextData.teacats_currentUser !== data.assigned_under
                         ) {
-                          contextData.setIsAutonsPageLoading(true);
-                          navigate(`/autons/view/${data.assigned_under}`);
+                          contextData.setIsTeacatsPageLoading(true);
+                          navigate(`/teacats/view/${data.assigned_under}`);
                         }
                       }}
                     >
@@ -234,11 +234,11 @@ export default function AutonsTable(props) {
                   className="font-normal hover:cursor-pointer"
                   onClick={() => {
                     if (
-                      contextData.autons_currentUser !== data.emp_id &&
+                      contextData.teacats_currentUser !== data.emp_id &&
                       data.emp_id !== ""
                     ) {
-                      contextData.setIsAutonsPageLoading(true);
-                      navigate(`/autons/view/${data.emp_id}`);
+                      contextData.setIsTeacatsPageLoading(true);
+                      navigate(`/teacats/view/${data.emp_id}`);
                     }
                   }}
                 >
@@ -252,18 +252,18 @@ export default function AutonsTable(props) {
                   className="font-normal hover:cursor-pointer"
                   onClick={() => {
                     if (
-                      contextData.autons_currentUser !== data.mgr_id &&
+                      contextData.teacats_currentUser !== data.mgr_id &&
                       data.mgr_id !== ""
                     ) {
-                      contextData.setIsAutonsPageLoading(true);
-                      navigate(`/autons/view/${data.mgr_id}`);
+                      contextData.setIsTeacatsPageLoading(true);
+                      navigate(`/teacats/view/${data.mgr_id}`);
                     }
                   }}
                 >
                   {data.mgr_id}
                 </Typography>
               </td>
-              <td className="p-4">
+              {/* <td className="p-4">
                 <Typography
                   variant="small"
                   color="blue-gray"
@@ -271,7 +271,7 @@ export default function AutonsTable(props) {
                 >
                   {data.component}
                 </Typography>
-              </td>
+              </td> */}
             </tr>
           ))}
         </tbody>

@@ -13,20 +13,20 @@ import HighchartsReact from "highcharts-react-official";
 import { useNavigate, useParams } from "react-router-dom";
 import DataContext from "../context/dataContext";
 import { Loader } from "rsuite";
-import AutonsTypeRadio from "../components/autonsTypeRadio";
-import AutonsSegmentRadio from "../components/autonsSegmentRadio";
-import AutonsTable from "../components/autonsTable";
-import AutonsAssigneeTable from "../components/autonsAssigneeTable";
+import TeacatsTypeRadio from "../components/teacatsTypeRadio";
+import TeacatsSegmentRadio from "../components/teacatsSegmentRadio";
+import TeacatsTable from "../components/teacatsTable";
+import TeacatsAssigneeTable from "../components/teacatsAssigneeTable";
 
 // dashboard view page for any user
-const AutonsViewPage = (props) => {
+const TeacatsViewPage = (props) => {
   //extracting context global data
   const contextData = useContext(DataContext);
   // useState containing all filter's states
   // level 1 filters
-  const bugSegment = contextData.autons_states.bugSegment;
-  const bugType = contextData.autons_states.bugType;
-  const tableOpen = contextData.autons_states.tableOpen;
+  const bugSegment = contextData.teacats_states.bugSegment;
+  const bugType = contextData.teacats_states.bugType;
+  const tableOpen = contextData.teacats_states.tableOpen;
 
   const [viewData, setViewData] = useState([]); //it will contain all elements after applying level 1 filter, used for showing lvl 1 charts
   const [viewTableData, setViewTableData] = useState([]); //it will contain all elements after applying level 2 filter, used for filling table
@@ -41,8 +41,8 @@ const AutonsViewPage = (props) => {
 
   // getting the bugs details that was sorted
   const sortedFeature = {
-    feature: contextData.autons_states.sortedFeature.feature,
-    order: contextData.autons_states.sortedFeature.order,
+    feature: contextData.teacats_states.sortedFeature.feature,
+    order: contextData.teacats_states.sortedFeature.order,
   };
 
   const segmentFullNameMap = new Map([
@@ -83,7 +83,7 @@ const AutonsViewPage = (props) => {
 
   const navigate = useNavigate(); //for navigating to different routes
   const userId = useParams().uid; //extracting user id from the route/url
-  contextData.setAutonsUser(userId);
+  contextData.setTeacatsUser(userId);
 
   // for finding all parents nodes of the current user
   const previous_parents = [userId];
@@ -107,19 +107,19 @@ const AutonsViewPage = (props) => {
       });
     }
     setViewTableData(copyViewTableData);
-    const currentAutonsStatus = contextData.autons_states;
+    const currentTeacatsStatus = contextData.teacats_states;
     if (
-      currentAutonsStatus.sortedFeature.feature !== feature ||
-      currentAutonsStatus.sortedFeature.order !== order
+      currentTeacatsStatus.sortedFeature.feature !== feature ||
+      currentTeacatsStatus.sortedFeature.order !== order
     ) {
-      contextData.setAutonsStates({
-        bugSegment: currentAutonsStatus.bugSegment,
-        bugType: currentAutonsStatus.bugType,
+      contextData.setTeacatsStates({
+        bugSegment: currentTeacatsStatus.bugSegment,
+        bugType: currentTeacatsStatus.bugType,
         sortedFeature: {
           feature,
           order,
         },
-        tableOpen: currentAutonsStatus.tableOpen,
+        tableOpen: currentTeacatsStatus.tableOpen,
       });
     }
   };
@@ -397,22 +397,22 @@ const AutonsViewPage = (props) => {
         const fetchData = async () => {
           try {
             const response = await fetch(
-              `${process.env.REACT_APP_BACKEND_URL}/test/autons`
+              `${process.env.REACT_APP_BACKEND_URL}/test/teacats`
             );
             const responseData = await response.json();
-            contextData.setAutonsTable(responseData);
+            contextData.setTeacatsTable(responseData);
           } catch (err) {
             console.log(err);
-            alert("Can't fetch autons bug details at the moment");
+            alert("Can't fetch teacats bug details at the moment");
           }
         };
         //fetch table
-        if (!contextData.isAutonsTableLoaded) {
+        if (!contextData.isTeacatsTableLoaded) {
           await fetchData();
-          contextData.setIsAutonsTableLoaded(true);
+          contextData.setIsTeacatsTableLoaded(true);
         }
-        const table = contextData.isAutonsTableLoaded
-          ? contextData.autonsTable.data
+        const table = contextData.isTeacatsTableLoaded
+          ? contextData.teacatsTable.data
           : [];
         loadData(table);
 
@@ -425,14 +425,14 @@ const AutonsViewPage = (props) => {
       } catch (err) {
         console.log(err);
       }
-      if (contextData.isAutonsTableLoaded) {
+      if (contextData.isTeacatsTableLoaded) {
         setPrevUser(userId);
         setPrevType(bugType);
-        contextData.setIsAutonsPageLoading(false);
+        contextData.setIsTeacatsPageLoading(false);
       }
     },
     // eslint-disable-next-line
-    [userId, bugSegment, contextData.isAutonsTableLoaded, bugType] // dependency array
+    [userId, bugSegment, contextData.isTeacatsTableLoaded, bugType] // dependency array
   );
   var outstandingAll = 0;
   var outstandinglte7 = 0;
@@ -443,7 +443,7 @@ const AutonsViewPage = (props) => {
   var resolvedSemi = 0;
 
   if (userId === "all") {
-    contextData.autonsTable.data.forEach((elem) => {
+    contextData.teacatsTable.data.forEach((elem) => {
       const bugSegment = elem.bug_segment;
       elem = elem.bug_info;
 
@@ -535,12 +535,12 @@ const AutonsViewPage = (props) => {
         data: diffOutstandingSegmentCount,
         events: {
           click: (e) => {
-            const currentAutonsStatus = contextData.autons_states;
-            contextData.setAutonsStates({
+            const currentTeacatsStatus = contextData.teacats_states;
+            contextData.setTeacatsStates({
               bugSegment: reverseSegmentMap.get(e.point.name),
               bugType: "AMINO",
-              sortedFeature: currentAutonsStatus.sortedFeature,
-              tableOpen: currentAutonsStatus.tableOpen,
+              sortedFeature: currentTeacatsStatus.sortedFeature,
+              tableOpen: currentTeacatsStatus.tableOpen,
             });
           },
         },
@@ -620,12 +620,12 @@ const AutonsViewPage = (props) => {
       categories: diffResolvedSegment.map(
         (e) =>
           `${
-            contextData.autonsTable.dates
-              ? contextData.autonsTable.dates[e]["lower limit df"]
+            contextData.teacatsTable.dates
+              ? contextData.teacatsTable.dates[e]["lower limit df"]
               : ""
           } <br> - ${
-            contextData.autonsTable.dates
-              ? contextData.autonsTable.dates[e]["upper limit df"]
+            contextData.teacatsTable.dates
+              ? contextData.teacatsTable.dates[e]["upper limit df"]
               : ""
           }`
       ),
@@ -636,12 +636,12 @@ const AutonsViewPage = (props) => {
         data: diffResolvedSegmentCount,
         events: {
           click: (e) => {
-            const currentAutonsStatus = contextData.autons_states;
-            contextData.setAutonsStates({
+            const currentTeacatsStatus = contextData.teacats_states;
+            contextData.setTeacatsStates({
               bugSegment: reverseSegmentMap.get(e.point.name),
               bugType: "RJDCU",
-              sortedFeature: currentAutonsStatus.sortedFeature,
-              tableOpen: currentAutonsStatus.tableOpen,
+              sortedFeature: currentTeacatsStatus.sortedFeature,
+              tableOpen: currentTeacatsStatus.tableOpen,
             });
           },
         },
@@ -734,8 +734,8 @@ const AutonsViewPage = (props) => {
         events: {
           click: (e) => {
             if (e.point.category !== userId) {
-              contextData.setIsAutonsPageLoading(true);
-              navigate(`/autons/view/${e.point.name}`);
+              contextData.setIsTeacatsPageLoading(true);
+              navigate(`/teacats/view/${e.point.name}`);
             }
           },
         },
@@ -820,155 +820,154 @@ const AutonsViewPage = (props) => {
   };
 
   //component chart parameters
-  const diffComponent = viewData
-    .map((elem) => elem.component)
-    .filter((x, i, a) => a.indexOf(x) === i);
+  //   const diffComponent = viewData
+  //     .map((elem) => elem.component)
+  //     .filter((x, i, a) => a.indexOf(x) === i);
 
-  var diffComponentCount = diffComponent.map((component) => {
-    let count = 0;
-    viewData.forEach((elem) => {
-      if (elem.component === component) count++;
-    });
-    return { name: component, y: count };
-  });
-  diffComponentCount.sort((a, b) => b.y - a.y);
-  if (diffComponentCount.length > 10 && !showAllComponents)
-    diffComponentCount = diffComponentCount.slice(0, 10);
-  const componentChartOptions = {
-    chart: {
-      type: "column",
-      height: 350,
-      width: 1300,
-    },
-    title: {
-      text:
-        diffComponent.length > 10 && !showAllComponents
-          ? "Top 10 Components"
-          : "Top components",
-    },
-    colors: ["#EC610A", "#A40A3C", "#6B0848", "#FFC300"],
-    // colors: ["#6366f1", "#41AEA9", "#213E3B", "#E8FFFF"],
-    plotOptions: {
-      series: {
-        allowPointSelect: false,
-        cursor: "pointer",
-        dataLabels: {
-          enabled: true,
-          format: "<b>{point.name}</b><br>{point.percentage:.1f}",
-          distance: 20,
-        },
-        colorByPoint: false,
-      },
-    },
-    credits: {
-      enabled: true,
-      href: "#",
-      text: `For: ${
-        bugSegment !== "all" ? segmentFullNameMap.get(bugSegment) : "All"
-      }, State (${bugType})`,
-      style: {
-        fontSize: "15px",
-      },
-    },
+  //   var diffComponentCount = diffComponent.map((component) => {
+  //     let count = 0;
+  //     viewData.forEach((elem) => {
+  //       if (elem.component === component) count++;
+  //     });
+  //     return { name: component, y: count };
+  //   });
+  //   diffComponentCount.sort((a, b) => b.y - a.y);
+  //   if (diffComponentCount.length > 10 && !showAllComponents)
+  //     diffComponentCount = diffComponentCount.slice(0, 10);
+  //   const componentChartOptions = {
+  //     chart: {
+  //       type: "column",
+  //       height: 350,
+  //       width: 1300,
+  //     },
+  //     title: {
+  //       text:
+  //         diffComponent.length > 10 && !showAllComponents
+  //           ? "Top 10 Components"
+  //           : "Top components",
+  //     },
+  //     colors: ["#EC610A", "#A40A3C", "#6B0848", "#FFC300"],
+  //     // colors: ["#6366f1", "#41AEA9", "#213E3B", "#E8FFFF"],
+  //     plotOptions: {
+  //       series: {
+  //         allowPointSelect: false,
+  //         cursor: "pointer",
+  //         dataLabels: {
+  //           enabled: true,
+  //           format: "<b>{point.name}</b><br>{point.percentage:.1f}",
+  //           distance: 20,
+  //         },
+  //         colorByPoint: false,
+  //       },
+  //     },
+  //     credits: {
+  //       enabled: true,
+  //       href: "#",
+  //       text: `For: ${
+  //         bugSegment !== "all" ? segmentFullNameMap.get(bugSegment) : "All"
+  //       }, State (${bugType})`,
+  //       style: {
+  //         fontSize: "15px",
+  //       },
+  //     },
 
-    xAxis: {
-      categories: diffComponentCount.map((elem) => ""),
-    },
-    series: [
-      {
-        name: "No. of bugs",
-        data: diffComponentCount,
-      },
-    ],
-  };
+  //     xAxis: {
+  //       categories: diffComponentCount.map((elem) => ""),
+  //     },
+  //     series: [
+  //       {
+  //         name: "No. of bugs",
+  //         data: diffComponentCount,
+  //       },
+  //     ],
+  //   };
 
   // wrappers function for selecting user from the user search bar
   const selectUserId = (user) => {
     if (user !== userId) {
-      contextData.setIsAutonsPageLoading(true);
-      navigate(`/autons/view/${user}`);
+      contextData.setIsTeacatsPageLoading(true);
+      navigate(`/teacats/view/${user}`);
     }
   };
 
   // filtering data according to type (lvl 1 filter)
   const selectBugType = (type) => {
-    const currentAutonsStatus = contextData.autons_states;
+    const currentTeacatsStatus = contextData.teacats_states;
     if ("AMINO".includes(type)) {
       if (
         ["week", "month", "quarter", "semi", "none"].includes(
-          contextData.autons_states.bugSegment
+          contextData.teacats_states.bugSegment
         )
       ) {
-        contextData.setAutonsStates({
+        contextData.setTeacatsStates({
           bugSegment: "all",
           bugType: type,
-          sortedFeature: currentAutonsStatus.sortedFeature,
-          tableOpen: currentAutonsStatus.tableOpen,
+          sortedFeature: currentTeacatsStatus.sortedFeature,
+          tableOpen: currentTeacatsStatus.tableOpen,
         });
       } else {
-        contextData.setAutonsStates({
-          bugSegment: currentAutonsStatus.bugSegment,
+        contextData.setTeacatsStates({
+          bugSegment: currentTeacatsStatus.bugSegment,
           bugType: type,
-          sortedFeature: currentAutonsStatus.sortedFeature,
-          tableOpen: currentAutonsStatus.tableOpen,
+          sortedFeature: currentTeacatsStatus.sortedFeature,
+          tableOpen: currentTeacatsStatus.tableOpen,
         });
       }
     } else if ("RJDCU".includes(type)) {
       if (
         ["all", "lte7", "gt7", "none"].includes(
-          contextData.autons_states.bugSegment
+          contextData.teacats_states.bugSegment
         )
       ) {
-        contextData.setAutonsStates({
+        contextData.setTeacatsStates({
           bugSegment: "semi",
           bugType: type,
-          sortedFeature: currentAutonsStatus.sortedFeature,
-          tableOpen: currentAutonsStatus.tableOpen,
+          sortedFeature: currentTeacatsStatus.sortedFeature,
+          tableOpen: currentTeacatsStatus.tableOpen,
         });
       } else {
-        contextData.setAutonsStates({
-          bugSegment: currentAutonsStatus.bugSegment,
+        contextData.setTeacatsStates({
+          bugSegment: currentTeacatsStatus.bugSegment,
           bugType: type,
-          sortedFeature: currentAutonsStatus.sortedFeature,
-          tableOpen: currentAutonsStatus.tableOpen,
+          sortedFeature: currentTeacatsStatus.sortedFeature,
+          tableOpen: currentTeacatsStatus.tableOpen,
         });
       }
     } else {
-      contextData.setAutonsStates({
+      contextData.setTeacatsStates({
         bugSegment: "semi",
         bugType: "all",
-        sortedFeature: currentAutonsStatus.sortedFeature,
-        tableOpen: currentAutonsStatus.tableOpen,
+        sortedFeature: currentTeacatsStatus.sortedFeature,
+        tableOpen: currentTeacatsStatus.tableOpen,
       });
     }
   };
 
   //for change assignee table states
   const setTableOpen = (value) => {
-    const currentAutonsStatus = contextData.autons_states;
-    contextData.setAutonsStates({
-      bugSegment: currentAutonsStatus.bugSegment,
-      bugType: currentAutonsStatus.bugType,
-      sortedFeature: currentAutonsStatus.sortedFeature,
+    const currentTeacatsStatus = contextData.teacats_states;
+    contextData.setTeacatsStates({
+      bugSegment: currentTeacatsStatus.bugSegment,
+      bugType: currentTeacatsStatus.bugType,
+      sortedFeature: currentTeacatsStatus.sortedFeature,
       tableOpen: value,
     });
   };
 
   // filtering data according to status (lvl 1 filter)
   const selectBugSegment = (segment) => {
-    const currentAutonsStatus = contextData.autons_states;
-    contextData.setAutonsStates({
+    const currentTeacatsStatus = contextData.teacats_states;
+    contextData.setTeacatsStates({
       bugSegment: segment,
-      bugType: currentAutonsStatus.bugType,
-      sortedFeature: currentAutonsStatus.sortedFeature,
-      tableOpen: currentAutonsStatus.tableOpen,
+      bugType: currentTeacatsStatus.bugType,
+      sortedFeature: currentTeacatsStatus.sortedFeature,
+      tableOpen: currentTeacatsStatus.tableOpen,
     });
   };
-  
   return (
     <>
-      {contextData.isAutonsPageLoading ||
-      !contextData.isAutonsTableLoaded ||
+      {contextData.isTeacatsPageLoading ||
+      !contextData.isTeacatsTableLoaded ||
       (bugType !== "all" && bugSegment === "none") ? (
         <>
           <div className="h-full w-full flex flex-row justify-center items-center">
@@ -982,16 +981,18 @@ const AutonsViewPage = (props) => {
             <div className="flex flex-row justify-center mb-[-35px]">
               {" "}
               <span className=" bg-blue-600 py-2 px-3 rounded-lg text-white font-bold text-lg">
-                Test Metrics : Autons
+                Test Metrics : Teacats
               </span>
             </div>
             <ProfileSearchBar
               selectUserId={selectUserId}
               table={
-                contextData.autonsTable.data ? contextData.autonsTable.data : []
+                contextData.teacatsTable.data
+                  ? contextData.teacatsTable.data
+                  : []
               }
               userId={userId}
-              type={"autons"}
+              type={"teacats"}
             />
 
             {/* level 1 filter block */}
@@ -1008,13 +1009,13 @@ const AutonsViewPage = (props) => {
                 </Card>
 
                 <div className="flex flex-col items-center space-y-2">
-                  <AutonsTypeRadio
+                  <TeacatsTypeRadio
                     value={bugType}
                     selectBugType={selectBugType}
                   />
                   {bugType !== "all" ? (
                     <>
-                      <AutonsSegmentRadio
+                      <TeacatsSegmentRadio
                         value={bugSegment}
                         selectSegment={selectBugSegment}
                       />
@@ -1087,8 +1088,8 @@ const AutonsViewPage = (props) => {
                         className="px-2 cursor-pointer text-blue-500"
                         onClick={() => {
                           if (elem !== userId) {
-                            contextData.setIsAutonsPageLoading(true);
-                            navigate(`/autons/view/${elem}`);
+                            contextData.setIsTeacatsPageLoading(true);
+                            navigate(`/teacats/view/${elem}`);
                           }
                         }}
                       >
@@ -1357,14 +1358,14 @@ const AutonsViewPage = (props) => {
                       {" "}
                       {segmentFullNameMap.get(bugSegment)}
                       {" : "}
-                      {contextData.autonsTable.dates
-                        ? contextData.autonsTable.dates[bugSegment][
+                      {contextData.teacatsTable.dates
+                        ? contextData.teacatsTable.dates[bugSegment][
                             "lower limit"
                           ]
                         : ""}
                       {" - "}
-                      {contextData.autonsTable.dates
-                        ? contextData.autonsTable.dates[bugSegment][
+                      {contextData.teacatsTable.dates
+                        ? contextData.teacatsTable.dates[bugSegment][
                             "upper limit"
                           ]
                         : ""}{" "}
@@ -1416,7 +1417,7 @@ const AutonsViewPage = (props) => {
 
                   {tableOpen && userId !== "all" ? (
                     <>
-                      <AutonsAssigneeTable
+                      <TeacatsAssigneeTable
                         bugType={bugType}
                         tableData={assigneeTableData}
                         userId={userId}
@@ -1511,7 +1512,7 @@ const AutonsViewPage = (props) => {
                   )}
                 </Card>
 
-                <Card className="pb-3 pt-1 px-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
+                {/* <Card className="pb-3 pt-1 px-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
                   {diffComponent.length > 10 && !showAllComponents ? (
                     <>
                       <div className=" w-full flex pr-4 flex-row justify-end mb-[-20px] z-10">
@@ -1545,7 +1546,7 @@ const AutonsViewPage = (props) => {
                     highcharts={Highcharts}
                     options={componentChartOptions}
                   />
-                </Card>
+                </Card> */}
 
                 {"AMINO".includes(bugType) ? (
                   <></>
@@ -1555,14 +1556,14 @@ const AutonsViewPage = (props) => {
                       {" "}
                       {segmentFullNameMap.get(bugSegment)}
                       {" : "}
-                      {contextData.autonsTable.dates
-                        ? contextData.autonsTable.dates[bugSegment][
+                      {contextData.teacatsTable.dates
+                        ? contextData.teacatsTable.dates[bugSegment][
                             "lower limit"
                           ]
                         : ""}
                       {" - "}
-                      {contextData.autonsTable.dates
-                        ? contextData.autonsTable.dates[bugSegment][
+                      {contextData.teacatsTable.dates
+                        ? contextData.teacatsTable.dates[bugSegment][
                             "upper limit"
                           ]
                         : ""}{" "}
@@ -1635,14 +1636,13 @@ const AutonsViewPage = (props) => {
                   </span>{" "}
                   <br />
                 </Typography>
-                
-                <AutonsTable
+
+                <TeacatsTable
                   userId={userId}
                   data={viewTableData}
                   sortViewTableAscending={sortViewTableAscending}
                   sortedFeature={sortedFeature}
                   bugType={bugType}
-                  
                 />
               </div>
             </div>
@@ -1653,4 +1653,4 @@ const AutonsViewPage = (props) => {
   );
 };
 
-export default AutonsViewPage;
+export default TeacatsViewPage;

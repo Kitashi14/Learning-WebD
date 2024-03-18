@@ -7,7 +7,7 @@ const RadioLabel = ({ children }) => (
 );
 
 //select feature tag radio component
-const AutonsSegmentRadio = (props) => {
+const TeacatsSegmentRadio = (props) => {
   const contextData = useContext(DataContext);
   const selectType = (e) => {
     props.selectSegment(e == null ? "annual" : e);
@@ -24,7 +24,7 @@ const AutonsSegmentRadio = (props) => {
         onChange={selectType}
       >
         <RadioLabel>Segment: </RadioLabel>
-        {"RJDCU".includes(contextData.autons_states.bugType)?<>
+        {"RJDCU".includes(contextData.teacats_states.bugType)?<>
         <Radio value="week">Last 7 days (Weekly)</Radio>
         <Radio value="month">Monthly</Radio>
         <Radio value="quarter">Quarterly</Radio>
@@ -42,4 +42,4 @@ const AutonsSegmentRadio = (props) => {
   );
 };
 
-export default AutonsSegmentRadio;
+export default TeacatsSegmentRadio;

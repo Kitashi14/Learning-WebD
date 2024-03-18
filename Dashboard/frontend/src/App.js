@@ -12,6 +12,7 @@ import ActiveFeatureViewPage from "./pages/activeFeatureViewPage";
 import DevMetricsViewPage from "./pages/devMetricsPage";
 import LocViewPage from "./pages/locViewPage";
 import AutonsViewPage from "./pages/autonsViewPage";
+import TeacatsViewPage from "./pages/teacatsViewPage";
 // contains all routes for the client side
 function App() {
   const contextData = useContext(DataContext);
@@ -27,6 +28,7 @@ function App() {
     else if (location.pathname.includes("dev")) setCurrentTab("dev");
     else if (location.pathname.includes("loc")) setCurrentTab("loc");
     else if (location.pathname.includes("autons")) setCurrentTab("autons");
+    else if (location.pathname.includes("teacats")) setCurrentTab("teacats");
     else {
       setCurrentTab(null);
     }
@@ -80,6 +82,11 @@ function App() {
                 exact
                 path="/autons/view/:uid"
                 element={<AutonsViewPage />}
+              ></Route>
+              <Route
+                exact
+                path="/teacats/view/:uid"
+                element={<TeacatsViewPage />}
               ></Route>
             </Routes>
           )}

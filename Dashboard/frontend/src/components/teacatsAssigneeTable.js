@@ -2,7 +2,7 @@ import { Typography } from "@material-tailwind/react";
 import { useContext } from "react";
 import DataContext from "../context/dataContext";
 import { useNavigate } from "react-router-dom";
-const AutonsAssigneeTable = (props) => {
+const TeacatsAssigneeTable = (props) => {
   const tableData = props.tableData;
   const contextData = useContext(DataContext);
   const navigate = useNavigate();
@@ -61,7 +61,7 @@ const AutonsAssigneeTable = (props) => {
                     color="blue-gray"
                     className="font-normal flex flex-row justify-center items-center space-x-2 leading-none opacity-70"
                   >
-                    <span>Outstanding Autons (AMINO)</span>
+                    <span>Outstanding Teacats (AMINO)</span>
                   </Typography>
                 </th>
                 <th
@@ -74,7 +74,7 @@ const AutonsAssigneeTable = (props) => {
                     color="blue-gray"
                     className="font-normal flex flex-row justify-center items-center space-x-2 leading-none opacity-70"
                   >
-                    <span>Resolved Autons (RJDCU)</span>
+                    <span>Resolved Teacats (RJDCU)</span>
                   </Typography>
                 </th>
               </tr>
@@ -188,8 +188,8 @@ const AutonsAssigneeTable = (props) => {
                         } `}
                         onClick={() => {
                           if (data.assignee !== "self") {
-                            contextData.setIsAutonsPageLoading(true);
-                            navigate(`/autons/view/${data.assignee}`);
+                            contextData.setIsTeacatsPageLoading(true);
+                            navigate(`/teacats/view/${data.assignee}`);
                           }
                         }}
                       >
@@ -470,8 +470,8 @@ const AutonsAssigneeTable = (props) => {
                         } `}
                         onClick={() => {
                           if (data.assignee !== "self") {
-                            contextData.setIsAutonsPageLoading(true);
-                            navigate(`/autons/view/${data.assignee}`);
+                            contextData.setIsTeacatsPageLoading(true);
+                            navigate(`/teacats/view/${data.assignee}`);
                           }
                         }}
                       >
@@ -661,8 +661,8 @@ const AutonsAssigneeTable = (props) => {
                         } `}
                         onClick={() => {
                           if (data.assignee !== "self") {
-                            contextData.setIsAutonsPageLoading(true);
-                            navigate(`/autons/view/${data.assignee}`);
+                            contextData.setIsTeacatsPageLoading(true);
+                            navigate(`/teacats/view/${data.assignee}`);
                           }
                         }}
                       >
@@ -779,4 +779,4 @@ const AutonsAssigneeTable = (props) => {
   );
 };
 
-export default AutonsAssigneeTable;
+export default TeacatsAssigneeTable;

@@ -151,7 +151,7 @@ export const DataContextProvider = (props) => {
     tableOpen: false,
   })
   const [teacats_states,setTeacatsStates] = useState({
-    teacatsSegment : "semi",
+    bugSegment : "semi",
     bugType: "all",
     sortedFeature: {
       feature: null,
@@ -443,7 +443,7 @@ export const DataContextProvider = (props) => {
     setDevMetricsUser: setDevMetricsCurrentUser,
     setLocUser: setLocCurrentUser,
     setAutonsUser: setAutonsCurrentUser,
-    setTeacatssUser: setTeacatsCurrentUser,
+    setTeacatsUser: setTeacatsCurrentUser,
     setTestbugsUser: setTestbugsCurrentUser,
     setDpl,
     setActive,
