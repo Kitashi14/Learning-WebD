@@ -733,9 +733,9 @@ const AutonsViewPage = (props) => {
         innerSize: "50%",
         events: {
           click: (e) => {
-            if (e.point.category !== userId) {
+            if (e.point.category !== userId){
               contextData.setIsAutonsPageLoading(true);
-              navigate(`/autons/view/${e.point.name}`);
+              navigate(`/autons/view/${e.point.category}`);
             }
           },
         },

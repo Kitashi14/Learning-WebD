@@ -735,7 +735,7 @@ const TeacatsViewPage = (props) => {
           click: (e) => {
             if (e.point.category !== userId) {
               contextData.setIsTeacatsPageLoading(true);
-              navigate(`/teacats/view/${e.point.name}`);
+              navigate(`/teacats/view/${e.point.category}`);
             }
           },
         },
@@ -820,67 +820,67 @@ const TeacatsViewPage = (props) => {
   };
 
   //component chart parameters
-  //   const diffComponent = viewData
-  //     .map((elem) => elem.component)
-  //     .filter((x, i, a) => a.indexOf(x) === i);
+    const diffComponent = viewData
+      .map((elem) => elem.component)
+      .filter((x, i, a) => a.indexOf(x) === i);
 
-  //   var diffComponentCount = diffComponent.map((component) => {
-  //     let count = 0;
-  //     viewData.forEach((elem) => {
-  //       if (elem.component === component) count++;
-  //     });
-  //     return { name: component, y: count };
-  //   });
-  //   diffComponentCount.sort((a, b) => b.y - a.y);
-  //   if (diffComponentCount.length > 10 && !showAllComponents)
-  //     diffComponentCount = diffComponentCount.slice(0, 10);
-  //   const componentChartOptions = {
-  //     chart: {
-  //       type: "column",
-  //       height: 350,
-  //       width: 1300,
-  //     },
-  //     title: {
-  //       text:
-  //         diffComponent.length > 10 && !showAllComponents
-  //           ? "Top 10 Components"
-  //           : "Top components",
-  //     },
-  //     colors: ["#EC610A", "#A40A3C", "#6B0848", "#FFC300"],
-  //     // colors: ["#6366f1", "#41AEA9", "#213E3B", "#E8FFFF"],
-  //     plotOptions: {
-  //       series: {
-  //         allowPointSelect: false,
-  //         cursor: "pointer",
-  //         dataLabels: {
-  //           enabled: true,
-  //           format: "<b>{point.name}</b><br>{point.percentage:.1f}",
-  //           distance: 20,
-  //         },
-  //         colorByPoint: false,
-  //       },
-  //     },
-  //     credits: {
-  //       enabled: true,
-  //       href: "#",
-  //       text: `For: ${
-  //         bugSegment !== "all" ? segmentFullNameMap.get(bugSegment) : "All"
-  //       }, State (${bugType})`,
-  //       style: {
-  //         fontSize: "15px",
-  //       },
-  //     },
+    var diffComponentCount = diffComponent.map((component) => {
+      let count = 0;
+      viewData.forEach((elem) => {
+        if (elem.component === component) count++;
+      });
+      return { name: component, y: count };
+    });
+    diffComponentCount.sort((a, b) => b.y - a.y);
+    if (diffComponentCount.length > 10 && !showAllComponents)
+      diffComponentCount = diffComponentCount.slice(0, 10);
+    const componentChartOptions = {
+      chart: {
+        type: "column",
+        height: 350,
+        width: 1300,
+      },
+      title: {
+        text:
+          diffComponent.length > 10 && !showAllComponents
+            ? "Top 10 Components"
+            : "Top components",
+      },
+      colors: ["#EC610A", "#A40A3C", "#6B0848", "#FFC300"],
+      // colors: ["#6366f1", "#41AEA9", "#213E3B", "#E8FFFF"],
+      plotOptions: {
+        series: {
+          allowPointSelect: false,
+          cursor: "pointer",
+          dataLabels: {
+            enabled: true,
+            format: "<b>{point.name}</b><br>{point.percentage:.1f}",
+            distance: 20,
+          },
+          colorByPoint: false,
+        },
+      },
+      credits: {
+        enabled: true,
+        href: "#",
+        text: `For: ${
+          bugSegment !== "all" ? segmentFullNameMap.get(bugSegment) : "All"
+        }, State (${bugType})`,
+        style: {
+          fontSize: "15px",
+        },
+      },
 
-  //     xAxis: {
-  //       categories: diffComponentCount.map((elem) => ""),
-  //     },
-  //     series: [
-  //       {
-  //         name: "No. of bugs",
-  //         data: diffComponentCount,
-  //       },
-  //     ],
-  //   };
+      xAxis: {
+        categories: diffComponentCount.map((elem) => ""),
+      },
+      series: [
+        {
+          name: "No. of bugs",
+          data: diffComponentCount,
+        },
+      ],
+    };
 
   // wrappers function for selecting user from the user search bar
   const selectUserId = (user) => {
@@ -1512,7 +1512,7 @@ const TeacatsViewPage = (props) => {
                   )}
                 </Card>
 
-                {/* <Card className="pb-3 pt-1 px-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
+                <Card className="pb-3 pt-1 px-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
                   {diffComponent.length > 10 && !showAllComponents ? (
                     <>
                       <div className=" w-full flex pr-4 flex-row justify-end mb-[-20px] z-10">
@@ -1546,7 +1546,7 @@ const TeacatsViewPage = (props) => {
                     highcharts={Highcharts}
                     options={componentChartOptions}
                   />
-                </Card> */}
+                </Card>
 
                 {"AMINO".includes(bugType) ? (
                   <></>

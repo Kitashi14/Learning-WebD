@@ -160,6 +160,13 @@ export const DataContextProvider = (props) => {
     tableOpen: false,
   })
   const [testbugs_states,setTestbugsStates] = useState({
+    bugSegment: "annual",
+    bugType: "all",
+    sortedFeature: {
+      feature: null,
+      order: null,
+    },
+    tableOpen: false,
   })
 
   const setLoading = (value) => {

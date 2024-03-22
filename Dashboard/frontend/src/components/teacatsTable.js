@@ -11,7 +11,7 @@ export default function TeacatsTable(props) {
     "State",
     "Engineer",
     "Manager",
-    // "Component",
+    "Component",
   ];
 
   const navigate = useNavigate();
@@ -31,7 +31,7 @@ export default function TeacatsTable(props) {
     ["Bug under", "assigned_under"],
     ["Engineer", "emp_id"],
     ["Manager", "mgr_id"],
-    // ["Component", "component"],
+    ["Component", "component"],
   ]);
 
   //for navigating to different routes
@@ -263,7 +263,7 @@ export default function TeacatsTable(props) {
                   {data.mgr_id}
                 </Typography>
               </td>
-              {/* <td className="p-4">
+              <td className="p-4">
                 <Typography
                   variant="small"
                   color="blue-gray"
@@ -271,7 +271,7 @@ export default function TeacatsTable(props) {
                 >
                   {data.component}
                 </Typography>
-              </td> */}
+              </td>
             </tr>
           ))}
         </tbody>
