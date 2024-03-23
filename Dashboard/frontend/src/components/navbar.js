@@ -261,6 +261,29 @@ const Navbar = (props) => {
               icon={<GearCircleIcon />}
             >
               <Nav.Item
+                eventKey="6-3"
+                icon={<TableColumnIcon />}
+                style={
+                  props.currentTab === "testbugs"
+                    ? { background: "#2589F4", fontSize: 16 }
+                    : { background: "#3498FE", fontSize: 16 }
+                }
+                onClick={() => {
+                  if (
+                    !location.pathname.includes(
+                      `/testbugs/view/${contextData.testbugs_currentUser}`
+                    )
+                  ) {
+                    contextData.setIsAutonsPageLoading(true);
+                    navigate(
+                      `/testbugs/view/${contextData.testbugs_currentUser}`
+                    );
+                  }
+                }}
+              >
+                Bugs
+              </Nav.Item>
+              <Nav.Item
                 eventKey="6-1"
                 icon={<TableColumnIcon />}
                 style={
@@ -286,8 +309,8 @@ const Navbar = (props) => {
                 icon={<TableColumnIcon />}
                 style={
                   props.currentTab === "teacats"
-                  ? { background: "#2589F4", fontSize: 16 }
-                  : { background: "#3498FE", fontSize: 16 }
+                    ? { background: "#2589F4", fontSize: 16 }
+                    : { background: "#3498FE", fontSize: 16 }
                 }
                 onClick={() => {
                   if (

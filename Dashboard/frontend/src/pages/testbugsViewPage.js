@@ -12,23 +12,21 @@ import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import { useNavigate, useParams } from "react-router-dom";
 import DataContext from "../context/dataContext";
-import DevMetricsTypeRadio from "../components/devMetricsTypeRadio";
-import DevMetricsSegmentTypeRadio from "../components/devMetricsSegmentTypeRadio";
-import DevMetricsTable from "../components/devMetricsTable";
 import { Loader } from "rsuite";
-import DevAssigneeTable from "../components/devAssigneeTable";
-import DevMetricsCategoryRadio from "../components/devMetricsCategoryRadio";
+import TestbugsMetricsSegmentTypeRadio from "../components/testbugsSegmentTypeRadio";
+import TestbugsMetricsTypeRadio from "../components/testbugsTypeRadio";
+import TestbugsAssigneeTable from "../components/testbugsAssigneeTable";
+import TestbugsMetricsTable from "../components/testbugsTable";
 
 // dashboard view page for any user
-const TestbugsViewPage = (props) => {
+const TestbugsMetricsViewPage = (props) => {
   //extracting context global data
   const contextData = useContext(DataContext);
   // useState containing all filter's states
   // level 1 filters
-  const bugSegment = contextData.dev_states.bugSegment;
-  const bugType = contextData.dev_states.bugType;
-  const bugCategory = contextData.dev_states.bugCategory;
-  const tableOpen = contextData.dev_states.tableOpen;
+  const bugSegment = contextData.testbugs_states.bugSegment;
+  const bugType = contextData.testbugs_states.bugType;
+  const tableOpen = contextData.testbugs_states.tableOpen;
 
   const [viewData, setViewData] = useState([]); //it will contain all elements after applying level 1 filter, used for showing lvl 1 charts
   const [viewTableData, setViewTableData] = useState([]); //it will contain all elements after applying level 2 filter, used for filling table
@@ -39,8 +37,8 @@ const TestbugsViewPage = (props) => {
 
   // getting the bugs details that was sorted
   const sortedFeature = {
-    feature: contextData.dev_states.sortedFeature.feature,
-    order: contextData.dev_states.sortedFeature.order,
+    feature: contextData.testbugs_states.sortedFeature.feature,
+    order: contextData.testbugs_states.sortedFeature.order,
   };
 
   //pagenation
@@ -90,12 +88,11 @@ const TestbugsViewPage = (props) => {
 
   const [prevUser, setPrevUser] = useState(null);
   const [prevType, setPrevType] = useState(null);
-  const [prevCategory, setPrevCategory] = useState(null);
   const [segmentCount, setSegmentCount] = useState(new Map());
 
   const navigate = useNavigate(); //for navigating to different routes
   const userId = useParams().uid; //extracting user id from the route/url
-  contextData.setDevMetricsUser(userId);
+  contextData.setTestbugsUser(userId);
 
   // for finding all parents nodes of the current user
   const previous_parents = [userId];
@@ -120,20 +117,19 @@ const TestbugsViewPage = (props) => {
     }
     setViewTableData(copyViewTableData);
     setCurrentPage(1);
-    const currentDevStatus = contextData.dev_states;
+    const currentTestbugsStatus = contextData.testbugs_states;
     if (
-      currentDevStatus.sortedFeature.feature !== feature ||
-      currentDevStatus.sortedFeature.order !== order
+      currentTestbugsStatus.sortedFeature.feature !== feature ||
+      currentTestbugsStatus.sortedFeature.order !== order
     ) {
-      contextData.setDevMetricsStates({
-        bugSegment: currentDevStatus.bugSegment,
-        bugType: currentDevStatus.bugType,
-        bugCategory: currentDevStatus.bugCategory,
+      contextData.setTestbugsStates({
+        bugSegment: currentTestbugsStatus.bugSegment,
+        bugType: currentTestbugsStatus.bugType,
         sortedFeature: {
           feature,
           order,
         },
-        tableOpen: currentDevStatus.tableOpen,
+        tableOpen: currentTestbugsStatus.tableOpen,
       });
     }
   };
@@ -157,13 +153,6 @@ const TestbugsViewPage = (props) => {
         const segmentMap = new Map();
         const loadData = async (table, segment) => {
           let data = [];
-
-          table = table.filter(
-            (e) =>
-              bugCategory === "all" ||
-              (bugCategory === "IFD" && e.found_at.trim() !== "customer-use") ||
-              (bugCategory === "CFD" && e.found_at.trim() === "customer-use")
-          );
 
           //condition check is a valid is selected
           if (userId === "all") {
@@ -277,35 +266,31 @@ const TestbugsViewPage = (props) => {
         const fetchData = async () => {
           try {
             const response = await fetch(
-              `${process.env.REACT_APP_BACKEND_URL}/dev/details`
+              `${process.env.REACT_APP_BACKEND_URL}/test/testbugs`
             );
             const responseData = await response.json();
-            contextData.setDevTable(responseData.data);
+            contextData.setTestbugsTable(responseData.data);
           } catch (err) {
             console.log(err);
-            alert("Can't fetch dev metrics bug details at the moment");
+            alert("Can't fetch test metrics bug details at the moment");
           }
         };
         //fetch table
-        if (!contextData.isDevTableLoaded) {
+        if (!contextData.isTestbugsTableLoaded) {
           await fetchData();
-          contextData.setIsDevTableLoaded(true);
+          contextData.setIsTestbugsTableLoaded(true);
         }
         var tableToUse;
         //segment will be selected
-        if (
-          userId === prevUser &&
-          prevType === bugType &&
-          prevCategory === bugCategory
-        ) {
-          tableToUse = contextData.devMetricsTable[bugSegment]
-            ? contextData.devMetricsTable[bugSegment].bugs
+        if (userId === prevUser && prevType === bugType) {
+          tableToUse = contextData.testbugsTable[bugSegment]
+            ? contextData.testbugsTable[bugSegment].bugs
             : [];
           loadData(tableToUse, bugSegment);
         } else {
           segmentFullNameMap.forEach((v, k) => {
-            tableToUse = contextData.devMetricsTable[k]
-              ? contextData.devMetricsTable[k].bugs
+            tableToUse = contextData.testbugsTable[k]
+              ? contextData.testbugsTable[k].bugs
               : [];
             loadData(tableToUse, k);
           });
@@ -313,8 +298,8 @@ const TestbugsViewPage = (props) => {
         }
 
         // segmentFullNameMap.forEach((v, k) => {
-        //   tableToUse = contextData.devMetricsTable[k]
-        //     ? contextData.devMetricsTable[k].bugs
+        //   tableToUse = contextData.testbugsTable[k]
+        //     ? contextData.testbugsTable[k].bugs
         //     : [];
         //   loadData(tableToUse, k);
         // });
@@ -325,15 +310,14 @@ const TestbugsViewPage = (props) => {
       } catch (err) {
         console.log(err);
       }
-      if (contextData.isDevTableLoaded) {
+      if (contextData.isTestbugsTableLoaded) {
         setPrevUser(userId);
         setPrevType(bugType);
-        setPrevCategory(bugCategory);
-        contextData.setIsDevPageLoading(false);
+        contextData.setIsTestbugsPageLoading(false);
       }
     },
     // eslint-disable-next-line
-    [userId, bugSegment, contextData.isDevTableLoaded, bugType, bugCategory] // dependency array
+    [userId, bugSegment, contextData.isTestbugsTableLoaded, bugType] // dependency array
   );
 
   //segment chart parameters
@@ -398,7 +382,7 @@ const TestbugsViewPage = (props) => {
     credits: {
       enabled: true,
       href: "#",
-      text: `For: State (${bugType}), Category (${bugCategory})`,
+      text: `For: State (${bugType})`,
       style: {
         fontSize: "15px",
       },
@@ -411,12 +395,12 @@ const TestbugsViewPage = (props) => {
       categories: diffSegment.map(
         (e) =>
           `${
-            contextData.devMetricsTable[e]
-              ? contextData.devMetricsTable[e]["lower limit df"]
+            contextData.testbugsTable[e]
+              ? contextData.testbugsTable[e]["lower limit df"]
               : ""
           } <br> - ${
-            contextData.devMetricsTable[e]
-              ? contextData.devMetricsTable[e]["upper limit df"]
+            contextData.testbugsTable[e]
+              ? contextData.testbugsTable[e]["upper limit df"]
               : ""
           }`
       ),
@@ -477,7 +461,6 @@ const TestbugsViewPage = (props) => {
     chart: {
       type: "bar",
       height: 300,
-      width: bugCategory==="all"?400:600,
     },
     title: {
       text:
@@ -500,9 +483,7 @@ const TestbugsViewPage = (props) => {
     credits: {
       enabled: true,
       href: "#",
-      text: `For: ${segmentFullNameMap.get(
-        bugSegment
-      )}, State (${bugType}), Category (${bugCategory})`,
+      text: `For: ${segmentFullNameMap.get(bugSegment)}, State (${bugType})`,
       style: {
         fontSize: "15px",
       },
@@ -519,8 +500,8 @@ const TestbugsViewPage = (props) => {
         events: {
           click: (e) => {
             if (e.point.category !== userId) {
-              contextData.setIsDevPageLoading(true);
-              navigate(`/dev/view/${e.point.category}`);
+              contextData.setIsTestbugsPageLoading(true);
+              navigate(`/testbugs/view/${e.point.category}`);
             }
           },
         },
@@ -544,7 +525,6 @@ const TestbugsViewPage = (props) => {
     chart: {
       type: "pie",
       height: 300,
-      width: bugCategory==="all"?400:600,
     },
     title: {
       text: "State Chart",
@@ -564,9 +544,7 @@ const TestbugsViewPage = (props) => {
     credits: {
       enabled: true,
       href: "#",
-      text: `For: ${segmentFullNameMap.get(
-        bugSegment
-      )}, State (${bugType}), Category (${bugCategory})`,
+      text: `For: ${segmentFullNameMap.get(bugSegment)}, State (${bugType})`,
       style: {
         fontSize: "15px",
       },
@@ -586,65 +564,6 @@ const TestbugsViewPage = (props) => {
             selectBugType(e.point.name);
           },
         },
-      },
-    ],
-  };
-
-  //category chart parameters
-  const diffCategory = ["IFD", "CFD"];
-
-  const diffCategoryCount = diffCategory.map((category) => {
-    let count = 0;
-    viewData.forEach((elem) => {
-      if (
-        (elem.found_at.trim() !== "customer-use" && category === "IFD") ||
-        (elem.found_at.trim() === "customer-use" && category === "CFD")
-      )
-        count++;
-    });
-    return { name: category, y: count };
-  });
-  const categoryChartOptions = {
-    chart: {
-      type: "pie",
-      height: 300,
-      width: 400,
-    },
-    title: {
-      text: "IFD-CFD Chart",
-    },
-    colors: ["#A40A3C", "#FFC300"],
-    // colors: ["#6366f1", "#41AEA9", "#213E3B", "#E8FFFF"],
-    plotOptions: {
-      series: {
-        allowPointSelect: false,
-        cursor: "pointer",
-        dataLabels: {
-          enabled: true,
-          format: "<b>{point.name}</b><br>{point.percentage:.1f}",
-          distance: 20,
-        },
-        colorByPoint: true,
-      },
-    },
-    credits: {
-      enabled: true,
-      href: "#",
-      text: `For: ${segmentFullNameMap.get(
-        bugSegment
-      )}, State (${bugType}), Category (${bugCategory})`,
-      style: {
-        fontSize: "15px",
-      },
-    },
-
-    xAxis: {
-      categories: diffCategory,
-    },
-    series: [
-      {
-        name: "No. of bugs",
-        data: diffCategoryCount,
       },
     ],
   };
@@ -693,9 +612,7 @@ const TestbugsViewPage = (props) => {
     credits: {
       enabled: true,
       href: "#",
-      text: `For: ${segmentFullNameMap.get(
-        bugSegment
-      )}, State (${bugType}), Category (${bugCategory})`,
+      text: `For: ${segmentFullNameMap.get(bugSegment)}, State (${bugType})`,
       style: {
         fontSize: "15px",
       },
@@ -712,61 +629,44 @@ const TestbugsViewPage = (props) => {
     ],
   };
 
-  
-
   // wrappers function for selecting user from the user search bar
   const selectUserId = (user) => {
     if (user !== userId) {
-      contextData.setIsDevPageLoading(true);
-      navigate(`/dev/view/${user}`);
+      contextData.setIsTestbugsPageLoading(true);
+      navigate(`/testbugs/view/${user}`);
     }
   };
 
-  // filtering data according to type (lvl 1 filter)
+  // filtering data according to release (lvl 1 filter)
   const selectBugType = (type) => {
-    const currentDevStatus = contextData.dev_states;
-    contextData.setDevMetricsStates({
-      bugSegment: currentDevStatus.bugSegment,
+    const currentTestbugsStatus = contextData.testbugs_states;
+    contextData.setTestbugsStates({
+      bugSegment: currentTestbugsStatus.bugSegment,
       bugType: type,
-      bugCategory: currentDevStatus.bugCategory,
-      sortedFeature: currentDevStatus.sortedFeature,
-      tableOpen: currentDevStatus.tableOpen,
-    });
-  };
-
-  // filtering data according to category (lvl 1 filter)
-  const selectBugCategory = (category) => {
-    const currentDevStatus = contextData.dev_states;
-    contextData.setDevMetricsStates({
-      bugSegment: currentDevStatus.bugSegment,
-      bugType: currentDevStatus.bugType,
-      bugCategory: category,
-      sortedFeature: currentDevStatus.sortedFeature,
-      tableOpen: currentDevStatus.tableOpen,
+      sortedFeature: currentTestbugsStatus.sortedFeature,
+      tableOpen: currentTestbugsStatus.tableOpen,
     });
   };
 
   //for change assignee table states
   const setTableOpen = (value) => {
-    const currentDevStatus = contextData.dev_states;
-    contextData.setDevMetricsStates({
-      bugSegment: currentDevStatus.bugSegment,
-      bugType: currentDevStatus.bugType,
-      bugCategory: currentDevStatus.bugCategory,
-      sortedFeature: currentDevStatus.sortedFeature,
+    const currentTestbugsStatus = contextData.testbugs_states;
+    contextData.setTestbugsStates({
+      bugSegment: currentTestbugsStatus.bugSegment,
+      bugType: currentTestbugsStatus.bugType,
+      sortedFeature: currentTestbugsStatus.sortedFeature,
       tableOpen: value,
     });
   };
 
   // filtering data according to status (lvl 1 filter)
   const selectBugSegment = (segment) => {
-    const currentDevStatus = contextData.dev_states;
-    contextData.setDevMetricsStates({
+    const currentTestbugsStatus = contextData.testbugs_states;
+    contextData.setTestbugsStates({
       bugSegment: segment,
-      bugType: currentDevStatus.bugType,
-      bugCategory: currentDevStatus.bugCategory,
-      sortedFeature: currentDevStatus.sortedFeature,
-      tableOpen: currentDevStatus.tableOpen,
+      bugType: currentTestbugsStatus.bugType,
+      sortedFeature: currentTestbugsStatus.sortedFeature,
+      tableOpen: currentTestbugsStatus.tableOpen,
     });
   };
   const pageNumbers = [];
@@ -778,7 +678,8 @@ const TestbugsViewPage = (props) => {
   pageNumbers.push(p / 1000);
   return (
     <>
-      {contextData.isDevPageLoading || !contextData.isDevTableLoaded ? (
+      {contextData.isTestbugsPageLoading ||
+      !contextData.isTestbugsTableLoaded ? (
         <>
           <div className="h-full w-full flex flex-row justify-center items-center">
             <Loader size="lg" />
@@ -791,18 +692,18 @@ const TestbugsViewPage = (props) => {
             <div className="flex flex-row justify-center mb-[-20px]">
               {" "}
               <span className=" bg-blue-600 py-2 px-3 rounded-lg text-white font-bold text-lg">
-                Dev Metrics
+                Test Metrics: Bugs
               </span>
             </div>
             <ProfileSearchBar
               selectUserId={selectUserId}
               table={
-                contextData.devMetricsTable.annual
-                  ? contextData.devMetricsTable.annual.bugs
+                contextData.testbugsTable.annual
+                  ? contextData.testbugsTable.annual.bugs
                   : []
               }
               userId={userId}
-              type={"dev"}
+              type={"testbugs"}
             />
 
             {/* level 1 filter block */}
@@ -819,29 +720,22 @@ const TestbugsViewPage = (props) => {
                 </Card>
 
                 <div className="flex flex-col items-center space-y-3">
-                  <DevMetricsSegmentTypeRadio
+                  <TestbugsMetricsSegmentTypeRadio
                     value={bugSegment}
                     selectSegment={selectBugSegment}
                     data={segmentFullNameMap}
-                    type={"dev"}
                   />
-                  <div className="flex flex-row space-x-8">
-                    <DevMetricsTypeRadio
-                      value={bugType}
-                      selectBugType={selectBugType}
-                    />
-                    <DevMetricsCategoryRadio
-                      value={bugCategory}
-                      selectBugCategory={selectBugCategory}
-                    />
-                  </div>
+                  <TestbugsMetricsTypeRadio
+                    value={bugType}
+                    selectBugType={selectBugType}
+                  />
                 </div>
                 <Typography variant="h5" className="pl-4 text-center">
                   {" "}
                   Total no. of Bugs : <span>{viewData.length}</span>{" "}
                 </Typography>
               </div>
-              <div className="  w-1/5 flex flex-col justify-evenly items-center">
+              <div className="   w-1/5 flex flex-col justify-evenly items-center  pr-8">
                 {bugType !== "all" ? (
                   <>
                     <div className="  bg-gray-100 border-gray-300 border-solid border-[2px] rounded-lg   w-4/5 h-full flex flex-col justify-evenly items-center">
@@ -900,8 +794,8 @@ const TestbugsViewPage = (props) => {
                         className="px-2 cursor-pointer text-blue-500"
                         onClick={() => {
                           if (elem !== userId) {
-                            contextData.setIsDevPageLoading(true);
-                            navigate(`/dev/view/${elem}`);
+                            contextData.setIsTestbugsPageLoading(true);
+                            navigate(`/testbugs/view/${elem}`);
                           }
                         }}
                       >
@@ -994,12 +888,12 @@ const TestbugsViewPage = (props) => {
                   {" "}
                   {segmentFullNameMap.get(bugSegment)}
                   {" : "}
-                  {contextData.devMetricsTable[bugSegment]
-                    ? contextData.devMetricsTable[bugSegment]["lower limit"]
+                  {contextData.testbugsTable[bugSegment]
+                    ? contextData.testbugsTable[bugSegment]["lower limit"]
                     : ""}
                   {" - "}
-                  {contextData.devMetricsTable[bugSegment]
-                    ? contextData.devMetricsTable[bugSegment]["upper limit"]
+                  {contextData.testbugsTable[bugSegment]
+                    ? contextData.testbugsTable[bugSegment]["upper limit"]
                     : ""}{" "}
                 </Card>
                 <Card className="pb-3 pt-1 px-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
@@ -1040,7 +934,7 @@ const TestbugsViewPage = (props) => {
 
                   {tableOpen && userId !== "all" ? (
                     <>
-                      <DevAssigneeTable
+                      <TestbugsAssigneeTable
                         bugType={bugType}
                         tableData={assigneeTableData}
                         userId={userId}
@@ -1059,17 +953,10 @@ const TestbugsViewPage = (props) => {
                 {tableOpen && userId !== "all" ? (
                   <>
                     <div className="flex bg-gray-100 p-4 rounded-lg flex-col items-center space-y-3">
-                      <div className="flex flex-row space-x-8">
-                        <DevMetricsTypeRadio
-                          value={bugType}
-                          selectBugType={selectBugType}
-                        />
-                        <DevMetricsCategoryRadio
-                          value={bugCategory}
-                          selectBugCategory={selectBugCategory}
-                        />
-                      </div>
-
+                      <TestbugsMetricsTypeRadio
+                        value={bugType}
+                        selectBugType={selectBugType}
+                      />
                       <Typography variant="medium" className="pl-4 text-center">
                         {" "}
                         Bug Count : <span>{viewData.length}</span>{" "}
@@ -1129,18 +1016,6 @@ const TestbugsViewPage = (props) => {
                         <HighchartsReact
                           highcharts={Highcharts}
                           options={typeChartOptions}
-                        />
-                      </Card>
-                    </>
-                  ) : (
-                    <></>
-                  )}
-                  {bugCategory === "all" ? (
-                    <>
-                      <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit">
-                        <HighchartsReact
-                          highcharts={Highcharts}
-                          options={categoryChartOptions}
                         />
                       </Card>
                     </>
@@ -1234,12 +1109,12 @@ const TestbugsViewPage = (props) => {
                   {" "}
                   {segmentFullNameMap.get(bugSegment)}
                   {" : "}
-                  {contextData.devMetricsTable[bugSegment]
-                    ? contextData.devMetricsTable[bugSegment]["lower limit"]
+                  {contextData.testbugsTable[bugSegment]
+                    ? contextData.testbugsTable[bugSegment]["lower limit"]
                     : ""}
                   {" - "}
-                  {contextData.devMetricsTable[bugSegment]
-                    ? contextData.devMetricsTable[bugSegment]["upper limit"]
+                  {contextData.testbugsTable[bugSegment]
+                    ? contextData.testbugsTable[bugSegment]["upper limit"]
                     : ""}{" "}
                 </Card>
               </div>
@@ -1255,7 +1130,7 @@ const TestbugsViewPage = (props) => {
                       : "All"}
                   </span>
                   <br />
-                  {bugSegment !== "annual" || bugType !== "all" || bugCategory!=="all" ? (
+                  {bugSegment !== "annual" || bugType !== "all" ? (
                     <>
                       {" "}
                       {bugSegment !== "annual" ? (
@@ -1283,22 +1158,6 @@ const TestbugsViewPage = (props) => {
                               className="fill-gray-500 hover:fill-red-500 hover:cursor-pointer"
                               onClick={() => {
                                 selectBugType("all");
-                              }}
-                            />
-                          </span>
-                        </>
-                      ) : (
-                        <></>
-                      )}
-                      {bugCategory !== "all" ? (
-                        <>
-                          <span className=" bg-gray-100 py-2 pl-3 ml-3 rounded-md drop-shadow-md text-blue-500 font-medium font-mono text-base">
-                            {bugCategory}{" "}
-                            <CloseIcon
-                              style={{ marginRight: 10, fontSize: "0.8em" }}
-                              className="fill-gray-500 hover:fill-red-500 hover:cursor-pointer"
-                              onClick={() => {
-                                selectBugCategory("all");
                               }}
                             />
                           </span>
@@ -1373,7 +1232,7 @@ const TestbugsViewPage = (props) => {
                     </span>
                   </div>
                 </div>
-                <DevMetricsTable
+                <TestbugsMetricsTable
                   userId={userId}
                   data={viewTableData}
                   sortViewTableAscending={sortViewTableAscending}
@@ -1436,4 +1295,4 @@ const TestbugsViewPage = (props) => {
   );
 };
 
-export default TestbugsViewPage;
+export default TestbugsMetricsViewPage;

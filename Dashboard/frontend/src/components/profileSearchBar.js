@@ -33,7 +33,7 @@ const ProfileSearchBar = (props) => {
           .filter((x, i, a) => a.indexOf(x) === i)
           .forEach((manager) => callParent(manager));
       })
-    : props.type === "dev"
+    : (props.type === "dev" || props.type==="testbugs")
     ? props.table.forEach((elem) => {
         if ("OAIRMVJDCUN".includes(elem.state))
           callParent(

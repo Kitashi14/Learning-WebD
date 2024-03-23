@@ -13,6 +13,7 @@ import DevMetricsViewPage from "./pages/devMetricsPage";
 import LocViewPage from "./pages/locViewPage";
 import AutonsViewPage from "./pages/autonsViewPage";
 import TeacatsViewPage from "./pages/teacatsViewPage";
+import TestbugsMetricsViewPage from "./pages/testbugsViewPage";
 // contains all routes for the client side
 function App() {
   const contextData = useContext(DataContext);
@@ -29,6 +30,7 @@ function App() {
     else if (location.pathname.includes("loc")) setCurrentTab("loc");
     else if (location.pathname.includes("autons")) setCurrentTab("autons");
     else if (location.pathname.includes("teacats")) setCurrentTab("teacats");
+    else if (location.pathname.includes("testbugs")) setCurrentTab("testbugs");
     else {
       setCurrentTab(null);
     }
@@ -87,6 +89,11 @@ function App() {
                 exact
                 path="/teacats/view/:uid"
                 element={<TeacatsViewPage />}
+              ></Route>
+              <Route
+                exact
+                path="/testbugs/view/:uid"
+                element={<TestbugsMetricsViewPage />}
               ></Route>
             </Routes>
           )}
