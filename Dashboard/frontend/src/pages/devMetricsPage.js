@@ -477,7 +477,7 @@ const DevMetricsViewPage = (props) => {
     chart: {
       type: "bar",
       height: 300,
-      width: bugCategory==="all"?400:600,
+      width: bugCategory === "all" ? 400 : 600,
     },
     title: {
       text:
@@ -544,7 +544,7 @@ const DevMetricsViewPage = (props) => {
     chart: {
       type: "pie",
       height: 300,
-      width: bugCategory==="all"?400:600,
+      width: bugCategory === "all" ? 400 : 600,
     },
     title: {
       text: "State Chart",
@@ -711,8 +711,6 @@ const DevMetricsViewPage = (props) => {
       },
     ],
   };
-
-  
 
   // wrappers function for selecting user from the user search bar
   const selectUserId = (user) => {
@@ -1255,7 +1253,9 @@ const DevMetricsViewPage = (props) => {
                       : "All"}
                   </span>
                   <br />
-                  {bugSegment !== "annual" || bugType !== "all" || bugCategory!=="all" ? (
+                  {bugSegment !== "annual" ||
+                  bugType !== "all" ||
+                  bugCategory !== "all" ? (
                     <>
                       {" "}
                       {bugSegment !== "annual" ? (
