@@ -405,7 +405,9 @@ const ActiveViewPage = (props) => {
           return { name: type, y: count };
         })
       : [];
-    diffTypeCount.sort((a, b) => a.name > b.name ? 1 : a.name < b.name ? -1 : 0);
+  diffTypeCount.sort((a, b) =>
+    a.name > b.name ? 1 : a.name < b.name ? -1 : 0
+  );
   const typeChartOptions = {
     chart: {
       type: "pie",
@@ -431,7 +433,7 @@ const ActiveViewPage = (props) => {
     },
 
     xAxis: {
-      categories: diffTypeCount.map(elem=>elem.name),
+      categories: diffTypeCount.map((elem) => elem.name),
     },
     series: [
       {
@@ -459,7 +461,9 @@ const ActiveViewPage = (props) => {
     });
     return { name: release, y: count };
   });
-  diffReleaseCount.sort((a, b) => a.name > b.name ? 1 : a.name < b.name ? -1 : 0);
+  diffReleaseCount.sort((a, b) =>
+    a.name > b.name ? 1 : a.name < b.name ? -1 : 0
+  );
   const releaseChartOptions = {
     chart: {
       type: "bar",
@@ -487,7 +491,7 @@ const ActiveViewPage = (props) => {
     },
 
     xAxis: {
-      categories: diffReleaseCount.map(elem=>""),
+      categories: diffReleaseCount.map((elem) => ""),
     },
     series: [
       {
@@ -610,7 +614,9 @@ const ActiveViewPage = (props) => {
     return { name: status, y: count };
   });
 
-  diffStatusCount.sort((a, b) => a.name > b.name ? 1 : a.name < b.name ? -1 : 0);
+  diffStatusCount.sort((a, b) =>
+    a.name > b.name ? 1 : a.name < b.name ? -1 : 0
+  );
   const statusChartOptions = {
     chart: {
       type: "pie",
@@ -637,7 +643,7 @@ const ActiveViewPage = (props) => {
     },
 
     xAxis: {
-      categories: diffStatusCount.map(elem=>elem.name),
+      categories: diffStatusCount.map((elem) => elem.name),
     },
     series: [
       {
@@ -697,6 +703,9 @@ const ActiveViewPage = (props) => {
     .map((item) => ({ label: item, value: item }));
   releaseSelectorData.unshift({ label: "All", value: "all" });
 
+  if (featureRelease!=="all" && diffRelease.indexOf(featureRelease) === -1) {
+    selectFeatureRelease("all");
+  }
   return (
     <>
       {/* page block */}
@@ -785,8 +794,8 @@ const ActiveViewPage = (props) => {
         {/* data block, contains charts and table */}
         <div className="w-full flex flex-col space-y-4 px-0">
           {/* level 1 charts */}
-          <div className="flex flex-col space-y-3 items-center pt-1 pb-2 px-8 bg-blue-gray-200">
-            <div className="w-full flex flex-row space-x-3 justify-evenly pt-1 px-8">
+          <div className="flex flex-col space-y-3 items-center pt-1 pb-2  bg-blue-gray-200">
+            <div className="w-full flex flex-row space-x-1 justify-evenly pt-1 ">
               {userId !== "all" && featureType === "all" ? (
                 <>
                   <Card className=" p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">

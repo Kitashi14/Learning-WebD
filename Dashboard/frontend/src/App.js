@@ -53,12 +53,12 @@ function App() {
               {/* <Route
                 exact
                 path="/dpl/view/:uid"
-                element={<ProfileViewPage />}
+                element={<DplViewPage />}
               ></Route>
               <Route
                 exact
                 path="/dpl/feature/:fid"
-                element={<FeatureViewPage />}
+                element={<DplFeatureViewPage />}
               ></Route>
               <Route
                 exact

@@ -21,7 +21,7 @@ export default function DevMetricsTable(props) {
 
   //table rows passed through props (viewTableData)
   const TABLE_ROWS = props.data;
-  const typeColors = ["#D789D7", "#9D65C9", "#5D54A4", "#2A3D66"];
+  const typeColors = ["#4ade80", "#16a34a", "#166534", "#052e16"];
   const stateOrder = ["N", "OAI", "RMV", "JDCU"];
 
   //features with sorting option

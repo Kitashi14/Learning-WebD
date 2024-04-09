@@ -21,8 +21,8 @@ const ActiveFeatureTypeRadio = (props) => {
       >
         <RadioLabel>Field: </RadioLabel>
         <Radio value="all">All</Radio>
-        <Radio value="dev">Dev</Radio>
-        <Radio value="test">Test</Radio>
+        <Radio value="dev">Only as Dev</Radio>
+        <Radio value="test">Only as Test</Radio>
         <Radio value="combined">Combined</Radio>
       </RadioGroup>
     </>

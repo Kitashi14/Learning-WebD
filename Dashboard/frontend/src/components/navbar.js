@@ -200,15 +200,15 @@ const Navbar = (props) => {
                 navigate("/");
               }}
             >
-              Dashboard
+              <span className="font-bold">Dashboard</span>
             </Nav.Item>
             {/* <Nav.Item
               eventKey="2"
               icon={<DashboardIcon />}
               style={
                 props.currentTab === "dpl"
-                  ? { background: "#2589F4" }
-                  : { background: "#3498FE" }
+                ? { background: "#FAFAFA", color: "#2589F4" }
+                : { background: "#3498FE" }
               }
               onClick={() => {
                 navigate(`/dpl/view/${contextData.dpl_currentUser}`);
@@ -221,8 +221,8 @@ const Navbar = (props) => {
               icon={<PinIcon />}
               style={
                 props.currentTab === "active"
-                  ? { background: "#2589F4" }
-                  : { background: "#3498FE" }
+                ? { background: "#FAFAFA", color: "#2589F4" }
+                : { background: "#3498FE" }
               }
               onClick={() => {
                 navigate(`/active/view/${contextData.active_currentUser}`);
@@ -235,7 +235,7 @@ const Navbar = (props) => {
               icon={<PeopleBranchIcon />}
               style={
                 props.currentTab === "dev"
-                  ? { background: "#2589F4" }
+                  ? { background: "#FAFAFA", color: "#2589F4" }
                   : { background: "#3498FE" }
               }
               onClick={() => {
@@ -265,8 +265,8 @@ const Navbar = (props) => {
                 icon={<TableColumnIcon />}
                 style={
                   props.currentTab === "testbugs"
-                    ? { background: "#2589F4", fontSize: 16 }
-                    : { background: "#3498FE", fontSize: 16 }
+                    ? { background: "#FAFAFA", color: "#2589F4" }
+                    : { background: "#3498FE" }
                 }
                 onClick={() => {
                   if (
@@ -274,7 +274,7 @@ const Navbar = (props) => {
                       `/testbugs/view/${contextData.testbugs_currentUser}`
                     )
                   ) {
-                    contextData.setIsAutonsPageLoading(true);
+                    contextData.setIsTestbugsPageLoading(true);
                     navigate(
                       `/testbugs/view/${contextData.testbugs_currentUser}`
                     );
@@ -288,8 +288,8 @@ const Navbar = (props) => {
                 icon={<TableColumnIcon />}
                 style={
                   props.currentTab === "autons"
-                    ? { background: "#2589F4", fontSize: 16 }
-                    : { background: "#3498FE", fontSize: 16 }
+                    ? { background: "#FAFAFA", color: "#2589F4" }
+                    : { background: "#3498FE" }
                 }
                 onClick={() => {
                   if (
@@ -309,8 +309,8 @@ const Navbar = (props) => {
                 icon={<TableColumnIcon />}
                 style={
                   props.currentTab === "teacats"
-                    ? { background: "#2589F4", fontSize: 16 }
-                    : { background: "#3498FE", fontSize: 16 }
+                    ? { background: "#FAFAFA", color: "#2589F4" }
+                    : { background: "#3498FE" }
                 }
                 onClick={() => {
                   if (
@@ -318,7 +318,7 @@ const Navbar = (props) => {
                       `/teacats/view/${contextData.teacats_currentUser}`
                     )
                   ) {
-                    contextData.setIsAutonsPageLoading(true);
+                    contextData.setIsTeacatsPageLoading(true);
                     navigate(
                       `/teacats/view/${contextData.teacats_currentUser}`
                     );
@@ -333,7 +333,7 @@ const Navbar = (props) => {
               icon={<PinIcon />}
               style={
                 props.currentTab === "loc"
-                  ? { background: "#2589F4" }
+                  ? { background: "#FAFAFA", color: "#2589F4" }
                   : { background: "#3498FE" }
               }
               onClick={() => {

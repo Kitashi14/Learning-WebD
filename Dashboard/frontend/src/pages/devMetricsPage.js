@@ -85,7 +85,7 @@ const DevMetricsViewPage = (props) => {
     ["N", "New"],
   ]);
 
-  const typeColors = ["#D789D7", "#9D65C9", "#5D54A4", "#2A3D66"];
+  const typeColors = ["#4ade80", "#16a34a", "#166534", "#052e16"];
   const stateOrder = ["N", "OAI", "RMV", "JDCU"];
 
   const [prevUser, setPrevUser] = useState(null);
@@ -358,7 +358,6 @@ const DevMetricsViewPage = (props) => {
         segment === bugSegment
           ? {
               enabled: true,
-              color: "#16803C",
             }
           : {
               enabled: true,
@@ -375,7 +374,7 @@ const DevMetricsViewPage = (props) => {
       text: "Segment Chart",
     },
     // colors: ["#FFC300", "#EC610A", "#A40A3C", "#6B0848"],
-    colors: ["#16803C", "#41AEA9", "#213E3B", "#E8FFFF"],
+    colors: ["#a21caf", "#41AEA9", "#213E3B", "#E8FFFF"],
     plotOptions: {
       series: {
         allowPointSelect: true,
@@ -387,10 +386,9 @@ const DevMetricsViewPage = (props) => {
         },
         states: {
           select: {
-            colorIndex: "#D789D7",
-            color: "#6CE890",
+            color: "#e879f9",
             borderWidth: 0,
-            borderColor: "#6CE890",
+            borderColor: "#e879f9",
           },
         },
       },
@@ -549,7 +547,7 @@ const DevMetricsViewPage = (props) => {
     title: {
       text: "State Chart",
     },
-    colors: ["#D789D7", "#9D65C9", "#5D54A4", "#2A3D66"],
+    colors: ["#4ade80", "#16a34a", "#166534", "#052e16"],
     plotOptions: {
       series: {
         allowPointSelect: true,
@@ -918,7 +916,7 @@ const DevMetricsViewPage = (props) => {
                 <div
                   style={{
                     background: weekBarValidityMap.get("annual").has(bugSegment)
-                      ? "#16803B"
+                      ? "#a21caf"
                       : "",
                   }}
                   className="rounded-l-md border-solid border-r-[1px] border-gray-300 w-[50%]"
@@ -926,7 +924,7 @@ const DevMetricsViewPage = (props) => {
                 <div
                   style={{
                     background: weekBarValidityMap.get("semi").has(bugSegment)
-                      ? "#16803B"
+                      ? "#a21caf"
                       : "",
                   }}
                   className="border-solid border-r-[1px] border-gray-300 w-[25%]"
@@ -936,7 +934,7 @@ const DevMetricsViewPage = (props) => {
                     background: weekBarValidityMap
                       .get("quarter")
                       .has(bugSegment)
-                      ? "#16803B"
+                      ? "#a21caf"
                       : "",
                   }}
                   className="border-solid border-r-[1px] border-gray-300 w-[7%]"
@@ -944,7 +942,7 @@ const DevMetricsViewPage = (props) => {
                 <div
                   style={{
                     background: weekBarValidityMap.get("week-4").has(bugSegment)
-                      ? "#16803B"
+                      ? "#a21caf"
                       : "",
                   }}
                   className="border-solid border-r-[1px] border-gray-300 w-[4%]"
@@ -952,7 +950,7 @@ const DevMetricsViewPage = (props) => {
                 <div
                   style={{
                     background: weekBarValidityMap.get("week-3").has(bugSegment)
-                      ? "#16803B"
+                      ? "#a21caf"
                       : "",
                   }}
                   className="border-solid border-r-[1px] border-gray-300 w-[4%]"
@@ -960,7 +958,7 @@ const DevMetricsViewPage = (props) => {
                 <div
                   style={{
                     background: weekBarValidityMap.get("week-2").has(bugSegment)
-                      ? "#16803B"
+                      ? "#a21caf"
                       : "",
                   }}
                   className="border-solid border-r-[1px] border-gray-300 w-[4%]"
@@ -968,7 +966,7 @@ const DevMetricsViewPage = (props) => {
                 <div
                   style={{
                     background: weekBarValidityMap.get("week-1").has(bugSegment)
-                      ? "#16803B"
+                      ? "#a21caf"
                       : "",
                   }}
                   className="border-solid border-r-[1px] border-gray-300 w-[4%]"
@@ -976,7 +974,7 @@ const DevMetricsViewPage = (props) => {
                 <div
                   style={{
                     background: weekBarValidityMap.get("week-0").has(bugSegment)
-                      ? "#16803B"
+                      ? "#a21caf"
                       : "",
                   }}
                   className=" rounded-r-md  w-[2%]"
@@ -988,7 +986,7 @@ const DevMetricsViewPage = (props) => {
             <div className="w-full flex flex-col space-y-4 px-0">
               {/* level 1 charts */}
               <div className="flex flex-col space-y-3 pt-3 items-center pt-1 pb-2 px-8 bg-blue-gray-200">
-                <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-full font-bold text-lg text-green-800 ">
+                <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-full font-bold text-lg text-[#a21caf] ">
                   {" "}
                   {segmentFullNameMap.get(bugSegment)}
                   {" : "}
@@ -1228,7 +1226,7 @@ const DevMetricsViewPage = (props) => {
                   />
                 </Card>
 
-                <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-full font-bold text-lg text-green-800 ">
+                <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-full font-bold text-lg text-[#a21caf] ">
                   {" "}
                   {segmentFullNameMap.get(bugSegment)}
                   {" : "}

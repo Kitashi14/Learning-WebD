@@ -17,7 +17,8 @@ const DevAssigneeTable = (props) => {
     <>
       <table className="w-fit  table-auto items-center text-center ">
         <caption className="caption-top font-bold pb-3">
-          Table for : {props.bugSegment}, Category ({contextData.dev_states.bugCategory})
+          Table for : {props.bugSegment}, Category (
+          {contextData.dev_states.bugCategory})
         </caption>
         <thead className="bg-blue-gray-50 ">
           <tr>
@@ -39,7 +40,7 @@ const DevAssigneeTable = (props) => {
               rowSpan={2}
               style={{
                 background:
-                  bugType === "all" || bugType === "N" ? "#B8F4D1" : "",
+                  bugType === "all" || bugType === "N" ? "#f5d0fe" : "",
               }}
               className="border-b border-r border-blue-gray-100 p-4"
             >
@@ -56,7 +57,7 @@ const DevAssigneeTable = (props) => {
               colSpan={3}
               style={{
                 background:
-                  bugType === "all" || bugType.includes("OAI") ? "#B8F4D1" : "",
+                  bugType === "all" || bugType.includes("OAI") ? "#f5d0fe" : "",
               }}
               className="border-b border-r border-blue-gray-100 p-4"
             >
@@ -73,7 +74,7 @@ const DevAssigneeTable = (props) => {
               colSpan={3}
               style={{
                 background:
-                  bugType === "all" || bugType.includes("RMV") ? "#B8F4D1" : "",
+                  bugType === "all" || bugType.includes("RMV") ? "#f5d0fe" : "",
               }}
               className="border-b border-r border-blue-gray-100 p-4"
             >
@@ -91,7 +92,7 @@ const DevAssigneeTable = (props) => {
               style={{
                 background:
                   bugType === "all" || bugType.includes("JDCU")
-                    ? "#B8F4D1"
+                    ? "#f5d0fe"
                     : "",
               }}
               className="border-b border-r border-blue-gray-100 p-4"
@@ -107,7 +108,7 @@ const DevAssigneeTable = (props) => {
             <th
               key="Total"
               style={{
-                background: bugType === "all" ? "#B8F4D1" : "",
+                background: bugType === "all" ? "#f5d0fe" : "",
               }}
               rowSpan={2}
               className="border-b rounded-tr-lg border-blue-gray-100 p-4"
@@ -126,7 +127,7 @@ const DevAssigneeTable = (props) => {
               key="O"
               style={{
                 background:
-                  bugType === "all" || bugType.includes("O") ? "#B8F4D1" : "",
+                  bugType === "all" || bugType.includes("O") ? "#f5d0fe" : "",
               }}
               className="border-b border-r border-blue-gray-100 p-4"
             >
@@ -142,7 +143,7 @@ const DevAssigneeTable = (props) => {
               key="A"
               style={{
                 background:
-                  bugType === "all" || bugType.includes("A") ? "#B8F4D1" : "",
+                  bugType === "all" || bugType.includes("A") ? "#f5d0fe" : "",
               }}
               className="border-b border-r border-blue-gray-100 p-4"
             >
@@ -158,7 +159,7 @@ const DevAssigneeTable = (props) => {
               key="I"
               style={{
                 background:
-                  bugType === "all" || bugType.includes("I") ? "#B8F4D1" : "",
+                  bugType === "all" || bugType.includes("I") ? "#f5d0fe" : "",
               }}
               className="border-b border-r border-blue-gray-100 p-4"
             >
@@ -174,7 +175,7 @@ const DevAssigneeTable = (props) => {
               key="R"
               style={{
                 background:
-                  bugType === "all" || bugType.includes("R") ? "#B8F4D1" : "",
+                  bugType === "all" || bugType.includes("R") ? "#f5d0fe" : "",
               }}
               className="border-b border-r border-blue-gray-100 p-4"
             >
@@ -190,7 +191,7 @@ const DevAssigneeTable = (props) => {
               key="M"
               style={{
                 background:
-                  bugType === "all" || bugType.includes("M") ? "#B8F4D1" : "",
+                  bugType === "all" || bugType.includes("M") ? "#f5d0fe" : "",
               }}
               className="border-b border-r border-blue-gray-100 p-4"
             >
@@ -206,7 +207,7 @@ const DevAssigneeTable = (props) => {
               key="V"
               style={{
                 background:
-                  bugType === "all" || bugType.includes("V") ? "#B8F4D1" : "",
+                  bugType === "all" || bugType.includes("V") ? "#f5d0fe" : "",
               }}
               className="border-b border-r border-blue-gray-100 p-4"
             >
@@ -222,7 +223,7 @@ const DevAssigneeTable = (props) => {
               key="J"
               style={{
                 background:
-                  bugType === "all" || bugType.includes("J") ? "#B8F4D1" : "",
+                  bugType === "all" || bugType.includes("J") ? "#f5d0fe" : "",
               }}
               className="border-b border-r border-blue-gray-100 p-4"
             >
@@ -238,7 +239,7 @@ const DevAssigneeTable = (props) => {
               key="D"
               style={{
                 background:
-                  bugType === "all" || bugType.includes("D") ? "#B8F4D1" : "",
+                  bugType === "all" || bugType.includes("D") ? "#f5d0fe" : "",
               }}
               className="border-b border-r border-blue-gray-100 p-4"
             >
@@ -255,7 +256,7 @@ const DevAssigneeTable = (props) => {
               key="C"
               style={{
                 background:
-                  bugType === "all" || bugType.includes("C") ? "#B8F4D1" : "",
+                  bugType === "all" || bugType.includes("C") ? "#f5d0fe" : "",
               }}
               className="border-b border-r border-blue-gray-100 p-4"
             >
@@ -271,7 +272,7 @@ const DevAssigneeTable = (props) => {
               key="U"
               style={{
                 background:
-                  bugType === "all" || bugType.includes("U") ? "#B8F4D1" : "",
+                  bugType === "all" || bugType.includes("U") ? "#f5d0fe" : "",
               }}
               className="border-b border-r border-blue-gray-100 p-4"
             >
@@ -315,7 +316,7 @@ const DevAssigneeTable = (props) => {
                     style={{
                       background:
                         bugType === "all" || bugType.includes(c)
-                          ? "#E3F7F6"
+                          ? "#fae8ff"
                           : "",
                     }}
                     className="py-4 w-[100px] border-b border-r border-blue-gray-100"
@@ -335,7 +336,7 @@ const DevAssigneeTable = (props) => {
               ))}
               <td
                 style={{
-                  background: bugType === "all" ? "#E3F7F6" : "",
+                  background: bugType === "all" ? "#fae8ff" : "",
                 }}
                 className="py-4 w-[100px] border-b border-r border-blue-gray-100"
               >
@@ -379,7 +380,7 @@ const DevAssigneeTable = (props) => {
                       style={{
                         background:
                           bugType === "all" || bugType.includes(c)
-                            ? "#E3F7F6"
+                            ? "#fae8ff"
                             : "",
                       }}
                       className="py-4 w-[100px] border-b border-r border-blue-gray-100"
@@ -400,7 +401,7 @@ const DevAssigneeTable = (props) => {
                       style={{
                         background:
                           bugType === "all" || bugType.includes(c)
-                            ? "#E3F7F6"
+                            ? "#fae8ff"
                             : "",
                       }}
                       className="py-4 w-[100px] border-b border-r border-blue-gray-100"
@@ -419,7 +420,7 @@ const DevAssigneeTable = (props) => {
             <td
               rowSpan={2}
               style={{
-                background: bugType === "all" ? "#E3F7F6" : "",
+                background: bugType === "all" ? "#fae8ff" : "",
               }}
               className="py-4 w-[100px] border-b  border-r border-blue-gray-100"
             >
@@ -435,7 +436,7 @@ const DevAssigneeTable = (props) => {
               colSpan={3}
               style={{
                 background:
-                  bugType === "all" || bugType === "OAI" ? "#E3F7F6" : "",
+                  bugType === "all" || bugType === "OAI" ? "#fae8ff" : "",
               }}
               className="py-4 w-[100px] border-b border-r border-blue-gray-100"
             >
@@ -450,7 +451,7 @@ const DevAssigneeTable = (props) => {
               colSpan={3}
               style={{
                 background:
-                  bugType === "all" || bugType === "RMV" ? "#E3F7F6" : "",
+                  bugType === "all" || bugType === "RMV" ? "#fae8ff" : "",
               }}
               className="py-4 w-[100px] border-b border-r border-blue-gray-100"
             >
@@ -465,7 +466,7 @@ const DevAssigneeTable = (props) => {
               colSpan={4}
               style={{
                 background:
-                  bugType === "all" || bugType === "JDCU" ? "#E3F7F6" : "",
+                  bugType === "all" || bugType === "JDCU" ? "#fae8ff" : "",
               }}
               className="py-4 w-[100px] border-b border-r border-blue-gray-100"
             >
@@ -479,7 +480,8 @@ const DevAssigneeTable = (props) => {
           </tr>
         </tbody>
         <caption className="caption-bottom font-bold pt-3">
-          Table for : {props.bugSegment}, Category ({contextData.dev_states.bugCategory})
+          Table for : {props.bugSegment}, Category (
+          {contextData.dev_states.bugCategory})
         </caption>
       </table>
     </>
