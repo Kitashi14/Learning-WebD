@@ -35,6 +35,9 @@ const TestbugsMetricsViewPage = (props) => {
   const [showAllAssignees, setShowAllAssignees] = useState(false);
   const [showAllComponents, setShowAllComponents] = useState(false);
 
+  //for invalid userId
+  const [isUserValid, SetIsUserValid] = useState(true);
+
   // getting the bugs details that was sorted
   const sortedFeature = {
     feature: contextData.testbugs_states.sortedFeature.feature,
@@ -676,6 +679,10 @@ const TestbugsMetricsViewPage = (props) => {
     p = p + 1000;
   }
   pageNumbers.push(p / 1000);
+
+  const setInvalidUserSelected = (value) => {
+    SetIsUserValid(value);
+  };
   return (
     <>
       {contextData.isTestbugsPageLoading ||
@@ -704,590 +711,633 @@ const TestbugsMetricsViewPage = (props) => {
               }
               userId={userId}
               type={"testbugs"}
+              setInvalidUserSelected={setInvalidUserSelected}
             />
 
-            {/* level 1 filter block */}
-            <div className=" flex flex-row justify-stretch">
-              <div className="w-1/5"> </div>
-              <div className="flex flex-col items-center px-3 rounded-lg space-y-3 bg-gray-50 drop-shadow-md border-blue-200 border-none border-[1px] border-solid py-2 w-fit m-auto ">
-                <Card className="w-fit flex flex-row items-center px-3 py-3 ml-4">
-                  View For :
-                  <span className="text-base text-blue-500 font-bold pl-2">
-                    {userId === "all"
-                      ? "All"
-                      : contextData.userFullNameMap.get(userId)}
-                  </span>
-                </Card>
-
-                <div className="flex flex-col items-center space-y-3">
-                  <TestbugsMetricsSegmentTypeRadio
-                    value={bugSegment}
-                    selectSegment={selectBugSegment}
-                    data={segmentFullNameMap}
-                  />
-                  <TestbugsMetricsTypeRadio
-                    value={bugType}
-                    selectBugType={selectBugType}
-                  />
-                </div>
-                <Typography variant="h5" className="pl-4 text-center">
-                  {" "}
-                  Total no. of Bugs : <span>{viewData.length}</span>{" "}
-                </Typography>
-              </div>
-              <div className="   w-1/5 flex flex-col justify-evenly items-center  pr-8">
-                {bugType !== "all" ? (
-                  <>
-                    <div className="  bg-gray-100 border-gray-300 border-solid border-[2px] rounded-lg   w-4/5 h-full flex flex-col justify-evenly items-center">
-                      {stateOrder[
-                        stateOrder.findIndex((v, i, a) => {
-                          return v.includes(bugType);
-                        })
-                      ]
-                        .split("")
-                        .map((char) => (
-                          <>
-                            <div
-                              style={{
-                                color:
-                                  typeColors[
-                                    stateOrder[
-                                      stateOrder.findIndex((v, i, a) => {
-                                        return v.includes(char);
-                                      })
-                                    ].indexOf(char)
-                                  ],
-                              }}
-                              className={
-                                bugType !== char
-                                  ? "underline hover:cursor-pointer"
-                                  : "font-bold"
-                              }
-                              onClick={() => {
-                                if (bugType !== char) selectBugType(char);
-                              }}
-                            >
-                              {" "}
-                              {char}
-                              {" : "}
-                              {typeFullNameMap.get(char)}
-                            </div>
-                          </>
-                        ))}
-                    </div>
-                  </>
-                ) : (
-                  <></>
-                )}
-              </div>
-            </div>
-
-            {/* user path from its ultimate parent */}
-            {userId !== "all" ? (
+            {isUserValid ? (
               <>
-                <div className=" px-3 flex cursor-default flex-row justify-center">
-                  {" "}
-                  {previous_parents.map((elem) => (
-                    <>
-                      /
-                      <span
-                        className="px-2 cursor-pointer text-blue-500"
-                        onClick={() => {
-                          if (elem !== userId) {
-                            contextData.setIsTestbugsPageLoading(true);
-                            navigate(`/testbugs/view/${elem}`);
-                          }
-                        }}
-                      >
-                        {elem}
+                {/* level 1 filter block */}
+                <div className=" flex flex-row justify-stretch">
+                  <div className="w-1/5"> </div>
+                  <div className="flex flex-col items-center px-3 rounded-lg space-y-3 bg-gray-50 drop-shadow-md border-blue-200 border-none border-[1px] border-solid py-2 w-fit m-auto ">
+                    <Card className="w-fit flex flex-row items-center px-3 py-3 ml-4">
+                      View For :
+                      <span className="text-base text-blue-500 font-bold pl-2">
+                        {userId === "all"
+                          ? "All"
+                          : contextData.userFullNameMap.get(userId)}
                       </span>
-                    </>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <></>
-            )}
+                    </Card>
 
-            <div className="w-full px-8 py-[1px] ">
-              <div className="w-full flex flex-row bg-gray-50 border-solid border-[1px] border-gray-300 rounded-md h-[22px]">
-                <div
-                  style={{
-                    background: weekBarValidityMap.get("annual").has(bugSegment)
-                      ? "#16803B"
-                      : "",
-                  }}
-                  className="rounded-l-md border-solid border-r-[1px] border-gray-300 w-[50%]"
-                ></div>
-                <div
-                  style={{
-                    background: weekBarValidityMap.get("semi").has(bugSegment)
-                      ? "#16803B"
-                      : "",
-                  }}
-                  className="border-solid border-r-[1px] border-gray-300 w-[25%]"
-                ></div>
-                <div
-                  style={{
-                    background: weekBarValidityMap
-                      .get("quarter")
-                      .has(bugSegment)
-                      ? "#16803B"
-                      : "",
-                  }}
-                  className="border-solid border-r-[1px] border-gray-300 w-[7%]"
-                ></div>
-                <div
-                  style={{
-                    background: weekBarValidityMap.get("week-4").has(bugSegment)
-                      ? "#16803B"
-                      : "",
-                  }}
-                  className="border-solid border-r-[1px] border-gray-300 w-[4%]"
-                ></div>
-                <div
-                  style={{
-                    background: weekBarValidityMap.get("week-3").has(bugSegment)
-                      ? "#16803B"
-                      : "",
-                  }}
-                  className="border-solid border-r-[1px] border-gray-300 w-[4%]"
-                ></div>
-                <div
-                  style={{
-                    background: weekBarValidityMap.get("week-2").has(bugSegment)
-                      ? "#16803B"
-                      : "",
-                  }}
-                  className="border-solid border-r-[1px] border-gray-300 w-[4%]"
-                ></div>
-                <div
-                  style={{
-                    background: weekBarValidityMap.get("week-1").has(bugSegment)
-                      ? "#16803B"
-                      : "",
-                  }}
-                  className="border-solid border-r-[1px] border-gray-300 w-[4%]"
-                ></div>
-                <div
-                  style={{
-                    background: weekBarValidityMap.get("week-0").has(bugSegment)
-                      ? "#16803B"
-                      : "",
-                  }}
-                  className=" rounded-r-md  w-[2%]"
-                ></div>
-              </div>
-            </div>
-
-            {/* data block, contains charts and table */}
-            <div className="w-full flex flex-col space-y-4 px-0">
-              {/* level 1 charts */}
-              <div className="flex flex-col space-y-3 pt-3 items-center pt-1 pb-2 px-8 bg-blue-gray-200">
-                <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-full font-bold text-lg text-green-800 ">
-                  {" "}
-                  {segmentFullNameMap.get(bugSegment)}
-                  {" : "}
-                  {contextData.testbugsTable[bugSegment]
-                    ? contextData.testbugsTable[bugSegment]["lower limit"]
-                    : ""}
-                  {" - "}
-                  {contextData.testbugsTable[bugSegment]
-                    ? contextData.testbugsTable[bugSegment]["upper limit"]
-                    : ""}{" "}
-                </Card>
-                <Card className="pb-3 pt-1 px-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
-                  {userId !== "all" ? (
-                    <>
-                      <Tabs value={tableOpen ? "table" : "graph"}>
-                        <TabsHeader>
-                          <Tab
-                            className={`${
-                              tableOpen ? "font-normal" : " font-bold"
-                            } text-blue-600 z-10`}
-                            key={"graph"}
-                            value={"graph"}
-                            onClick={() => {
-                              setTableOpen(false);
-                            }}
-                          >
-                            {"Graph"}
-                          </Tab>
-                          <Tab
-                            className={`${
-                              tableOpen ? "font-bold" : " font-normal"
-                            } text-blue-600 z-10`}
-                            key={"table"}
-                            value={"table"}
-                            onClick={() => {
-                              setTableOpen(true);
-                            }}
-                          >
-                            {"Table"}
-                          </Tab>
-                        </TabsHeader>
-                      </Tabs>
-                    </>
-                  ) : (
-                    <></>
-                  )}
-
-                  {tableOpen && userId !== "all" ? (
-                    <>
-                      <TestbugsAssigneeTable
-                        bugType={bugType}
-                        tableData={assigneeTableData}
-                        userId={userId}
-                        bugSegment={segmentFullNameMap.get(bugSegment)}
+                    <div className="flex flex-col items-center space-y-3">
+                      <TestbugsMetricsSegmentTypeRadio
+                        value={bugSegment}
+                        selectSegment={selectBugSegment}
+                        data={segmentFullNameMap}
                       />
-                    </>
-                  ) : (
-                    <>
-                      <HighchartsReact
-                        highcharts={Highcharts}
-                        options={segmentChartOptions}
-                      />
-                    </>
-                  )}
-                </Card>
-                {tableOpen && userId !== "all" ? (
-                  <>
-                    <div className="flex bg-gray-100 p-4 rounded-lg flex-col items-center space-y-3">
                       <TestbugsMetricsTypeRadio
                         value={bugType}
                         selectBugType={selectBugType}
                       />
-                      <Typography variant="medium" className="pl-4 text-center">
-                        {" "}
-                        Bug Count : <span>{viewData.length}</span>{" "}
-                      </Typography>
+                    </div>
+                    <Typography variant="h5" className="pl-4 text-center">
+                      {" "}
+                      Total no. of Bugs : <span>{viewData.length}</span>{" "}
+                    </Typography>
+                  </div>
+                  <div className="   w-1/5 flex flex-col justify-evenly items-center  pr-8">
+                    {bugType !== "all" ? (
+                      <>
+                        <div className="  bg-gray-100 border-gray-300 border-solid border-[2px] rounded-lg   w-4/5 h-full flex flex-col justify-evenly items-center">
+                          {stateOrder[
+                            stateOrder.findIndex((v, i, a) => {
+                              return v.includes(bugType);
+                            })
+                          ]
+                            .split("")
+                            .map((char) => (
+                              <>
+                                <div
+                                  style={{
+                                    color:
+                                      typeColors[
+                                        stateOrder[
+                                          stateOrder.findIndex((v, i, a) => {
+                                            return v.includes(char);
+                                          })
+                                        ].indexOf(char)
+                                      ],
+                                  }}
+                                  className={
+                                    bugType !== char
+                                      ? "underline hover:cursor-pointer"
+                                      : "font-bold"
+                                  }
+                                  onClick={() => {
+                                    if (bugType !== char) selectBugType(char);
+                                  }}
+                                >
+                                  {" "}
+                                  {char}
+                                  {" : "}
+                                  {typeFullNameMap.get(char)}
+                                </div>
+                              </>
+                            ))}
+                        </div>
+                      </>
+                    ) : (
+                      <></>
+                    )}
+                  </div>
+                </div>
+
+                {/* user path from its ultimate parent */}
+                {userId !== "all" ? (
+                  <>
+                    <div className=" px-3 flex cursor-default flex-row justify-center">
+                      {" "}
+                      {previous_parents.map((elem) => (
+                        <>
+                          /
+                          <span
+                            className="px-2 cursor-pointer text-blue-500"
+                            onClick={() => {
+                              if (elem !== userId) {
+                                contextData.setIsTestbugsPageLoading(true);
+                                navigate(`/testbugs/view/${elem}`);
+                              }
+                            }}
+                          >
+                            {elem}
+                          </span>
+                        </>
+                      ))}
                     </div>
                   </>
                 ) : (
                   <></>
                 )}
 
-                <div className="w-full flex flex-row space-x-3 justify-evenly items-center pt-1 px-8">
-                  {userId !== "all" ? (
-                    <>
-                      <Card className=" p-4  flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
-                        {diffAssignNumbers > 10 && !showAllAssignees ? (
-                          <>
-                            <div className=" w-full flex pr-4 flex-row justify-end mb-[-20px] z-10">
-                              <span
-                                className="underline hover:cursor-pointer"
-                                onClick={() => {
-                                  setShowAllAssignees(true);
-                                }}
-                              >
-                                show all
-                              </span>
-                            </div>
-                          </>
-                        ) : diffAssignNumbers > 10 ? (
-                          <>
-                            <div className=" w-full flex pr-4 flex-row justify-end mb-[-20px] z-10">
-                              <span
-                                className="underline hover:cursor-pointer"
-                                onClick={() => {
-                                  setShowAllAssignees(false);
-                                }}
-                              >
-                                show top 10
-                              </span>
-                            </div>
-                          </>
-                        ) : (
-                          <></>
-                        )}
+                <div className="w-full px-8 py-[1px] ">
+                  <div className="w-full flex flex-row bg-gray-50 border-solid border-[1px] border-gray-300 rounded-md h-[22px]">
+                    <div
+                      style={{
+                        background: weekBarValidityMap
+                          .get("annual")
+                          .has(bugSegment)
+                          ? "#16803B"
+                          : "",
+                      }}
+                      className="rounded-l-md border-solid border-r-[1px] border-gray-300 w-[50%]"
+                    ></div>
+                    <div
+                      style={{
+                        background: weekBarValidityMap
+                          .get("semi")
+                          .has(bugSegment)
+                          ? "#16803B"
+                          : "",
+                      }}
+                      className="border-solid border-r-[1px] border-gray-300 w-[25%]"
+                    ></div>
+                    <div
+                      style={{
+                        background: weekBarValidityMap
+                          .get("quarter")
+                          .has(bugSegment)
+                          ? "#16803B"
+                          : "",
+                      }}
+                      className="border-solid border-r-[1px] border-gray-300 w-[7%]"
+                    ></div>
+                    <div
+                      style={{
+                        background: weekBarValidityMap
+                          .get("week-4")
+                          .has(bugSegment)
+                          ? "#16803B"
+                          : "",
+                      }}
+                      className="border-solid border-r-[1px] border-gray-300 w-[4%]"
+                    ></div>
+                    <div
+                      style={{
+                        background: weekBarValidityMap
+                          .get("week-3")
+                          .has(bugSegment)
+                          ? "#16803B"
+                          : "",
+                      }}
+                      className="border-solid border-r-[1px] border-gray-300 w-[4%]"
+                    ></div>
+                    <div
+                      style={{
+                        background: weekBarValidityMap
+                          .get("week-2")
+                          .has(bugSegment)
+                          ? "#16803B"
+                          : "",
+                      }}
+                      className="border-solid border-r-[1px] border-gray-300 w-[4%]"
+                    ></div>
+                    <div
+                      style={{
+                        background: weekBarValidityMap
+                          .get("week-1")
+                          .has(bugSegment)
+                          ? "#16803B"
+                          : "",
+                      }}
+                      className="border-solid border-r-[1px] border-gray-300 w-[4%]"
+                    ></div>
+                    <div
+                      style={{
+                        background: weekBarValidityMap
+                          .get("week-0")
+                          .has(bugSegment)
+                          ? "#16803B"
+                          : "",
+                      }}
+                      className=" rounded-r-md  w-[2%]"
+                    ></div>
+                  </div>
+                </div>
 
-                        <HighchartsReact
-                          highcharts={Highcharts}
-                          options={assignedChartOptions}
-                        />
-                      </Card>
-                    </>
-                  ) : (
-                    <></>
-                  )}
-                  {bugType.length > 1 ? (
-                    <>
-                      <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit">
-                        <HighchartsReact
-                          highcharts={Highcharts}
-                          options={typeChartOptions}
-                        />
-                      </Card>
-                    </>
-                  ) : (
-                    <></>
-                  )}
-                  {bugType.length === 1 &&
-                  bugType !== "N" &&
-                  userId !== "all" &&
-                  tableOpen ? (
-                    <>
-                      <div className="  bg-gray-100 border-gray-300 border-solid border-[2px] rounded-lg   w-1/5 h-fit flex flex-col justify-evenly space-y-4 py-16 items-center">
-                        {stateOrder[
-                          stateOrder.findIndex((v, i, a) => {
-                            return v.includes(bugType);
-                          })
-                        ]
-                          .split("")
-                          .map((char) => (
+                {/* data block, contains charts and table */}
+                <div className="w-full flex flex-col space-y-4 px-0">
+                  {/* level 1 charts */}
+                  <div className="flex flex-col space-y-3 pt-3 items-center pt-1 pb-2 px-8 bg-blue-gray-200">
+                    <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-full font-bold text-lg text-green-800 ">
+                      {" "}
+                      {segmentFullNameMap.get(bugSegment)}
+                      {" : "}
+                      {contextData.testbugsTable[bugSegment]
+                        ? contextData.testbugsTable[bugSegment]["lower limit"]
+                        : ""}
+                      {" - "}
+                      {contextData.testbugsTable[bugSegment]
+                        ? contextData.testbugsTable[bugSegment]["upper limit"]
+                        : ""}{" "}
+                    </Card>
+                    <Card className="pb-3 pt-1 px-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
+                      {userId !== "all" ? (
+                        <>
+                          <Tabs value={tableOpen ? "table" : "graph"}>
+                            <TabsHeader>
+                              <Tab
+                                className={`${
+                                  tableOpen ? "font-normal" : " font-bold"
+                                } text-blue-600 z-10`}
+                                key={"graph"}
+                                value={"graph"}
+                                onClick={() => {
+                                  setTableOpen(false);
+                                }}
+                              >
+                                {"Graph"}
+                              </Tab>
+                              <Tab
+                                className={`${
+                                  tableOpen ? "font-bold" : " font-normal"
+                                } text-blue-600 z-10`}
+                                key={"table"}
+                                value={"table"}
+                                onClick={() => {
+                                  setTableOpen(true);
+                                }}
+                              >
+                                {"Table"}
+                              </Tab>
+                            </TabsHeader>
+                          </Tabs>
+                        </>
+                      ) : (
+                        <></>
+                      )}
+
+                      {tableOpen && userId !== "all" ? (
+                        <>
+                          <TestbugsAssigneeTable
+                            bugType={bugType}
+                            tableData={assigneeTableData}
+                            userId={userId}
+                            bugSegment={segmentFullNameMap.get(bugSegment)}
+                          />
+                        </>
+                      ) : (
+                        <>
+                          <HighchartsReact
+                            highcharts={Highcharts}
+                            options={segmentChartOptions}
+                          />
+                        </>
+                      )}
+                    </Card>
+                    {tableOpen && userId !== "all" ? (
+                      <>
+                        <div className="flex bg-gray-100 p-4 rounded-lg flex-col items-center space-y-3">
+                          <TestbugsMetricsTypeRadio
+                            value={bugType}
+                            selectBugType={selectBugType}
+                          />
+                          <Typography
+                            variant="medium"
+                            className="pl-4 text-center"
+                          >
+                            {" "}
+                            Bug Count : <span>{viewData.length}</span>{" "}
+                          </Typography>
+                        </div>
+                      </>
+                    ) : (
+                      <></>
+                    )}
+
+                    <div className="w-full flex flex-row space-x-3 justify-evenly items-center pt-1 px-8">
+                      {userId !== "all" ? (
+                        <>
+                          <Card className=" p-4  flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
+                            {diffAssignNumbers > 10 && !showAllAssignees ? (
+                              <>
+                                <div className=" w-full flex pr-4 flex-row justify-end mb-[-20px] z-10">
+                                  <span
+                                    className="underline hover:cursor-pointer"
+                                    onClick={() => {
+                                      setShowAllAssignees(true);
+                                    }}
+                                  >
+                                    show all
+                                  </span>
+                                </div>
+                              </>
+                            ) : diffAssignNumbers > 10 ? (
+                              <>
+                                <div className=" w-full flex pr-4 flex-row justify-end mb-[-20px] z-10">
+                                  <span
+                                    className="underline hover:cursor-pointer"
+                                    onClick={() => {
+                                      setShowAllAssignees(false);
+                                    }}
+                                  >
+                                    show top 10
+                                  </span>
+                                </div>
+                              </>
+                            ) : (
+                              <></>
+                            )}
+
+                            <HighchartsReact
+                              highcharts={Highcharts}
+                              options={assignedChartOptions}
+                            />
+                          </Card>
+                        </>
+                      ) : (
+                        <></>
+                      )}
+                      {bugType.length > 1 ? (
+                        <>
+                          <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit">
+                            <HighchartsReact
+                              highcharts={Highcharts}
+                              options={typeChartOptions}
+                            />
+                          </Card>
+                        </>
+                      ) : (
+                        <></>
+                      )}
+                      {bugType.length === 1 &&
+                      bugType !== "N" &&
+                      userId !== "all" &&
+                      tableOpen ? (
+                        <>
+                          <div className="  bg-gray-100 border-gray-300 border-solid border-[2px] rounded-lg   w-1/5 h-fit flex flex-col justify-evenly space-y-4 py-16 items-center">
+                            {stateOrder[
+                              stateOrder.findIndex((v, i, a) => {
+                                return v.includes(bugType);
+                              })
+                            ]
+                              .split("")
+                              .map((char) => (
+                                <>
+                                  <div
+                                    style={{
+                                      color:
+                                        typeColors[
+                                          stateOrder[
+                                            stateOrder.findIndex((v, i, a) => {
+                                              return v.includes(char);
+                                            })
+                                          ].indexOf(char)
+                                        ],
+                                    }}
+                                    className={
+                                      bugType !== char
+                                        ? "underline hover:cursor-pointer "
+                                        : "font-bold"
+                                    }
+                                    onClick={() => {
+                                      if (bugType !== char) selectBugType(char);
+                                    }}
+                                  >
+                                    {" "}
+                                    {char}
+                                    {" : "}
+                                    {typeFullNameMap.get(char)}
+                                  </div>
+                                </>
+                              ))}
+                          </div>
+                        </>
+                      ) : (
+                        <></>
+                      )}
+                    </div>
+                    <Card className="pb-3 pt-1 px-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
+                      {diffComponent.length > 10 && !showAllComponents ? (
+                        <>
+                          <div className=" w-full flex pr-4 flex-row justify-end mb-[-20px] z-10">
+                            <span
+                              className="underline hover:cursor-pointer"
+                              onClick={() => {
+                                setShowAllComponents(true);
+                              }}
+                            >
+                              show all
+                            </span>
+                          </div>
+                        </>
+                      ) : diffComponent.length > 10 ? (
+                        <>
+                          <div className=" w-full flex pr-4 flex-row justify-end mb-[-20px] z-10">
+                            <span
+                              className="underline hover:cursor-pointer"
+                              onClick={() => {
+                                setShowAllComponents(false);
+                              }}
+                            >
+                              show top 10
+                            </span>
+                          </div>
+                        </>
+                      ) : (
+                        <></>
+                      )}
+                      <HighchartsReact
+                        highcharts={Highcharts}
+                        options={componentChartOptions}
+                      />
+                    </Card>
+
+                    <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-full font-bold text-lg text-green-800 ">
+                      {" "}
+                      {segmentFullNameMap.get(bugSegment)}
+                      {" : "}
+                      {contextData.testbugsTable[bugSegment]
+                        ? contextData.testbugsTable[bugSegment]["lower limit"]
+                        : ""}
+                      {" - "}
+                      {contextData.testbugsTable[bugSegment]
+                        ? contextData.testbugsTable[bugSegment]["upper limit"]
+                        : ""}{" "}
+                    </Card>
+                  </div>
+
+                  {/* table block */}
+                  <div className="px-4 bg-gray-50 pb-4 pt-6">
+                    {/* table label with level 1 filter data */}
+                    <Typography className="pl-4" variant="h3">
+                      <span className="font-medium font-mono text-base text-blue-500 text-md">
+                        View For:{" "}
+                        {userId !== "all"
+                          ? contextData.userFullNameMap.get(userId)
+                          : "All"}
+                      </span>
+                      <br />
+                      {bugSegment !== "annual" || bugType !== "all" ? (
+                        <>
+                          {" "}
+                          {bugSegment !== "annual" ? (
+                            <>
+                              <span className=" bg-gray-100 py-2 pl-3 rounded-md drop-shadow-md text-blue-500 font-medium font-mono text-base">
+                                {segmentFullNameMap.get(bugSegment)}{" "}
+                                <CloseIcon
+                                  style={{ marginRight: 10, fontSize: "0.8em" }}
+                                  className="fill-gray-500 hover:fill-red-500 hover:cursor-pointer"
+                                  onClick={() => {
+                                    selectBugSegment("annual");
+                                  }}
+                                />
+                              </span>
+                            </>
+                          ) : (
+                            <></>
+                          )}
+                          {bugType !== "all" ? (
+                            <>
+                              <span className=" bg-gray-100 py-2 pl-3 ml-3 rounded-md drop-shadow-md text-blue-500 font-medium font-mono text-base">
+                                {bugType}{" "}
+                                <CloseIcon
+                                  style={{ marginRight: 10, fontSize: "0.8em" }}
+                                  className="fill-gray-500 hover:fill-red-500 hover:cursor-pointer"
+                                  onClick={() => {
+                                    selectBugType("all");
+                                  }}
+                                />
+                              </span>
+                            </>
+                          ) : (
+                            <></>
+                          )}
+                          <br />
+                        </>
+                      ) : (
+                        <></>
+                      )}
+                      <hr />
+                      Total Bugs Count :{" "}
+                      <span className=" text-blue-500">
+                        {viewTableData.length}
+                      </span>{" "}
+                      <br />
+                    </Typography>
+                    <div className="pb-4 flex flex-col justify-center items-center">
+                      <div className="bg-gray-100 border-bold border-gray-300 border-[1px] rounded-md flex flex-row max-w-lg  overflow-x-auto select-none">
+                        {pageNumbers.map((elem) => {
+                          if (elem === pageNumbers.length)
+                            return (
+                              <>
+                                <div
+                                  style={{
+                                    fontWeight:
+                                      elem === currentPage ? "bold" : "",
+                                    fontSize:
+                                      elem === currentPage ? "15px" : "",
+                                    color:
+                                      elem === currentPage ? "#2096F3" : "",
+                                  }}
+                                  className=" flex flex-row justify-center items-center py-2 px-3 hover:bg-gray-300 text-center"
+                                  onClick={() => {
+                                    if (elem !== currentPage)
+                                      setCurrentPage(elem);
+                                  }}
+                                >
+                                  {elem}
+                                </div>
+                              </>
+                            );
+                          return (
                             <>
                               <div
                                 style={{
-                                  color:
-                                    typeColors[
-                                      stateOrder[
-                                        stateOrder.findIndex((v, i, a) => {
-                                          return v.includes(char);
-                                        })
-                                      ].indexOf(char)
-                                    ],
+                                  fontWeight:
+                                    elem === currentPage ? "bold" : "",
+                                  fontSize: elem === currentPage ? "15px" : "",
+                                  color: elem === currentPage ? "#2096F3" : "",
                                 }}
-                                className={
-                                  bugType !== char
-                                    ? "underline hover:cursor-pointer "
-                                    : "font-bold"
-                                }
+                                className=" flex flex-row justify-center items-center py-2 px-3 hover:bg-gray-300 border-r-[1px] border-gray-300 border-bold text-center"
                                 onClick={() => {
-                                  if (bugType !== char) selectBugType(char);
+                                  if (elem !== currentPage)
+                                    setCurrentPage(elem);
                                 }}
                               >
-                                {" "}
-                                {char}
-                                {" : "}
-                                {typeFullNameMap.get(char)}
+                                {elem}
                               </div>
                             </>
-                          ))}
+                          );
+                        })}
                       </div>
-                    </>
-                  ) : (
-                    <></>
-                  )}
-                </div>
-                <Card className="pb-3 pt-1 px-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
-                  {diffComponent.length > 10 && !showAllComponents ? (
-                    <>
-                      <div className=" w-full flex pr-4 flex-row justify-end mb-[-20px] z-10">
-                        <span
-                          className="underline hover:cursor-pointer"
-                          onClick={() => {
-                            setShowAllComponents(true);
-                          }}
-                        >
-                          show all
+
+                      <div className="font-bold text-lg text-blue-600">
+                        <span className="text-gray-600 font-sans">Page:</span>{" "}
+                        {currentPage}
+                        <span className="font-normal italic ">
+                          {" ("}
+                          {(currentPage - 1) * 1000 + 1}
+                          {"-"}
+                          {currentPage * 1000 < viewTableData.length
+                            ? currentPage * 1000
+                            : viewTableData.length}
+                          {")"}
                         </span>
                       </div>
-                    </>
-                  ) : diffComponent.length > 10 ? (
-                    <>
-                      <div className=" w-full flex pr-4 flex-row justify-end mb-[-20px] z-10">
-                        <span
-                          className="underline hover:cursor-pointer"
-                          onClick={() => {
-                            setShowAllComponents(false);
-                          }}
-                        >
-                          show top 10
-                        </span>
+                    </div>
+                    <TestbugsMetricsTable
+                      userId={userId}
+                      data={viewTableData}
+                      sortViewTableAscending={sortViewTableAscending}
+                      sortedFeature={sortedFeature}
+                      bugType={bugType}
+                      lowerIndex={(currentPage - 1) * 1000}
+                      upperIndex={
+                        currentPage * 1000 < viewTableData.length
+                          ? currentPage * 1000
+                          : viewTableData.length
+                      }
+                    />
+                    <div className="py-4 flex flex-col justify-center items-center">
+                      <div className="bg-gray-100 border-bold border-gray-300 border-[1px] rounded-md flex flex-row max-w-lg  overflow-x-auto select-none">
+                        {pageNumbers.map((elem) => {
+                          if (elem === pageNumbers.length)
+                            return (
+                              <>
+                                <div
+                                  style={{
+                                    fontWeight:
+                                      elem === currentPage ? "bold" : "",
+                                    fontSize:
+                                      elem === currentPage ? "15px" : "",
+                                    color:
+                                      elem === currentPage ? "#2096F3" : "",
+                                  }}
+                                  className=" flex flex-row justify-center items-center py-2 px-3 hover:bg-gray-300 text-center"
+                                  onClick={() => {
+                                    if (elem !== currentPage)
+                                      setCurrentPage(elem);
+                                  }}
+                                >
+                                  {elem}
+                                </div>
+                              </>
+                            );
+                          return (
+                            <>
+                              <div
+                                style={{
+                                  fontWeight:
+                                    elem === currentPage ? "bold" : "",
+                                  fontSize: elem === currentPage ? "15px" : "",
+                                  color: elem === currentPage ? "#2096F3" : "",
+                                }}
+                                className=" flex flex-row justify-center items-center py-2 px-3 hover:bg-gray-300 border-r-[1px] border-gray-300 border-bold text-center"
+                                onClick={() => {
+                                  if (elem !== currentPage)
+                                    setCurrentPage(elem);
+                                }}
+                              >
+                                {elem}
+                              </div>
+                            </>
+                          );
+                        })}
                       </div>
-                    </>
-                  ) : (
-                    <></>
-                  )}
-                  <HighchartsReact
-                    highcharts={Highcharts}
-                    options={componentChartOptions}
-                  />
-                </Card>
-
-                <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-full font-bold text-lg text-green-800 ">
-                  {" "}
-                  {segmentFullNameMap.get(bugSegment)}
-                  {" : "}
-                  {contextData.testbugsTable[bugSegment]
-                    ? contextData.testbugsTable[bugSegment]["lower limit"]
-                    : ""}
-                  {" - "}
-                  {contextData.testbugsTable[bugSegment]
-                    ? contextData.testbugsTable[bugSegment]["upper limit"]
-                    : ""}{" "}
-                </Card>
-              </div>
-
-              {/* table block */}
-              <div className="px-4 bg-gray-50 pb-4 pt-6">
-                {/* table label with level 1 filter data */}
-                <Typography className="pl-4" variant="h3">
-                  <span className="font-medium font-mono text-base text-blue-500 text-md">
-                    View For:{" "}
-                    {userId !== "all"
-                      ? contextData.userFullNameMap.get(userId)
-                      : "All"}
-                  </span>
-                  <br />
-                  {bugSegment !== "annual" || bugType !== "all" ? (
-                    <>
-                      {" "}
-                      {bugSegment !== "annual" ? (
-                        <>
-                          <span className=" bg-gray-100 py-2 pl-3 rounded-md drop-shadow-md text-blue-500 font-medium font-mono text-base">
-                            {segmentFullNameMap.get(bugSegment)}{" "}
-                            <CloseIcon
-                              style={{ marginRight: 10, fontSize: "0.8em" }}
-                              className="fill-gray-500 hover:fill-red-500 hover:cursor-pointer"
-                              onClick={() => {
-                                selectBugSegment("annual");
-                              }}
-                            />
-                          </span>
-                        </>
-                      ) : (
-                        <></>
-                      )}
-                      {bugType !== "all" ? (
-                        <>
-                          <span className=" bg-gray-100 py-2 pl-3 ml-3 rounded-md drop-shadow-md text-blue-500 font-medium font-mono text-base">
-                            {bugType}{" "}
-                            <CloseIcon
-                              style={{ marginRight: 10, fontSize: "0.8em" }}
-                              className="fill-gray-500 hover:fill-red-500 hover:cursor-pointer"
-                              onClick={() => {
-                                selectBugType("all");
-                              }}
-                            />
-                          </span>
-                        </>
-                      ) : (
-                        <></>
-                      )}
-                      <br />
-                    </>
-                  ) : (
-                    <></>
-                  )}
-                  <hr />
-                  Total Bugs Count :{" "}
-                  <span className=" text-blue-500">
-                    {viewTableData.length}
-                  </span>{" "}
-                  <br />
-                </Typography>
-                <div className="pb-4 flex flex-col justify-center items-center">
-                  <div className="bg-gray-100 border-bold border-gray-300 border-[1px] rounded-md flex flex-row max-w-lg  overflow-x-auto select-none">
-                    {pageNumbers.map((elem) => {
-                      if (elem === pageNumbers.length)
-                        return (
-                          <>
-                            <div
-                              style={{
-                                fontWeight: elem === currentPage ? "bold" : "",
-                                fontSize: elem === currentPage ? "15px" : "",
-                                color: elem === currentPage ? "#2096F3" : "",
-                              }}
-                              className=" flex flex-row justify-center items-center py-2 px-3 hover:bg-gray-300 text-center"
-                              onClick={() => {
-                                if (elem !== currentPage) setCurrentPage(elem);
-                              }}
-                            >
-                              {elem}
-                            </div>
-                          </>
-                        );
-                      return (
-                        <>
-                          <div
-                            style={{
-                              fontWeight: elem === currentPage ? "bold" : "",
-                              fontSize: elem === currentPage ? "15px" : "",
-                              color: elem === currentPage ? "#2096F3" : "",
-                            }}
-                            className=" flex flex-row justify-center items-center py-2 px-3 hover:bg-gray-300 border-r-[1px] border-gray-300 border-bold text-center"
-                            onClick={() => {
-                              if (elem !== currentPage) setCurrentPage(elem);
-                            }}
-                          >
-                            {elem}
-                          </div>
-                        </>
-                      );
-                    })}
-                  </div>
-
-                  <div className="font-bold text-lg text-blue-600">
-                    <span className="text-gray-600 font-sans">Page:</span>{" "}
-                    {currentPage}
-                    <span className="font-normal italic ">
-                      {" ("}
-                      {(currentPage - 1) * 1000 + 1}
-                      {"-"}
-                      {currentPage * 1000 < viewTableData.length
-                        ? currentPage * 1000
-                        : viewTableData.length}
-                      {")"}
-                    </span>
+                    </div>
                   </div>
                 </div>
-                <TestbugsMetricsTable
-                  userId={userId}
-                  data={viewTableData}
-                  sortViewTableAscending={sortViewTableAscending}
-                  sortedFeature={sortedFeature}
-                  bugType={bugType}
-                  lowerIndex={(currentPage - 1) * 1000}
-                  upperIndex={
-                    currentPage * 1000 < viewTableData.length
-                      ? currentPage * 1000
-                      : viewTableData.length
-                  }
-                />
-                <div className="py-4 flex flex-col justify-center items-center">
-                  <div className="bg-gray-100 border-bold border-gray-300 border-[1px] rounded-md flex flex-row max-w-lg  overflow-x-auto select-none">
-                    {pageNumbers.map((elem) => {
-                      if (elem === pageNumbers.length)
-                        return (
-                          <>
-                            <div
-                              style={{
-                                fontWeight: elem === currentPage ? "bold" : "",
-                                fontSize: elem === currentPage ? "15px" : "",
-                                color: elem === currentPage ? "#2096F3" : "",
-                              }}
-                              className=" flex flex-row justify-center items-center py-2 px-3 hover:bg-gray-300 text-center"
-                              onClick={() => {
-                                if (elem !== currentPage) setCurrentPage(elem);
-                              }}
-                            >
-                              {elem}
-                            </div>
-                          </>
-                        );
-                      return (
-                        <>
-                          <div
-                            style={{
-                              fontWeight: elem === currentPage ? "bold" : "",
-                              fontSize: elem === currentPage ? "15px" : "",
-                              color: elem === currentPage ? "#2096F3" : "",
-                            }}
-                            className=" flex flex-row justify-center items-center py-2 px-3 hover:bg-gray-300 border-r-[1px] border-gray-300 border-bold text-center"
-                            onClick={() => {
-                              if (elem !== currentPage) setCurrentPage(elem);
-                            }}
-                          >
-                            {elem}
-                          </div>
-                        </>
-                      );
-                    })}
+              </>
+            ) : (
+              <>
+                <div className="flex flex-col justify-center items-center h-full text-3xl font-bold text-blue-gray-400 ">
+                  <div>
+                    User with this id ({userId}) not found for this page.
                   </div>
+                  Please select another user.
                 </div>
-              </div>
-            </div>
+              </>
+            )}
           </div>
         </>
       )}

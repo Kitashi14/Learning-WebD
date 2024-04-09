@@ -32,6 +32,9 @@ const ActiveViewPage = (props) => {
     order: contextData.active_states.sortedFeature.order,
   };
 
+  //for invalid userId
+  const [isUserValid, SetIsUserValid] = useState(true);
+
   const navigate = useNavigate(); //for navigating to different routes
   const userId = useParams().uid; //extracting user id from the route/url
   contextData.setActiveUser(userId);
@@ -703,9 +706,14 @@ const ActiveViewPage = (props) => {
     .map((item) => ({ label: item, value: item }));
   releaseSelectorData.unshift({ label: "All", value: "all" });
 
-  if (featureRelease!=="all" && diffRelease.indexOf(featureRelease) === -1) {
+  if (featureRelease !== "all" && diffRelease.indexOf(featureRelease) === -1) {
     selectFeatureRelease("all");
   }
+
+  const setInvalidUserSelected = (value) => {
+    SetIsUserValid(value);
+  };
+
   return (
     <>
       {/* page block */}
@@ -721,197 +729,208 @@ const ActiveViewPage = (props) => {
           table={contextData.jiraTable}
           userId={userId}
           type={"active"}
+          setInvalidUserSelected={setInvalidUserSelected}
         />
+        {isUserValid ? (
+          <>
+            {/* level 1 filter block */}
+            <div className="flex flex-col items-center px-3 rounded-lg space-y-3 bg-gray-50 drop-shadow-md border-blue-200 border-none border-[1px] border-solid py-2 w-fit m-auto ">
+              <Card className="w-fit flex flex-row items-center px-3 py-3 ml-4">
+                View For :
+                <span className="text-base text-blue-500 font-bold pl-2">
+                  {userId === "all"
+                    ? "All"
+                    : contextData.userFullNameMap.get(userId)}
+                </span>
+              </Card>
 
-        {/* level 1 filter block */}
-        <div className="flex flex-col items-center px-3 rounded-lg space-y-3 bg-gray-50 drop-shadow-md border-blue-200 border-none border-[1px] border-solid py-2 w-fit m-auto ">
-          <Card className="w-fit flex flex-row items-center px-3 py-3 ml-4">
-            View For :
-            <span className="text-base text-blue-500 font-bold pl-2">
-              {userId === "all"
-                ? "All"
-                : contextData.userFullNameMap.get(userId)}
-            </span>
-          </Card>
-
-          <div className="flex flex-row items-center space-x-3">
-            {userId !== "all" ? (
-              <>
-                <ActiveFeatureTypeRadio
-                  value={featureType}
-                  selectFeatureType={selectFeatureType}
+              <div className="flex flex-row items-center space-x-3">
+                {userId !== "all" ? (
+                  <>
+                    <ActiveFeatureTypeRadio
+                      value={featureType}
+                      selectFeatureType={selectFeatureType}
+                      userData={userData}
+                    />
+                  </>
+                ) : (
+                  <></>
+                )}
+                <SelectPicker
+                  label="Release"
+                  style={{ width: 250 }}
+                  data={releaseSelectorData}
+                  onChange={(e) => {
+                    selectFeatureRelease(e == null ? "all" : e);
+                  }}
+                  value={featureRelease}
+                />
+                <FeatureStatusRadio
+                  value={featureStatus}
+                  selectFeatureStatus={selectFeatureStatus}
                   userData={userData}
                 />
+              </div>
+              <Typography variant="h5" className="pl-4 text-center">
+                {" "}
+                Total no. of features : <span>{viewData.length}</span>{" "}
+              </Typography>
+            </div>
+
+            {/* user path from its ultimate parent */}
+            {userId !== "all" ? (
+              <>
+                <div className=" px-3 flex cursor-default flex-row justify-center">
+                  {" "}
+                  {previous_parents.map((elem) => (
+                    <>
+                      /
+                      <span
+                        className="px-2 cursor-pointer text-blue-500"
+                        onClick={() => {
+                          navigate(`/active/view/${elem}`);
+                        }}
+                      >
+                        {elem}
+                      </span>
+                    </>
+                  ))}
+                </div>
               </>
             ) : (
               <></>
             )}
-            <SelectPicker
-              label="Release"
-              style={{ width: 250 }}
-              data={releaseSelectorData}
-              onChange={(e) => {
-                selectFeatureRelease(e == null ? "all" : e);
-              }}
-              value={featureRelease}
-            />
-            <FeatureStatusRadio
-              value={featureStatus}
-              selectFeatureStatus={selectFeatureStatus}
-              userData={userData}
-            />
-          </div>
-          <Typography variant="h5" className="pl-4 text-center">
-            {" "}
-            Total no. of features : <span>{viewData.length}</span>{" "}
-          </Typography>
-        </div>
 
-        {/* user path from its ultimate parent */}
-        {userId !== "all" ? (
-          <>
-            <div className=" px-3 flex cursor-default flex-row justify-center">
-              {" "}
-              {previous_parents.map((elem) => (
-                <>
-                  /
-                  <span
-                    className="px-2 cursor-pointer text-blue-500"
-                    onClick={() => {
-                      navigate(`/active/view/${elem}`);
-                    }}
-                  >
-                    {elem}
+            {/* data block, contains charts and table */}
+            <div className="w-full flex flex-col space-y-4 px-0">
+              {/* level 1 charts */}
+              <div className="flex flex-col space-y-3 items-center pt-1 pb-2  bg-blue-gray-200">
+                <div className="w-full flex flex-row space-x-1 justify-evenly pt-1 ">
+                  {userId !== "all" && featureType === "all" ? (
+                    <>
+                      <Card className=" p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
+                        <HighchartsReact
+                          highcharts={Highcharts}
+                          options={typeChartOptions}
+                        />
+                      </Card>
+                    </>
+                  ) : (
+                    <></>
+                  )}
+                  {featureRelease === "all" ? (
+                    <>
+                      <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit">
+                        <HighchartsReact
+                          highcharts={Highcharts}
+                          options={releaseChartOptions}
+                        />
+                      </Card>
+                    </>
+                  ) : (
+                    <></>
+                  )}
+                  {featureStatus === "all" ? (
+                    <>
+                      <Card className=" p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
+                        <HighchartsReact
+                          highcharts={Highcharts}
+                          options={statusChartOptions}
+                        />
+                      </Card>
+                    </>
+                  ) : (
+                    <></>
+                  )}
+                </div>
+                {userId !== "all" ? (
+                  <>
+                    <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
+                      <HighchartsReact
+                        highcharts={Highcharts}
+                        options={assignedChartOptions}
+                      />
+                    </Card>
+                  </>
+                ) : (
+                  <></>
+                )}
+              </div>
+
+              {/* table block */}
+              <div className="px-4 bg-gray-50 pb-4 pt-6">
+                {/* table label with level 1 filter data */}
+                <Typography className="pl-4 pb-4" variant="h3">
+                  <span className="font-medium font-mono text-base text-blue-500 text-md">
+                    View For:{" "}
+                    {userId !== "all"
+                      ? contextData.userFullNameMap.get(userId)
+                      : "All"}
                   </span>
-                </>
-              ))}
+                  <br />
+                  {featureRelease !== "all" || featureStatus !== "all" ? (
+                    <>
+                      {" "}
+                      {featureRelease !== "all" ? (
+                        <>
+                          <span className=" bg-gray-100 py-2 pl-3 rounded-md drop-shadow-md text-blue-500 font-medium font-mono text-base">
+                            {featureRelease}{" "}
+                            <CloseIcon
+                              style={{ marginRight: 10, fontSize: "0.8em" }}
+                              className="fill-gray-500 hover:fill-red-500 hover:cursor-pointer"
+                              onClick={() => {
+                                selectFeatureRelease("all");
+                              }}
+                            />
+                          </span>
+                        </>
+                      ) : (
+                        <></>
+                      )}
+                      {featureStatus !== "all" ? (
+                        <>
+                          <span className=" bg-gray-100 py-2 pl-3 ml-3 rounded-md drop-shadow-md text-blue-500 font-medium font-mono text-base">
+                            {featureStatus}{" "}
+                            <CloseIcon
+                              style={{ marginRight: 10, fontSize: "0.8em" }}
+                              className="fill-gray-500 hover:fill-red-500 hover:cursor-pointer"
+                              onClick={() => {
+                                selectFeatureStatus("all");
+                              }}
+                            />
+                          </span>
+                        </>
+                      ) : (
+                        <></>
+                      )}
+                      <br />
+                    </>
+                  ) : (
+                    <></>
+                  )}
+                  <hr />
+                  Feature Count :{" "}
+                  <span className=" text-blue-500">
+                    {viewTableData.length}
+                  </span>{" "}
+                </Typography>
+                <ActiveFeatureTable
+                  userId={userId}
+                  data={viewTableData}
+                  sortViewTableAscending={sortViewTableAscending}
+                  sortedFeature={sortedFeature}
+                />
+              </div>
             </div>
           </>
         ) : (
-          <></>
-        )}
-
-        {/* data block, contains charts and table */}
-        <div className="w-full flex flex-col space-y-4 px-0">
-          {/* level 1 charts */}
-          <div className="flex flex-col space-y-3 items-center pt-1 pb-2  bg-blue-gray-200">
-            <div className="w-full flex flex-row space-x-1 justify-evenly pt-1 ">
-              {userId !== "all" && featureType === "all" ? (
-                <>
-                  <Card className=" p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
-                    <HighchartsReact
-                      highcharts={Highcharts}
-                      options={typeChartOptions}
-                    />
-                  </Card>
-                </>
-              ) : (
-                <></>
-              )}
-              {featureRelease === "all" ? (
-                <>
-                  <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit">
-                    <HighchartsReact
-                      highcharts={Highcharts}
-                      options={releaseChartOptions}
-                    />
-                  </Card>
-                </>
-              ) : (
-                <></>
-              )}
-              {featureStatus === "all" ? (
-                <>
-                  <Card className=" p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
-                    <HighchartsReact
-                      highcharts={Highcharts}
-                      options={statusChartOptions}
-                    />
-                  </Card>
-                </>
-              ) : (
-                <></>
-              )}
+          <>
+            <div className="flex flex-col justify-center items-center h-full text-3xl font-bold text-blue-gray-400 ">
+              <div>User with this id ({userId}) not found for this page.</div>
+              Please select another user.
             </div>
-            {userId !== "all" ? (
-              <>
-                <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
-                  <HighchartsReact
-                    highcharts={Highcharts}
-                    options={assignedChartOptions}
-                  />
-                </Card>
-              </>
-            ) : (
-              <></>
-            )}
-          </div>
-
-          {/* table block */}
-          <div className="px-4 bg-gray-50 pb-4 pt-6">
-            {/* table label with level 1 filter data */}
-            <Typography className="pl-4 pb-4" variant="h3">
-              <span className="font-medium font-mono text-base text-blue-500 text-md">
-                View For:{" "}
-                {userId !== "all"
-                  ? contextData.userFullNameMap.get(userId)
-                  : "All"}
-              </span>
-              <br />
-              {featureRelease !== "all" || featureStatus !== "all" ? (
-                <>
-                  {" "}
-                  {featureRelease !== "all" ? (
-                    <>
-                      <span className=" bg-gray-100 py-2 pl-3 rounded-md drop-shadow-md text-blue-500 font-medium font-mono text-base">
-                        {featureRelease}{" "}
-                        <CloseIcon
-                          style={{ marginRight: 10, fontSize: "0.8em" }}
-                          className="fill-gray-500 hover:fill-red-500 hover:cursor-pointer"
-                          onClick={() => {
-                            selectFeatureRelease("all");
-                          }}
-                        />
-                      </span>
-                    </>
-                  ) : (
-                    <></>
-                  )}
-                  {featureStatus !== "all" ? (
-                    <>
-                      <span className=" bg-gray-100 py-2 pl-3 ml-3 rounded-md drop-shadow-md text-blue-500 font-medium font-mono text-base">
-                        {featureStatus}{" "}
-                        <CloseIcon
-                          style={{ marginRight: 10, fontSize: "0.8em" }}
-                          className="fill-gray-500 hover:fill-red-500 hover:cursor-pointer"
-                          onClick={() => {
-                            selectFeatureStatus("all");
-                          }}
-                        />
-                      </span>
-                    </>
-                  ) : (
-                    <></>
-                  )}
-                  <br />
-                </>
-              ) : (
-                <></>
-              )}
-              <hr />
-              Feature Count :{" "}
-              <span className=" text-blue-500">
-                {viewTableData.length}
-              </span>{" "}
-            </Typography>
-            <ActiveFeatureTable
-              userId={userId}
-              data={viewTableData}
-              sortViewTableAscending={sortViewTableAscending}
-              sortedFeature={sortedFeature}
-            />
-          </div>
-        </div>
+          </>
+        )}
       </div>
     </>
   );

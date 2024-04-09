@@ -14,6 +14,7 @@ import LocViewPage from "./pages/locViewPage";
 import AutonsViewPage from "./pages/autonsViewPage";
 import TeacatsViewPage from "./pages/teacatsViewPage";
 import TestbugsMetricsViewPage from "./pages/testbugsViewPage";
+import Page404 from "./pages/Page404";
 // contains all routes for the client side
 function App() {
   const contextData = useContext(DataContext);
@@ -95,6 +96,7 @@ function App() {
                 path="/testbugs/view/:uid"
                 element={<TestbugsMetricsViewPage />}
               ></Route>
+              <Route exact path="*" element={<Page404 />} />
             </Routes>
           )}
         </div>

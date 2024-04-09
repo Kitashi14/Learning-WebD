@@ -35,6 +35,9 @@ const AutonsViewPage = (props) => {
   const [showAllAssignees, setShowAllAssignees] = useState(false);
   const [showAllComponents, setShowAllComponents] = useState(false);
 
+  //for invalid userId
+  const [isUserValid, SetIsUserValid] = useState(true);
+
   const [prevUser, setPrevUser] = useState(null);
   const [prevType, setPrevType] = useState(null);
   const [segmentCountData, setSegmentCountData] = useState([]);
@@ -733,7 +736,7 @@ const AutonsViewPage = (props) => {
         innerSize: "50%",
         events: {
           click: (e) => {
-            if (e.point.category !== userId){
+            if (e.point.category !== userId) {
               contextData.setIsAutonsPageLoading(true);
               navigate(`/autons/view/${e.point.category}`);
             }
@@ -964,7 +967,11 @@ const AutonsViewPage = (props) => {
       tableOpen: currentAutonsStatus.tableOpen,
     });
   };
-  
+
+  const setInvalidUserSelected = (value) => {
+    SetIsUserValid(value);
+  };
+
   return (
     <>
       {contextData.isAutonsPageLoading ||
@@ -992,660 +999,673 @@ const AutonsViewPage = (props) => {
               }
               userId={userId}
               type={"autons"}
+              setInvalidUserSelected={setInvalidUserSelected}
             />
+            {isUserValid ? (
+              <>
+                {/* level 1 filter block */}
+                <div className=" flex flex-row justify-stretch">
+                  <div className="w-1/5"> </div>
+                  <div className="flex flex-col items-center px-3 rounded-lg space-y-3 bg-gray-50 drop-shadow-md border-blue-200 border-none border-[1px] border-solid py-2 w-fit m-auto ">
+                    <Card className="w-fit flex flex-row items-center px-3 py-3 ml-4">
+                      View For :
+                      <span className="text-base text-blue-500 font-bold pl-2">
+                        {userId === "all"
+                          ? "All"
+                          : contextData.userFullNameMap.get(userId)}
+                      </span>
+                    </Card>
 
-            {/* level 1 filter block */}
-            <div className=" flex flex-row justify-stretch">
-              <div className="w-1/5"> </div>
-              <div className="flex flex-col items-center px-3 rounded-lg space-y-3 bg-gray-50 drop-shadow-md border-blue-200 border-none border-[1px] border-solid py-2 w-fit m-auto ">
-                <Card className="w-fit flex flex-row items-center px-3 py-3 ml-4">
-                  View For :
-                  <span className="text-base text-blue-500 font-bold pl-2">
-                    {userId === "all"
-                      ? "All"
-                      : contextData.userFullNameMap.get(userId)}
-                  </span>
-                </Card>
-
-                <div className="flex flex-col items-center space-y-2">
-                  <AutonsTypeRadio
-                    value={bugType}
-                    selectBugType={selectBugType}
-                  />
-                  {bugType !== "all" ? (
-                    <>
-                      <AutonsSegmentRadio
-                        value={bugSegment}
-                        selectSegment={selectBugSegment}
+                    <div className="flex flex-col items-center space-y-2">
+                      <AutonsTypeRadio
+                        value={bugType}
+                        selectBugType={selectBugType}
                       />
-                    </>
-                  ) : (
-                    <></>
-                  )}
+                      {bugType !== "all" ? (
+                        <>
+                          <AutonsSegmentRadio
+                            value={bugSegment}
+                            selectSegment={selectBugSegment}
+                          />
+                        </>
+                      ) : (
+                        <></>
+                      )}
+                    </div>
+                    <Typography variant="h5" className="pl-4 text-center">
+                      {" "}
+                      Total no. of Bugs : <span>{viewData.length}</span>{" "}
+                    </Typography>
+                  </div>
+                  <div className="  w-1/5 flex flex-col justify-evenly items-center">
+                    {bugType !== "all" ? (
+                      <>
+                        <div className="  bg-gray-100 border-gray-300 border-solid border-[2px] rounded-lg   w-4/5 h-full flex flex-col justify-evenly items-center">
+                          {stateOrder[
+                            stateOrder.findIndex((v, i, a) => {
+                              return v.includes(bugType);
+                            })
+                          ]
+                            .split("")
+                            .map((char) => (
+                              <>
+                                <div
+                                  style={{
+                                    color:
+                                      typeColors[
+                                        stateOrder[
+                                          stateOrder.findIndex((v, i, a) => {
+                                            return v.includes(char);
+                                          })
+                                        ].indexOf(char)
+                                      ],
+                                  }}
+                                  className={
+                                    bugType !== char
+                                      ? "underline hover:cursor-pointer"
+                                      : "font-bold"
+                                  }
+                                  onClick={() => {
+                                    if (bugType !== char) selectBugType(char);
+                                  }}
+                                >
+                                  {" "}
+                                  {char}
+                                  {" : "}
+                                  {typeFullNameMap.get(char)}
+                                </div>
+                              </>
+                            ))}
+                        </div>
+                      </>
+                    ) : (
+                      <></>
+                    )}
+                  </div>
                 </div>
-                <Typography variant="h5" className="pl-4 text-center">
-                  {" "}
-                  Total no. of Bugs : <span>{viewData.length}</span>{" "}
-                </Typography>
-              </div>
-              <div className="  w-1/5 flex flex-col justify-evenly items-center">
-                {bugType !== "all" ? (
+
+                {/* user path from its ultimate parent */}
+                {userId !== "all" ? (
                   <>
-                    <div className="  bg-gray-100 border-gray-300 border-solid border-[2px] rounded-lg   w-4/5 h-full flex flex-col justify-evenly items-center">
-                      {stateOrder[
-                        stateOrder.findIndex((v, i, a) => {
-                          return v.includes(bugType);
-                        })
-                      ]
-                        .split("")
-                        .map((char) => (
-                          <>
-                            <div
-                              style={{
-                                color:
-                                  typeColors[
-                                    stateOrder[
-                                      stateOrder.findIndex((v, i, a) => {
-                                        return v.includes(char);
-                                      })
-                                    ].indexOf(char)
-                                  ],
-                              }}
-                              className={
-                                bugType !== char
-                                  ? "underline hover:cursor-pointer"
-                                  : "font-bold"
+                    <div className=" px-3 flex cursor-default flex-row justify-center">
+                      {" "}
+                      {previous_parents.map((elem) => (
+                        <>
+                          /
+                          <span
+                            className="px-2 cursor-pointer text-blue-500"
+                            onClick={() => {
+                              if (elem !== userId) {
+                                contextData.setIsAutonsPageLoading(true);
+                                navigate(`/autons/view/${elem}`);
                               }
-                              onClick={() => {
-                                if (bugType !== char) selectBugType(char);
-                              }}
-                            >
-                              {" "}
-                              {char}
-                              {" : "}
-                              {typeFullNameMap.get(char)}
-                            </div>
-                          </>
-                        ))}
+                            }}
+                          >
+                            {elem}
+                          </span>
+                        </>
+                      ))}
                     </div>
                   </>
                 ) : (
                   <></>
                 )}
-              </div>
-            </div>
-
-            {/* user path from its ultimate parent */}
-            {userId !== "all" ? (
-              <>
-                <div className=" px-3 flex cursor-default flex-row justify-center">
-                  {" "}
-                  {previous_parents.map((elem) => (
+                {bugType !== "all" ? (
+                  "AMINO".includes(bugType) ? (
                     <>
-                      /
-                      <span
-                        className="px-2 cursor-pointer text-blue-500"
-                        onClick={() => {
-                          if (elem !== userId) {
-                            contextData.setIsAutonsPageLoading(true);
-                            navigate(`/autons/view/${elem}`);
-                          }
-                        }}
-                      >
-                        {elem}
-                      </span>
+                      <hr className="border-[1px] border-blue-gray-200" />
+                      <div className="w-full  h-16 flex flex-row justify-evenly items-center pt-1 ">
+                        <div className="w-1/5 h-full  flex flex-col">
+                          <div className={`h-3/10 w-full text-center `}>
+                            {" "}
+                            <span
+                              className={
+                                bugSegment === "all"
+                                  ? "font-bold text-white bg-green-700 px-2 py-[3px] rounded-md"
+                                  : "font-semibold text-blue-gray-500"
+                              }
+                            >
+                              All Time
+                            </span>
+                          </div>
+                          <div className="h-7/10 w-full flex flex-col justify-center">
+                            <div className="flex w-full flex-row  justify-center space-x-6 items-center ">
+                              <div className="h-fit w-1/2 flex flex-row justify-end pr-2">
+                                <div className="w-[10px] h-[10px] bg-blue-600 rounded-full"></div>
+                              </div>
+                              <div className="h-fit w-1/2 flex flex-row justify-start ">
+                                <span
+                                  className={
+                                    bugSegment === "all" ? "font-bold" : ""
+                                  }
+                                >
+                                  {outstandingAll}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="w-1/5 h-full  flex flex-col">
+                          <div className={`h-3/10 w-full text-center `}>
+                            {" "}
+                            <span
+                              className={
+                                bugSegment === "lte7"
+                                  ? "font-bold text-white bg-green-700 px-2 py-[3px] rounded-md"
+                                  : "font-semibold text-blue-gray-500"
+                              }
+                            >
+                              {segmentFullNameMap.get("lte7")}
+                            </span>
+                          </div>
+                          <div className="h-7/10 w-full flex flex-col justify-center">
+                            <div className="flex w-full flex-row  justify-center space-x-6 items-center ">
+                              <div className="h-fit w-1/2 flex flex-row justify-end pr-2">
+                                <div className="w-[10px] h-[10px] bg-blue-600 rounded-full"></div>
+                              </div>
+                              <div className="h-fit w-1/2 flex flex-row justify-start ">
+                                <span
+                                  className={
+                                    bugSegment === "lte7" ? "font-bold" : ""
+                                  }
+                                >
+                                  {outstandinglte7}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="w-1/5 h-full  flex flex-col">
+                          <div className={`h-3/10 w-full text-center `}>
+                            {" "}
+                            <span
+                              className={
+                                bugSegment === "gt7"
+                                  ? "font-bold text-white bg-green-700 px-2 py-[3px] rounded-md"
+                                  : "font-semibold text-blue-gray-500"
+                              }
+                            >
+                              {segmentFullNameMap.get("gt7")}
+                            </span>
+                          </div>
+                          <div className="h-7/10 w-full flex flex-col justify-center">
+                            <div className="flex w-full flex-row  justify-center space-x-6 items-center ">
+                              <div className="h-fit w-1/2 flex flex-row justify-end pr-2">
+                                <div className="w-[10px] h-[10px] bg-blue-600 rounded-full"></div>
+                              </div>
+                              <div className="h-fit w-1/2 flex flex-row justify-start ">
+                                <span
+                                  className={
+                                    bugSegment === "gt7" ? "font-bold" : ""
+                                  }
+                                >
+                                  {outstandinggt7}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </>
-                  ))}
+                  ) : (
+                    <>
+                      <hr className="border-[1px] border-blue-gray-200" />
+                      <div className="w-full  h-16 flex flex-row justify-evenly items-center pt-1">
+                        <div className="w-1/5 h-full  flex flex-col">
+                          <div className={`h-3/10 w-full text-center `}>
+                            {" "}
+                            <span
+                              className={
+                                bugSegment === "week"
+                                  ? "font-bold text-white bg-green-700 px-2 py-[3px] rounded-md"
+                                  : "font-semibold text-blue-gray-500"
+                              }
+                            >
+                              {segmentFullNameMap.get("week")}
+                            </span>
+                          </div>
+                          <div className="h-7/10 w-full flex flex-col justify-center">
+                            <div className="flex w-full flex-row  justify-center space-x-6 items-center ">
+                              <div className="h-fit w-1/2 flex flex-row justify-end pr-2">
+                                <div className="w-[10px] h-[10px] bg-blue-600 rounded-full"></div>
+                              </div>
+                              <div className="h-fit w-1/2 flex flex-row justify-start ">
+                                <span
+                                  className={
+                                    bugSegment === "week" ? "font-bold" : ""
+                                  }
+                                >
+                                  {resolvedWeek}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="w-1/5 h-full  flex flex-col">
+                          <div className={`h-3/10 w-full text-center `}>
+                            {" "}
+                            <span
+                              className={
+                                bugSegment === "month"
+                                  ? "font-bold text-white bg-green-700 px-2 py-[3px] rounded-md"
+                                  : "font-semibold text-blue-gray-500"
+                              }
+                            >
+                              {segmentFullNameMap.get("month")}
+                            </span>
+                          </div>
+                          <div className="h-7/10 w-full flex flex-col justify-center">
+                            <div className="flex w-full flex-row  justify-center space-x-6 items-center ">
+                              <div className="h-fit w-1/2 flex flex-row justify-end pr-2">
+                                <div className="w-[10px] h-[10px] bg-blue-600 rounded-full"></div>
+                              </div>
+                              <div className="h-fit w-1/2 flex flex-row justify-start ">
+                                <span
+                                  className={
+                                    bugSegment === "month" ? "font-bold" : ""
+                                  }
+                                >
+                                  {resolvedMonth}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="w-1/5 h-full  flex flex-col">
+                          <div className={`h-3/10 w-full text-center `}>
+                            {" "}
+                            <span
+                              className={
+                                bugSegment === "quarter"
+                                  ? "font-bold text-white bg-green-700 px-2 py-[3px] rounded-md"
+                                  : "font-semibold text-blue-gray-500"
+                              }
+                            >
+                              {segmentFullNameMap.get("quarter")}
+                            </span>
+                          </div>
+                          <div className="h-7/10 w-full flex flex-col justify-center">
+                            <div className="flex w-full flex-row  justify-center space-x-6 items-center ">
+                              <div className="h-fit w-1/2 flex flex-row justify-end pr-2">
+                                <div className="w-[10px] h-[10px] bg-blue-600 rounded-full"></div>
+                              </div>
+                              <div className="h-fit w-1/2 flex flex-row justify-start ">
+                                <span
+                                  className={
+                                    bugSegment === "quarter" ? "font-bold" : ""
+                                  }
+                                >
+                                  {resolvedQuarter}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="w-1/5 h-full  flex flex-col">
+                          <div className={`h-3/10 w-full text-center `}>
+                            {" "}
+                            <span
+                              className={
+                                bugSegment === "semi"
+                                  ? "font-bold text-white bg-green-700 px-2 py-[3px] rounded-md"
+                                  : "font-semibold text-blue-gray-500"
+                              }
+                            >
+                              {segmentFullNameMap.get("semi")}
+                            </span>
+                          </div>
+                          <div className="h-7/10 w-full flex flex-col justify-center">
+                            <div className="flex w-full flex-row  justify-center space-x-6 items-center ">
+                              <div className="h-fit w-1/2 flex flex-row justify-end pr-2">
+                                <div className="w-[10px] h-[10px] bg-blue-600 rounded-full"></div>
+                              </div>
+                              <div className="h-fit w-1/2 flex flex-row justify-start ">
+                                <span
+                                  className={
+                                    bugSegment === "semi" ? "font-bold" : ""
+                                  }
+                                >
+                                  {resolvedSemi}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  )
+                ) : (
+                  <></>
+                )}
+
+                {/* data block, contains charts and table */}
+                <div className="w-full flex flex-col space-y-4 px-0">
+                  {/* level 1 charts */}
+                  <div className="flex flex-col space-y-3 pt-3 items-center pt-1 pb-2 px-8 bg-blue-gray-200">
+                    {"AMINO".includes(bugType) ? (
+                      bugSegment === "all" ? (
+                        <>
+                          <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-full font-bold text-lg text-green-800 ">
+                            {" "}
+                            All Time{" "}
+                          </Card>
+                        </>
+                      ) : (
+                        <>
+                          <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-full font-bold text-lg text-green-800 ">
+                            {" "}
+                            {segmentFullNameMap.get(bugSegment)}{" "}
+                          </Card>
+                        </>
+                      )
+                    ) : bugType !== "all" ? (
+                      <>
+                        <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-full font-bold text-lg text-green-800 ">
+                          {" "}
+                          {segmentFullNameMap.get(bugSegment)}
+                          {" : "}
+                          {contextData.autonsTable.dates
+                            ? contextData.autonsTable.dates[bugSegment][
+                                "lower limit"
+                              ]
+                            : ""}
+                          {" - "}
+                          {contextData.autonsTable.dates
+                            ? contextData.autonsTable.dates[bugSegment][
+                                "upper limit"
+                              ]
+                            : ""}{" "}
+                        </Card>
+                      </>
+                    ) : (
+                      <></>
+                    )}
+
+                    <Card
+                      className={`pb-3 pt-1 px-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ${
+                        tableOpen ? "bg-white" : "bg-gray-300"
+                      } `}
+                    >
+                      {userId !== "all" ? (
+                        <>
+                          <Tabs value={tableOpen ? "table" : "graph"}>
+                            <TabsHeader>
+                              <Tab
+                                className={`${
+                                  tableOpen ? "font-normal" : " font-bold"
+                                } text-blue-600 z-10`}
+                                key={"graph"}
+                                value={"graph"}
+                                onClick={() => {
+                                  setTableOpen(false);
+                                }}
+                              >
+                                {"Graph"}
+                              </Tab>
+                              <Tab
+                                className={`${
+                                  tableOpen ? "font-bold" : " font-normal"
+                                } text-blue-600 z-10`}
+                                key={"table"}
+                                value={"table"}
+                                onClick={() => {
+                                  setTableOpen(true);
+                                }}
+                              >
+                                {"Table"}
+                              </Tab>
+                            </TabsHeader>
+                          </Tabs>
+                        </>
+                      ) : (
+                        <></>
+                      )}
+
+                      {tableOpen && userId !== "all" ? (
+                        <>
+                          <AutonsAssigneeTable
+                            bugType={bugType}
+                            tableData={assigneeTableData}
+                            userId={userId}
+                            bugSegment={segmentFullNameMap.get(bugSegment)}
+                          />
+                        </>
+                      ) : (
+                        <>
+                          <div className="w-full flex flex-row space-x-3 justify-evenly items-center pt-1 ">
+                            {bugType === "all" ? (
+                              <>
+                                <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit">
+                                  <HighchartsReact
+                                    highcharts={Highcharts}
+                                    options={outstandingSegmentChartOptions}
+                                  />
+                                </Card>
+                              </>
+                            ) : (
+                              <></>
+                            )}
+
+                            {bugType.length > 1 ? (
+                              <>
+                                <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit">
+                                  <HighchartsReact
+                                    highcharts={Highcharts}
+                                    options={typeChartOptions}
+                                  />
+                                </Card>
+                              </>
+                            ) : (
+                              <></>
+                            )}
+                            {userId !== "all" && bugType !== "all" ? (
+                              <>
+                                <Card className=" p-4  flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
+                                  {diffAssignNumbers > 10 &&
+                                  !showAllAssignees ? (
+                                    <>
+                                      <div className=" w-full flex pr-4 flex-row justify-end mb-[-20px] z-10">
+                                        <span
+                                          className="underline hover:cursor-pointer"
+                                          onClick={() => {
+                                            setShowAllAssignees(true);
+                                          }}
+                                        >
+                                          show all
+                                        </span>
+                                      </div>
+                                    </>
+                                  ) : diffAssignNumbers > 10 ? (
+                                    <>
+                                      <div className=" w-full flex pr-4 flex-row justify-end mb-[-20px] z-10">
+                                        <span
+                                          className="underline hover:cursor-pointer"
+                                          onClick={() => {
+                                            setShowAllAssignees(false);
+                                          }}
+                                        >
+                                          show top 10
+                                        </span>
+                                      </div>
+                                    </>
+                                  ) : (
+                                    <></>
+                                  )}
+
+                                  <HighchartsReact
+                                    highcharts={Highcharts}
+                                    options={assignedChartOptions}
+                                  />
+                                </Card>
+                              </>
+                            ) : (
+                              <></>
+                            )}
+
+                            {bugType === "all" ? (
+                              <>
+                                <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit">
+                                  <HighchartsReact
+                                    highcharts={Highcharts}
+                                    options={resolvedSegmentChartOptions}
+                                  />
+                                </Card>
+                              </>
+                            ) : (
+                              <></>
+                            )}
+                          </div>
+                        </>
+                      )}
+                    </Card>
+
+                    <Card className="pb-3 pt-1 px-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
+                      {diffComponent.length > 10 && !showAllComponents ? (
+                        <>
+                          <div className=" w-full flex pr-4 flex-row justify-end mb-[-20px] z-10">
+                            <span
+                              className="underline hover:cursor-pointer"
+                              onClick={() => {
+                                setShowAllComponents(true);
+                              }}
+                            >
+                              show all
+                            </span>
+                          </div>
+                        </>
+                      ) : diffComponent.length > 10 ? (
+                        <>
+                          <div className=" w-full flex pr-4 flex-row justify-end mb-[-20px] z-10">
+                            <span
+                              className="underline hover:cursor-pointer"
+                              onClick={() => {
+                                setShowAllComponents(false);
+                              }}
+                            >
+                              show top 10
+                            </span>
+                          </div>
+                        </>
+                      ) : (
+                        <></>
+                      )}
+                      <HighchartsReact
+                        highcharts={Highcharts}
+                        options={componentChartOptions}
+                      />
+                    </Card>
+
+                    {"AMINO".includes(bugType) ? (
+                      <></>
+                    ) : bugType !== "all" ? (
+                      <>
+                        <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-full font-bold text-lg text-green-800 ">
+                          {" "}
+                          {segmentFullNameMap.get(bugSegment)}
+                          {" : "}
+                          {contextData.autonsTable.dates
+                            ? contextData.autonsTable.dates[bugSegment][
+                                "lower limit"
+                              ]
+                            : ""}
+                          {" - "}
+                          {contextData.autonsTable.dates
+                            ? contextData.autonsTable.dates[bugSegment][
+                                "upper limit"
+                              ]
+                            : ""}{" "}
+                        </Card>
+                      </>
+                    ) : (
+                      <></>
+                    )}
+                  </div>
+
+                  {/* table block */}
+                  <div className="px-4 bg-gray-50 pb-4 pt-6 space-y-2">
+                    {/* table label with level 1 filter data */}
+                    <Typography className="pl-4" variant="h3">
+                      <span className="font-medium font-mono text-base text-blue-500 text-md">
+                        View For:{" "}
+                        {userId !== "all"
+                          ? contextData.userFullNameMap.get(userId)
+                          : "All"}
+                      </span>
+                      <br />
+                      {bugType !== "all" ? (
+                        <>
+                          {" "}
+                          {bugSegment !== "semi" && bugSegment !== "all" ? (
+                            <>
+                              <span className=" bg-gray-100 py-2 pl-3 rounded-md drop-shadow-md text-blue-500 font-medium font-mono text-base">
+                                {segmentFullNameMap.get(bugSegment)}{" "}
+                                <CloseIcon
+                                  style={{ marginRight: 10, fontSize: "0.8em" }}
+                                  className="fill-gray-500 hover:fill-red-500 hover:cursor-pointer"
+                                  onClick={() => {
+                                    if (bugType === "AMINO")
+                                      selectBugSegment("all");
+                                    else selectBugSegment("semi");
+                                  }}
+                                />
+                              </span>
+                            </>
+                          ) : (
+                            <></>
+                          )}
+                          {bugType !== "all" ? (
+                            <>
+                              <span className=" bg-gray-100 py-2 pl-3 ml-3 rounded-md drop-shadow-md text-blue-500 font-medium font-mono text-base">
+                                {bugType.length === 1
+                                  ? typeFullNameMap.get(bugType)
+                                  : bugType}{" "}
+                                <CloseIcon
+                                  style={{ marginRight: 10, fontSize: "0.8em" }}
+                                  className="fill-gray-500 hover:fill-red-500 hover:cursor-pointer"
+                                  onClick={() => {
+                                    selectBugType("all");
+                                  }}
+                                />
+                              </span>
+                            </>
+                          ) : (
+                            <></>
+                          )}
+                          <br />
+                        </>
+                      ) : (
+                        <></>
+                      )}
+                      <hr />
+                      Total Bugs Count :{" "}
+                      <span className=" text-blue-500">
+                        {viewTableData.length}
+                      </span>{" "}
+                      <br />
+                    </Typography>
+
+                    <AutonsTable
+                      userId={userId}
+                      data={viewTableData}
+                      sortViewTableAscending={sortViewTableAscending}
+                      sortedFeature={sortedFeature}
+                      bugType={bugType}
+                    />
+                  </div>
                 </div>
               </>
             ) : (
-              <></>
-            )}
-            {bugType !== "all" ? (
-              "AMINO".includes(bugType) ? (
-                <>
-                  <hr className="border-[1px] border-blue-gray-200" />
-                  <div className="w-full  h-16 flex flex-row justify-evenly items-center pt-1 ">
-                    <div className="w-1/5 h-full  flex flex-col">
-                      <div className={`h-3/10 w-full text-center `}>
-                        {" "}
-                        <span
-                          className={
-                            bugSegment === "all"
-                              ? "font-bold text-white bg-green-700 px-2 py-[3px] rounded-md"
-                              : "font-semibold text-blue-gray-500"
-                          }
-                        >
-                          All Time
-                        </span>
-                      </div>
-                      <div className="h-7/10 w-full flex flex-col justify-center">
-                        <div className="flex w-full flex-row  justify-center space-x-6 items-center ">
-                          <div className="h-fit w-1/2 flex flex-row justify-end pr-2">
-                            <div className="w-[10px] h-[10px] bg-blue-600 rounded-full"></div>
-                          </div>
-                          <div className="h-fit w-1/2 flex flex-row justify-start ">
-                            <span
-                              className={
-                                bugSegment === "all" ? "font-bold" : ""
-                              }
-                            >
-                              {outstandingAll}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="w-1/5 h-full  flex flex-col">
-                      <div className={`h-3/10 w-full text-center `}>
-                        {" "}
-                        <span
-                          className={
-                            bugSegment === "lte7"
-                              ? "font-bold text-white bg-green-700 px-2 py-[3px] rounded-md"
-                              : "font-semibold text-blue-gray-500"
-                          }
-                        >
-                          {segmentFullNameMap.get("lte7")}
-                        </span>
-                      </div>
-                      <div className="h-7/10 w-full flex flex-col justify-center">
-                        <div className="flex w-full flex-row  justify-center space-x-6 items-center ">
-                          <div className="h-fit w-1/2 flex flex-row justify-end pr-2">
-                            <div className="w-[10px] h-[10px] bg-blue-600 rounded-full"></div>
-                          </div>
-                          <div className="h-fit w-1/2 flex flex-row justify-start ">
-                            <span
-                              className={
-                                bugSegment === "lte7" ? "font-bold" : ""
-                              }
-                            >
-                              {outstandinglte7}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="w-1/5 h-full  flex flex-col">
-                      <div className={`h-3/10 w-full text-center `}>
-                        {" "}
-                        <span
-                          className={
-                            bugSegment === "gt7"
-                              ? "font-bold text-white bg-green-700 px-2 py-[3px] rounded-md"
-                              : "font-semibold text-blue-gray-500"
-                          }
-                        >
-                          {segmentFullNameMap.get("gt7")}
-                        </span>
-                      </div>
-                      <div className="h-7/10 w-full flex flex-col justify-center">
-                        <div className="flex w-full flex-row  justify-center space-x-6 items-center ">
-                          <div className="h-fit w-1/2 flex flex-row justify-end pr-2">
-                            <div className="w-[10px] h-[10px] bg-blue-600 rounded-full"></div>
-                          </div>
-                          <div className="h-fit w-1/2 flex flex-row justify-start ">
-                            <span
-                              className={
-                                bugSegment === "gt7" ? "font-bold" : ""
-                              }
-                            >
-                              {outstandinggt7}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+              <>
+                <div className="flex flex-col justify-center items-center h-full text-3xl font-bold text-blue-gray-400 ">
+                  <div>
+                    User with this id ({userId}) not found for this page.
                   </div>
-                </>
-              ) : (
-                <>
-                  <hr className="border-[1px] border-blue-gray-200" />
-                  <div className="w-full  h-16 flex flex-row justify-evenly items-center pt-1">
-                    <div className="w-1/5 h-full  flex flex-col">
-                      <div className={`h-3/10 w-full text-center `}>
-                        {" "}
-                        <span
-                          className={
-                            bugSegment === "week"
-                              ? "font-bold text-white bg-green-700 px-2 py-[3px] rounded-md"
-                              : "font-semibold text-blue-gray-500"
-                          }
-                        >
-                          {segmentFullNameMap.get("week")}
-                        </span>
-                      </div>
-                      <div className="h-7/10 w-full flex flex-col justify-center">
-                        <div className="flex w-full flex-row  justify-center space-x-6 items-center ">
-                          <div className="h-fit w-1/2 flex flex-row justify-end pr-2">
-                            <div className="w-[10px] h-[10px] bg-blue-600 rounded-full"></div>
-                          </div>
-                          <div className="h-fit w-1/2 flex flex-row justify-start ">
-                            <span
-                              className={
-                                bugSegment === "week" ? "font-bold" : ""
-                              }
-                            >
-                              {resolvedWeek}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="w-1/5 h-full  flex flex-col">
-                      <div className={`h-3/10 w-full text-center `}>
-                        {" "}
-                        <span
-                          className={
-                            bugSegment === "month"
-                              ? "font-bold text-white bg-green-700 px-2 py-[3px] rounded-md"
-                              : "font-semibold text-blue-gray-500"
-                          }
-                        >
-                          {segmentFullNameMap.get("month")}
-                        </span>
-                      </div>
-                      <div className="h-7/10 w-full flex flex-col justify-center">
-                        <div className="flex w-full flex-row  justify-center space-x-6 items-center ">
-                          <div className="h-fit w-1/2 flex flex-row justify-end pr-2">
-                            <div className="w-[10px] h-[10px] bg-blue-600 rounded-full"></div>
-                          </div>
-                          <div className="h-fit w-1/2 flex flex-row justify-start ">
-                            <span
-                              className={
-                                bugSegment === "month" ? "font-bold" : ""
-                              }
-                            >
-                              {resolvedMonth}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="w-1/5 h-full  flex flex-col">
-                      <div className={`h-3/10 w-full text-center `}>
-                        {" "}
-                        <span
-                          className={
-                            bugSegment === "quarter"
-                              ? "font-bold text-white bg-green-700 px-2 py-[3px] rounded-md"
-                              : "font-semibold text-blue-gray-500"
-                          }
-                        >
-                          {segmentFullNameMap.get("quarter")}
-                        </span>
-                      </div>
-                      <div className="h-7/10 w-full flex flex-col justify-center">
-                        <div className="flex w-full flex-row  justify-center space-x-6 items-center ">
-                          <div className="h-fit w-1/2 flex flex-row justify-end pr-2">
-                            <div className="w-[10px] h-[10px] bg-blue-600 rounded-full"></div>
-                          </div>
-                          <div className="h-fit w-1/2 flex flex-row justify-start ">
-                            <span
-                              className={
-                                bugSegment === "quarter" ? "font-bold" : ""
-                              }
-                            >
-                              {resolvedQuarter}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="w-1/5 h-full  flex flex-col">
-                      <div className={`h-3/10 w-full text-center `}>
-                        {" "}
-                        <span
-                          className={
-                            bugSegment === "semi"
-                              ? "font-bold text-white bg-green-700 px-2 py-[3px] rounded-md"
-                              : "font-semibold text-blue-gray-500"
-                          }
-                        >
-                          {segmentFullNameMap.get("semi")}
-                        </span>
-                      </div>
-                      <div className="h-7/10 w-full flex flex-col justify-center">
-                        <div className="flex w-full flex-row  justify-center space-x-6 items-center ">
-                          <div className="h-fit w-1/2 flex flex-row justify-end pr-2">
-                            <div className="w-[10px] h-[10px] bg-blue-600 rounded-full"></div>
-                          </div>
-                          <div className="h-fit w-1/2 flex flex-row justify-start ">
-                            <span
-                              className={
-                                bugSegment === "semi" ? "font-bold" : ""
-                              }
-                            >
-                              {resolvedSemi}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </>
-              )
-            ) : (
-              <></>
+                  Please select another user.
+                </div>
+              </>
             )}
-
-            {/* data block, contains charts and table */}
-            <div className="w-full flex flex-col space-y-4 px-0">
-              {/* level 1 charts */}
-              <div className="flex flex-col space-y-3 pt-3 items-center pt-1 pb-2 px-8 bg-blue-gray-200">
-                {"AMINO".includes(bugType) ? (
-                  bugSegment === "all" ? (
-                    <>
-                      <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-full font-bold text-lg text-green-800 ">
-                        {" "}
-                        All Time{" "}
-                      </Card>
-                    </>
-                  ) : (
-                    <>
-                      <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-full font-bold text-lg text-green-800 ">
-                        {" "}
-                        {segmentFullNameMap.get(bugSegment)}{" "}
-                      </Card>
-                    </>
-                  )
-                ) : bugType !== "all" ? (
-                  <>
-                    <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-full font-bold text-lg text-green-800 ">
-                      {" "}
-                      {segmentFullNameMap.get(bugSegment)}
-                      {" : "}
-                      {contextData.autonsTable.dates
-                        ? contextData.autonsTable.dates[bugSegment][
-                            "lower limit"
-                          ]
-                        : ""}
-                      {" - "}
-                      {contextData.autonsTable.dates
-                        ? contextData.autonsTable.dates[bugSegment][
-                            "upper limit"
-                          ]
-                        : ""}{" "}
-                    </Card>
-                  </>
-                ) : (
-                  <></>
-                )}
-
-                <Card
-                  className={`pb-3 pt-1 px-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ${
-                    tableOpen ? "bg-white" : "bg-gray-300"
-                  } `}
-                >
-                  {userId !== "all" ? (
-                    <>
-                      <Tabs value={tableOpen ? "table" : "graph"}>
-                        <TabsHeader>
-                          <Tab
-                            className={`${
-                              tableOpen ? "font-normal" : " font-bold"
-                            } text-blue-600 z-10`}
-                            key={"graph"}
-                            value={"graph"}
-                            onClick={() => {
-                              setTableOpen(false);
-                            }}
-                          >
-                            {"Graph"}
-                          </Tab>
-                          <Tab
-                            className={`${
-                              tableOpen ? "font-bold" : " font-normal"
-                            } text-blue-600 z-10`}
-                            key={"table"}
-                            value={"table"}
-                            onClick={() => {
-                              setTableOpen(true);
-                            }}
-                          >
-                            {"Table"}
-                          </Tab>
-                        </TabsHeader>
-                      </Tabs>
-                    </>
-                  ) : (
-                    <></>
-                  )}
-
-                  {tableOpen && userId !== "all" ? (
-                    <>
-                      <AutonsAssigneeTable
-                        bugType={bugType}
-                        tableData={assigneeTableData}
-                        userId={userId}
-                        bugSegment={segmentFullNameMap.get(bugSegment)}
-                      />
-                    </>
-                  ) : (
-                    <>
-                      <div className="w-full flex flex-row space-x-3 justify-evenly items-center pt-1 ">
-                        {bugType === "all" ? (
-                          <>
-                            <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit">
-                              <HighchartsReact
-                                highcharts={Highcharts}
-                                options={outstandingSegmentChartOptions}
-                              />
-                            </Card>
-                          </>
-                        ) : (
-                          <></>
-                        )}
-
-                        {bugType.length > 1 ? (
-                          <>
-                            <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit">
-                              <HighchartsReact
-                                highcharts={Highcharts}
-                                options={typeChartOptions}
-                              />
-                            </Card>
-                          </>
-                        ) : (
-                          <></>
-                        )}
-                        {userId !== "all" && bugType !== "all" ? (
-                          <>
-                            <Card className=" p-4  flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
-                              {diffAssignNumbers > 10 && !showAllAssignees ? (
-                                <>
-                                  <div className=" w-full flex pr-4 flex-row justify-end mb-[-20px] z-10">
-                                    <span
-                                      className="underline hover:cursor-pointer"
-                                      onClick={() => {
-                                        setShowAllAssignees(true);
-                                      }}
-                                    >
-                                      show all
-                                    </span>
-                                  </div>
-                                </>
-                              ) : diffAssignNumbers > 10 ? (
-                                <>
-                                  <div className=" w-full flex pr-4 flex-row justify-end mb-[-20px] z-10">
-                                    <span
-                                      className="underline hover:cursor-pointer"
-                                      onClick={() => {
-                                        setShowAllAssignees(false);
-                                      }}
-                                    >
-                                      show top 10
-                                    </span>
-                                  </div>
-                                </>
-                              ) : (
-                                <></>
-                              )}
-
-                              <HighchartsReact
-                                highcharts={Highcharts}
-                                options={assignedChartOptions}
-                              />
-                            </Card>
-                          </>
-                        ) : (
-                          <></>
-                        )}
-
-                        {bugType === "all" ? (
-                          <>
-                            <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit">
-                              <HighchartsReact
-                                highcharts={Highcharts}
-                                options={resolvedSegmentChartOptions}
-                              />
-                            </Card>
-                          </>
-                        ) : (
-                          <></>
-                        )}
-                      </div>
-                    </>
-                  )}
-                </Card>
-
-                <Card className="pb-3 pt-1 px-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
-                  {diffComponent.length > 10 && !showAllComponents ? (
-                    <>
-                      <div className=" w-full flex pr-4 flex-row justify-end mb-[-20px] z-10">
-                        <span
-                          className="underline hover:cursor-pointer"
-                          onClick={() => {
-                            setShowAllComponents(true);
-                          }}
-                        >
-                          show all
-                        </span>
-                      </div>
-                    </>
-                  ) : diffComponent.length > 10 ? (
-                    <>
-                      <div className=" w-full flex pr-4 flex-row justify-end mb-[-20px] z-10">
-                        <span
-                          className="underline hover:cursor-pointer"
-                          onClick={() => {
-                            setShowAllComponents(false);
-                          }}
-                        >
-                          show top 10
-                        </span>
-                      </div>
-                    </>
-                  ) : (
-                    <></>
-                  )}
-                  <HighchartsReact
-                    highcharts={Highcharts}
-                    options={componentChartOptions}
-                  />
-                </Card>
-
-                {"AMINO".includes(bugType) ? (
-                  <></>
-                ) : bugType !== "all" ? (
-                  <>
-                    <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-full font-bold text-lg text-green-800 ">
-                      {" "}
-                      {segmentFullNameMap.get(bugSegment)}
-                      {" : "}
-                      {contextData.autonsTable.dates
-                        ? contextData.autonsTable.dates[bugSegment][
-                            "lower limit"
-                          ]
-                        : ""}
-                      {" - "}
-                      {contextData.autonsTable.dates
-                        ? contextData.autonsTable.dates[bugSegment][
-                            "upper limit"
-                          ]
-                        : ""}{" "}
-                    </Card>
-                  </>
-                ) : (
-                  <></>
-                )}
-              </div>
-
-              {/* table block */}
-              <div className="px-4 bg-gray-50 pb-4 pt-6 space-y-2">
-                {/* table label with level 1 filter data */}
-                <Typography className="pl-4" variant="h3">
-                  <span className="font-medium font-mono text-base text-blue-500 text-md">
-                    View For:{" "}
-                    {userId !== "all"
-                      ? contextData.userFullNameMap.get(userId)
-                      : "All"}
-                  </span>
-                  <br />
-                  {bugType !== "all" ? (
-                    <>
-                      {" "}
-                      {bugSegment !== "semi" && bugSegment !== "all" ? (
-                        <>
-                          <span className=" bg-gray-100 py-2 pl-3 rounded-md drop-shadow-md text-blue-500 font-medium font-mono text-base">
-                            {segmentFullNameMap.get(bugSegment)}{" "}
-                            <CloseIcon
-                              style={{ marginRight: 10, fontSize: "0.8em" }}
-                              className="fill-gray-500 hover:fill-red-500 hover:cursor-pointer"
-                              onClick={() => {
-                                if (bugType === "AMINO")
-                                  selectBugSegment("all");
-                                else selectBugSegment("semi");
-                              }}
-                            />
-                          </span>
-                        </>
-                      ) : (
-                        <></>
-                      )}
-                      {bugType !== "all" ? (
-                        <>
-                          <span className=" bg-gray-100 py-2 pl-3 ml-3 rounded-md drop-shadow-md text-blue-500 font-medium font-mono text-base">
-                            {bugType.length === 1
-                              ? typeFullNameMap.get(bugType)
-                              : bugType}{" "}
-                            <CloseIcon
-                              style={{ marginRight: 10, fontSize: "0.8em" }}
-                              className="fill-gray-500 hover:fill-red-500 hover:cursor-pointer"
-                              onClick={() => {
-                                selectBugType("all");
-                              }}
-                            />
-                          </span>
-                        </>
-                      ) : (
-                        <></>
-                      )}
-                      <br />
-                    </>
-                  ) : (
-                    <></>
-                  )}
-                  <hr />
-                  Total Bugs Count :{" "}
-                  <span className=" text-blue-500">
-                    {viewTableData.length}
-                  </span>{" "}
-                  <br />
-                </Typography>
-                
-                <AutonsTable
-                  userId={userId}
-                  data={viewTableData}
-                  sortViewTableAscending={sortViewTableAscending}
-                  sortedFeature={sortedFeature}
-                  bugType={bugType}
-                  
-                />
-              </div>
-            </div>
           </div>
         </>
       )}

@@ -31,6 +31,9 @@ const DplViewPage = (props) => {
   const [viewData, setViewData] = useState([]); //it will contain all elements after applying level 1 filter, used for showing lvl 1 charts
   const [viewTableData, setViewTableData] = useState([]); //it will contain all elements after applying level 2 filter, used for filling table
 
+  //for invalid userId
+  const [isUserValid, SetIsUserValid] = useState(true);
+
   // getting the feature details that was sorted
   const sortedFeature = {
     feature: contextData.dpl_states.sortedFeature.feature,
@@ -585,6 +588,10 @@ const DplViewPage = (props) => {
     .map((item) => ({ label: item, value: item }));
   releaseSelectorData.unshift({ label: "All", value: "all" });
 
+  const setInvalidUserSelected = (value) => {
+    SetIsUserValid(value);
+  };
+
   return (
     <>
       {/* page block */}
@@ -600,241 +607,253 @@ const DplViewPage = (props) => {
           table={contextData.dplTable}
           userId={userId}
           type={"dpl"}
+          setInvalidUserSelected={setInvalidUserSelected}
         />
 
-        {/* level 1 filter block */}
-        <div className="flex flex-col items-center px-3 rounded-lg space-y-3 bg-gray-50 drop-shadow-md border-blue-200 border-none border-[1px] border-solid py-2 w-fit m-auto">
-          <Card className="w-fit flex flex-row items-center px-3 py-3 ml-4">
-            View For :
-            <span className="text-base text-blue-500 font-bold pl-2">
-              {userId === "all"
-                ? "All"
-                : contextData.userFullNameMap.get(userId)}
-            </span>
-          </Card>
-
-          <div className="flex flex-col items-center space-y-3">
-            <SelectPicker
-              label="Release"
-              // style={{ width: 200 }}
-              data={releaseSelectorData}
-              onChange={(e) => {
-                selectFeatureRelease(e == null ? "all" : e);
-              }}
-              value={featureRelease}
-            />
-            <FeatureTagRadio
-              selectFeatureTag={selectFeatureTag}
-              value={featureTag}
-            />
-            <FeatureTypeRadio
-              selectFeatureType={selectFeatureType}
-              value={featureType}
-            />
-          </div>
-          <Typography variant="h5" className="pl-4 text-center">
-            {" "}
-            Total no. of features : <span>{viewData.length}</span>{" "}
-          </Typography>
-        </div>
-
-        {/* user path from its ultimate parent */}
-        {userId !== "all" ? (
+        {isUserValid ? (
           <>
-            <div className=" px-3 flex cursor-default flex-row justify-center">
-              {" "}
-              {previous_parents.map((elem) => (
-                <>
-                  /
-                  <span
-                    className="px-2 cursor-pointer text-blue-500"
-                    onClick={() => {
-                      navigate(`/dpl/view/${elem}`);
-                    }}
-                  >
-                    {elem}
-                  </span>
-                </>
-              ))}
-            </div>
-          </>
-        ) : (
-          <></>
-        )}
+            {/* level 1 filter block */}
+            <div className="flex flex-col items-center px-3 rounded-lg space-y-3 bg-gray-50 drop-shadow-md border-blue-200 border-none border-[1px] border-solid py-2 w-fit m-auto">
+              <Card className="w-fit flex flex-row items-center px-3 py-3 ml-4">
+                View For :
+                <span className="text-base text-blue-500 font-bold pl-2">
+                  {userId === "all"
+                    ? "All"
+                    : contextData.userFullNameMap.get(userId)}
+                </span>
+              </Card>
 
-        {/* data block, contains charts and table */}
-        <div className="w-full flex flex-col space-y-4">
-          {/* level 1 charts */}
-          <div className="flex flex-col space-y-1 items-center pt-3 pb-3 px-8 bg-blue-gray-200">
-            {featureRelease === "all" ? (
+              <div className="flex flex-col items-center space-y-3">
+                <SelectPicker
+                  label="Release"
+                  // style={{ width: 200 }}
+                  data={releaseSelectorData}
+                  onChange={(e) => {
+                    selectFeatureRelease(e == null ? "all" : e);
+                  }}
+                  value={featureRelease}
+                />
+                <FeatureTagRadio
+                  selectFeatureTag={selectFeatureTag}
+                  value={featureTag}
+                />
+                <FeatureTypeRadio
+                  selectFeatureType={selectFeatureType}
+                  value={featureType}
+                />
+              </div>
+              <Typography variant="h5" className="pl-4 text-center">
+                {" "}
+                Total no. of features : <span>{viewData.length}</span>{" "}
+              </Typography>
+            </div>
+
+            {/* user path from its ultimate parent */}
+            {userId !== "all" ? (
               <>
-                <Card className="p-4 hover:drop-shadow-xl w-full ">
-                  <HighchartsReact
-                    highcharts={Highcharts}
-                    options={releaseChartOptions}
-                  />
-                </Card>
+                <div className=" px-3 flex cursor-default flex-row justify-center">
+                  {" "}
+                  {previous_parents.map((elem) => (
+                    <>
+                      /
+                      <span
+                        className="px-2 cursor-pointer text-blue-500"
+                        onClick={() => {
+                          navigate(`/dpl/view/${elem}`);
+                        }}
+                      >
+                        {elem}
+                      </span>
+                    </>
+                  ))}
+                </div>
               </>
             ) : (
               <></>
             )}
-            <div className="w-full flex flex-row space-x-8 justify-evenly pt-1 px-8">
-              {featureTag === "all" ? (
-                <>
-                  <Card className="p-4 hover:drop-shadow-xl w-1/3">
-                    <HighchartsReact
-                      highcharts={Highcharts}
-                      options={tagChartOptions}
-                    />
-                  </Card>
-                </>
-              ) : (
-                <></>
-              )}
-              {userId !== "all" ? (
-                <>
-                  <Card className="p-4 hover:drop-shadow-xl w-1/3 ">
-                    <HighchartsReact
-                      highcharts={Highcharts}
-                      options={assignedChartOptions}
-                    />
-                  </Card>
-                </>
-              ) : (
-                <></>
-              )}
-              {featureType === "all" ? (
-                <>
-                  <Card className="p-4 hover:drop-shadow-xl w-1/3 ">
-                    <HighchartsReact
-                      highcharts={Highcharts}
-                      options={typeChartOptions}
-                    />
-                  </Card>
-                </>
-              ) : (
-                <></>
-              )}
-            </div>
-          </div>
 
-          {/* level 2 charts */}
-          <div className="flex flex-row  space-x-4 justify-evenly px-8 ">
-            <Card className=" p-4 hover:drop-shadow-md w-1/3 ">
-              <HighchartsReact
-                highcharts={Highcharts}
-                options={statusChartOptions}
-              />
-            </Card>
-
-            <Card className=" p-4 hover:drop-shadow-md w-1/3">
-              <HighchartsReact
-                highcharts={Highcharts}
-                options={pinChartOptions}
-              />
-            </Card>
-          </div>
-
-          {/* table block */}
-          <div className="px-4 bg-gray-50 pb-4 pt-6">
-            {/* table label with level 1 filter data */}
-            <Typography className="pl-4 pb-4" variant="h3">
-              <span className="font-medium font-mono text-base text-blue-500 text-md">
-                View For:{" "}
-                {userId !== "all"
-                  ? contextData.userFullNameMap.get(userId)
-                  : "All"}
-              </span>
-              <br />
-              {featureTag !== "all" ||
-              featureType !== "all" ||
-              featureRelease !== "all" ? (
-                <>
-                  {" "}
-                  {featureRelease !== "all" ? (
+            {/* data block, contains charts and table */}
+            <div className="w-full flex flex-col space-y-4">
+              {/* level 1 charts */}
+              <div className="flex flex-col space-y-1 items-center pt-3 pb-3 px-8 bg-blue-gray-200">
+                {featureRelease === "all" ? (
+                  <>
+                    <Card className="p-4 hover:drop-shadow-xl w-full ">
+                      <HighchartsReact
+                        highcharts={Highcharts}
+                        options={releaseChartOptions}
+                      />
+                    </Card>
+                  </>
+                ) : (
+                  <></>
+                )}
+                <div className="w-full flex flex-row space-x-8 justify-evenly pt-1 px-8">
+                  {featureTag === "all" ? (
                     <>
-                      <span className=" bg-gray-100 py-2 pl-3 rounded-md drop-shadow-md text-blue-500 font-medium font-mono text-base">
-                        {featureRelease}{" "}
-                        <CloseIcon
-                          style={{ marginRight: 10, fontSize: "0.8em" }}
-                          className="fill-gray-500 hover:fill-red-500 hover:cursor-pointer"
-                          onClick={() => {
-                            selectFeatureRelease("all");
-                          }}
+                      <Card className="p-4 hover:drop-shadow-xl w-1/3">
+                        <HighchartsReact
+                          highcharts={Highcharts}
+                          options={tagChartOptions}
                         />
-                      </span>
+                      </Card>
                     </>
                   ) : (
                     <></>
                   )}
-                  {featureTag !== "all" ? (
+                  {userId !== "all" ? (
                     <>
-                      <span className=" bg-gray-100 py-2 pl-3 ml-3 rounded-md drop-shadow-md text-blue-500 font-medium font-mono text-base">
-                        {featureTag}{" "}
-                        <CloseIcon
-                          style={{ marginRight: 10, fontSize: "0.8em" }}
-                          className="fill-gray-500 hover:fill-red-500 hover:cursor-pointer"
-                          onClick={() => {
-                            selectFeatureTag("all");
-                          }}
+                      <Card className="p-4 hover:drop-shadow-xl w-1/3 ">
+                        <HighchartsReact
+                          highcharts={Highcharts}
+                          options={assignedChartOptions}
                         />
-                      </span>
+                      </Card>
                     </>
                   ) : (
                     <></>
                   )}
-                  {featureType !== "all" ? (
+                  {featureType === "all" ? (
                     <>
-                      <span className=" bg-gray-100 py-2 pl-3 rounded-md drop-shadow-md text-blue-500 ml-4 font-medium font-mono text-base">
-                        {featureType}
-                        {" feature "}
-                        <CloseIcon
-                          style={{ marginRight: 10, fontSize: "0.8em" }}
-                          className="fill-gray-500 hover:fill-red-500 hover:cursor-pointer"
-                          onClick={() => {
-                            selectFeatureType("all");
-                          }}
+                      <Card className="p-4 hover:drop-shadow-xl w-1/3 ">
+                        <HighchartsReact
+                          highcharts={Highcharts}
+                          options={typeChartOptions}
                         />
-                      </span>
+                      </Card>
                     </>
                   ) : (
                     <></>
                   )}
+                </div>
+              </div>
+
+              {/* level 2 charts */}
+              <div className="flex flex-row  space-x-4 justify-evenly px-8 ">
+                <Card className=" p-4 hover:drop-shadow-md w-1/3 ">
+                  <HighchartsReact
+                    highcharts={Highcharts}
+                    options={statusChartOptions}
+                  />
+                </Card>
+
+                <Card className=" p-4 hover:drop-shadow-md w-1/3">
+                  <HighchartsReact
+                    highcharts={Highcharts}
+                    options={pinChartOptions}
+                  />
+                </Card>
+              </div>
+
+              {/* table block */}
+              <div className="px-4 bg-gray-50 pb-4 pt-6">
+                {/* table label with level 1 filter data */}
+                <Typography className="pl-4 pb-4" variant="h3">
+                  <span className="font-medium font-mono text-base text-blue-500 text-md">
+                    View For:{" "}
+                    {userId !== "all"
+                      ? contextData.userFullNameMap.get(userId)
+                      : "All"}
+                  </span>
                   <br />
-                </>
-              ) : (
-                <></>
-              )}
-              <hr />
-              Feature Count :{" "}
-              <span className=" text-blue-500">
-                {viewTableData.length}
-              </span>{" "}
-            </Typography>
-            {/* level 2 filter block */}
-            <div className="py-2">
-              <SearchBar
-                label={"Feature Status"}
-                data={statusSelectorData}
-                value={featureStatus}
-                selectOption={selectFeatureStatus}
-              />
-              <SearchBar
-                label={"Feature PIN"}
-                data={pinSelectorData}
-                value={featurePin}
-                selectOption={selectFeaturePin}
-              />
+                  {featureTag !== "all" ||
+                  featureType !== "all" ||
+                  featureRelease !== "all" ? (
+                    <>
+                      {" "}
+                      {featureRelease !== "all" ? (
+                        <>
+                          <span className=" bg-gray-100 py-2 pl-3 rounded-md drop-shadow-md text-blue-500 font-medium font-mono text-base">
+                            {featureRelease}{" "}
+                            <CloseIcon
+                              style={{ marginRight: 10, fontSize: "0.8em" }}
+                              className="fill-gray-500 hover:fill-red-500 hover:cursor-pointer"
+                              onClick={() => {
+                                selectFeatureRelease("all");
+                              }}
+                            />
+                          </span>
+                        </>
+                      ) : (
+                        <></>
+                      )}
+                      {featureTag !== "all" ? (
+                        <>
+                          <span className=" bg-gray-100 py-2 pl-3 ml-3 rounded-md drop-shadow-md text-blue-500 font-medium font-mono text-base">
+                            {featureTag}{" "}
+                            <CloseIcon
+                              style={{ marginRight: 10, fontSize: "0.8em" }}
+                              className="fill-gray-500 hover:fill-red-500 hover:cursor-pointer"
+                              onClick={() => {
+                                selectFeatureTag("all");
+                              }}
+                            />
+                          </span>
+                        </>
+                      ) : (
+                        <></>
+                      )}
+                      {featureType !== "all" ? (
+                        <>
+                          <span className=" bg-gray-100 py-2 pl-3 rounded-md drop-shadow-md text-blue-500 ml-4 font-medium font-mono text-base">
+                            {featureType}
+                            {" feature "}
+                            <CloseIcon
+                              style={{ marginRight: 10, fontSize: "0.8em" }}
+                              className="fill-gray-500 hover:fill-red-500 hover:cursor-pointer"
+                              onClick={() => {
+                                selectFeatureType("all");
+                              }}
+                            />
+                          </span>
+                        </>
+                      ) : (
+                        <></>
+                      )}
+                      <br />
+                    </>
+                  ) : (
+                    <></>
+                  )}
+                  <hr />
+                  Feature Count :{" "}
+                  <span className=" text-blue-500">
+                    {viewTableData.length}
+                  </span>{" "}
+                </Typography>
+                {/* level 2 filter block */}
+                <div className="py-2">
+                  <SearchBar
+                    label={"Feature Status"}
+                    data={statusSelectorData}
+                    value={featureStatus}
+                    selectOption={selectFeatureStatus}
+                  />
+                  <SearchBar
+                    label={"Feature PIN"}
+                    data={pinSelectorData}
+                    value={featurePin}
+                    selectOption={selectFeaturePin}
+                  />
+                </div>
+                <FeatureTable
+                  userId={userId}
+                  data={viewTableData}
+                  sortViewTableAscending={sortViewTableAscending}
+                  sortedFeature={sortedFeature}
+                  type={"dpl"}
+                />
+              </div>
             </div>
-            <FeatureTable
-              userId={userId}
-              data={viewTableData}
-              sortViewTableAscending={sortViewTableAscending}
-              sortedFeature={sortedFeature}
-              type={"dpl"}
-            />
-          </div>
-        </div>
+          </>
+        ) : (
+          <>
+            <div className="flex flex-col justify-center items-center h-full text-3xl font-bold text-blue-gray-400 ">
+              <div>User with this id ({userId}) not found for this page.</div>
+              Please select another user.
+            </div>
+          </>
+        )}
       </div>
     </>
   );

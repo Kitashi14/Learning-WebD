@@ -78,6 +78,12 @@ const ProfileSearchBar = (props) => {
     props.selectUserId(e == null ? "all" : e);
   };
 
+  if(s.has(props.userId) || props.userId==="all"){
+    props.setInvalidUserSelected(true);
+  }else{
+    props.setInvalidUserSelected(false);
+  }
+
   return (
     <>
       <SelectPicker

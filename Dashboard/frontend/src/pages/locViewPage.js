@@ -26,6 +26,9 @@ const LocViewPage = (props) => {
 
   const [viewData, setViewData] = useState([]); //it will contain all elements after applying level 1 filter, used for showing lvl 1 charts
 
+  //for invalid userId
+  const [isUserValid, SetIsUserValid] = useState(true);
+
   const [showAllLocAssignees, setShowAllLocAssignees] = useState(false);
   const [showAllPrAssignees, setShowAllPrAssignees] = useState(false);
   const tableSortBy = contextData.loc_states.tableSortBy;
@@ -710,6 +713,11 @@ const LocViewPage = (props) => {
   } else {
     getAssigneeCount("pr");
   }
+
+  const setInvalidUserSelected = (value) => {
+    SetIsUserValid(value);
+  };
+
   return (
     <>
       {contextData.isLocPageLoading || !contextData.isLocTableLoaded ? (
@@ -733,491 +741,443 @@ const LocViewPage = (props) => {
               table={contextData.locTable ? contextData.locTable.loc_data : []}
               userId={userId}
               type={"loc"}
+              setInvalidUserSelected={setInvalidUserSelected}
             />
+            {isUserValid ? (
+              <>
+                {/* level 1 filter block */}
+                <div className=" flex flex-row justify-stretch">
+                  <div className="flex flex-col items-center px-3 rounded-lg space-y-3 bg-gray-50 drop-shadow-md border-blue-200 border-none border-[1px] border-solid py-2 w-fit m-auto ">
+                    <Card className="w-fit flex flex-row items-center px-3 py-3 ">
+                      View For :
+                      <span className="text-base text-blue-500 font-bold pl-2">
+                        {userId === "all"
+                          ? "All"
+                          : contextData.userFullNameMap.get(userId)}
+                      </span>
+                    </Card>
 
-            {/* level 1 filter block */}
-            <div className=" flex flex-row justify-stretch">
-              <div className="flex flex-col items-center px-3 rounded-lg space-y-3 bg-gray-50 drop-shadow-md border-blue-200 border-none border-[1px] border-solid py-2 w-fit m-auto ">
-                <Card className="w-fit flex flex-row items-center px-3 py-3 ">
-                  View For :
-                  <span className="text-base text-blue-500 font-bold pl-2">
-                    {userId === "all"
-                      ? "All"
-                      : contextData.userFullNameMap.get(userId)}
-                  </span>
-                </Card>
+                    {userId !== "all" ? (
+                      <>
+                        <div className="flex flex-col items-center space-y-3">
+                          <DevMetricsSegmentTypeRadio
+                            value={locSegment}
+                            selectSegment={selectLocSegment}
+                            data={segmentFullNameMap}
+                            type={"loc"}
+                          />
+                        </div>
+                        <div className="flex flex-row space-x-8">
+                          <Typography variant="h5" className="pl-4 text-center">
+                            {" "}
+                            Total no. of LOC : <span>
+                              {total_loc_count}
+                            </span>{" "}
+                          </Typography>
+                          <Typography variant="h5" className="pl-4 text-center">
+                            {" "}
+                            Total no. of PRs Reviewed :{" "}
+                            <span>{total_pr_count}</span>{" "}
+                          </Typography>
+                        </div>
+                      </>
+                    ) : (
+                      <></>
+                    )}
+                  </div>
+                </div>
 
+                {/* user path from its ultimate parent */}
                 {userId !== "all" ? (
                   <>
-                    <div className="flex flex-col items-center space-y-3">
-                      <DevMetricsSegmentTypeRadio
-                        value={locSegment}
-                        selectSegment={selectLocSegment}
-                        data={segmentFullNameMap}
-                        type={"loc"}
-                      />
-                    </div>
-                    <div className="flex flex-row space-x-8">
-                      <Typography variant="h5" className="pl-4 text-center">
-                        {" "}
-                        Total no. of LOC : <span>{total_loc_count}</span>{" "}
-                      </Typography>
-                      <Typography variant="h5" className="pl-4 text-center">
-                        {" "}
-                        Total no. of PRs Reviewed :{" "}
-                        <span>{total_pr_count}</span>{" "}
-                      </Typography>
+                    <div className=" px-3 flex cursor-default flex-row justify-center">
+                      {" "}
+                      {previous_parents.map((elem) => (
+                        <>
+                          /
+                          <span
+                            className="px-2 cursor-pointer text-blue-500"
+                            onClick={() => {
+                              if (elem !== userId) {
+                                contextData.setIsLocPageLoading(true);
+                                navigate(`/loc/view/${elem}`);
+                              }
+                            }}
+                          >
+                            {elem}
+                          </span>
+                        </>
+                      ))}
                     </div>
                   </>
                 ) : (
                   <></>
                 )}
-              </div>
-            </div>
 
-            {/* user path from its ultimate parent */}
-            {userId !== "all" ? (
-              <>
-                <div className=" px-3 flex cursor-default flex-row justify-center">
-                  {" "}
-                  {previous_parents.map((elem) => (
-                    <>
-                      /
-                      <span
-                        className="px-2 cursor-pointer text-blue-500"
-                        onClick={() => {
-                          if (elem !== userId) {
-                            contextData.setIsLocPageLoading(true);
-                            navigate(`/loc/view/${elem}`);
-                          }
-                        }}
-                      >
-                        {elem}
-                      </span>
-                    </>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <></>
-            )}
-
-            {userId !== "all" ? (
-              <>
-                <hr className="border-[1px] border-blue-gray-200" />
-                <div className="w-full  h-16 flex flex-row justify-evenly items-center pt-1">
-                  <div className="w-1/5 h-full  flex flex-col">
-                    <div className={`h-3/10 w-full text-center `}>
-                      {" "}
-                      <span
-                        className={
-                          locSegment === "month"
-                            ? "font-bold text-white bg-green-700 px-2 py-[3px] rounded-md"
-                            : "font-semibold text-blue-gray-500"
-                        }
-                      >
-                        Monthly
-                      </span>
-                    </div>
-                    <div className="h-7/10 w-full flex flex-col justify-center">
-                      <div className="flex w-full flex-row  justify-center space-x-6 items-center ">
-                        <div className="h-fit w-1/2 flex flex-row justify-end pr-2">
-                          <div className="w-[10px] h-[10px] bg-blue-600 rounded-full"></div>
-                        </div>
-                        <div className="h-fit w-1/2 flex flex-row justify-start ">
-                          <span
-                            className={
-                              locSegment === "month" ? "font-bold" : ""
-                            }
-                          >
-                            {monthly_loc}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex w-full flex-row  justify-center space-x-6 items-center ">
-                        <div className="h-fit w-1/2 flex flex-row justify-end pr-2">
-                          <div className="w-[10px] h-[10px] bg-purple-600 rounded-full"></div>
-                        </div>
-                        <div className="h-fit w-1/2 flex flex-row justify-start ">
-                          <span
-                            className={
-                              locSegment === "month" ? "font-bold" : ""
-                            }
-                          >
-                            {monthly_pr}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="w-1/5 h-full  flex flex-col">
-                    <div className={`h-3/10 w-full text-center `}>
-                      {" "}
-                      <span
-                        className={
-                          locSegment === "quarter"
-                            ? "font-bold text-white bg-green-700 px-2 py-[3px] rounded-md"
-                            : "font-semibold text-blue-gray-500"
-                        }
-                      >
-                        Quarterly
-                      </span>
-                    </div>
-                    <div className="h-7/10 w-full flex flex-col justify-center">
-                      <div className="flex w-full flex-row  justify-center space-x-6 items-center ">
-                        <div className="h-fit w-1/2 flex flex-row justify-end pr-2">
-                          <div className="w-[10px] h-[10px] bg-blue-600 rounded-full"></div>
-                        </div>
-                        <div className="h-fit w-1/2 flex flex-row justify-start ">
-                          <span
-                            className={
-                              locSegment === "quarter" ? "font-bold" : ""
-                            }
-                          >
-                            {quarter_loc}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex w-full flex-row  justify-center space-x-6 items-center ">
-                        <div className="h-fit w-1/2 flex flex-row justify-end pr-2">
-                          <div className="w-[10px] h-[10px] bg-purple-600 rounded-full"></div>
-                        </div>
-                        <div className="h-fit w-1/2 flex flex-row justify-start ">
-                          <span
-                            className={
-                              locSegment === "quarter" ? "font-bold" : ""
-                            }
-                          >
-                            {quarter_pr}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="w-1/5 h-full  flex flex-col">
-                    <div className={`h-3/10 w-full text-center `}>
-                      {" "}
-                      <span
-                        className={
-                          locSegment === "semi"
-                            ? "font-bold text-white bg-green-700 px-2 py-[3px] rounded-md"
-                            : "font-semibold text-blue-gray-500"
-                        }
-                      >
-                        Semi Annually
-                      </span>
-                    </div>
-                    <div className="h-7/10 w-full flex flex-col justify-center">
-                      <div className="flex w-full flex-row  justify-center space-x-6 items-center ">
-                        <div className="h-fit w-1/2 flex flex-row justify-end pr-2">
-                          <div className="w-[10px] h-[10px] bg-blue-600 rounded-full"></div>
-                        </div>
-                        <div className="h-fit w-1/2 flex flex-row justify-start ">
-                          <span
-                            className={locSegment === "semi" ? "font-bold" : ""}
-                          >
-                            {semi_loc}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex w-full flex-row  justify-center space-x-6 items-center ">
-                        <div className="h-fit w-1/2 flex flex-row justify-end pr-2">
-                          <div className="w-[10px] h-[10px] bg-purple-600 rounded-full"></div>
-                        </div>
-                        <div className="h-fit w-1/2 flex flex-row justify-start ">
-                          <span
-                            className={locSegment === "semi" ? "font-bold" : ""}
-                          >
-                            {semi_pr}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <></>
-            )}
-
-            {/* <div className="w-full px-8 py-[1px] ">
-              <div className="w-full flex flex-row bg-gray-50 border-solid border-[1px] border-gray-300 rounded-md h-[22px]">
-                <div
-                  style={{
-                    background: weekBarValidityMap.get("annual").has(bugSegment)
-                      ? "#16803B"
-                      : "",
-                  }}
-                  className="rounded-l-md  w-[50%]"
-                ></div>
-                <div
-                  style={{
-                    background: weekBarValidityMap.get("semi").has(bugSegment)
-                      ? "#16803B"
-                      : "",
-                  }}
-                  className="border-solid border-r-[1px] border-gray-300 w-[25%]"
-                ></div>
-                <div
-                  style={{
-                    background: weekBarValidityMap
-                      .get("quarter")
-                      .has(bugSegment)
-                      ? "#16803B"
-                      : "",
-                  }}
-                  className="border-solid border-r-[1px] border-gray-300 w-[7%]"
-                ></div>
-                <div
-                  style={{
-                    background: weekBarValidityMap.get("week-4").has(bugSegment)
-                      ? "#16803B"
-                      : "",
-                  }}
-                  className="border-solid border-r-[1px] border-gray-300 w-[4%]"
-                ></div>
-                <div
-                  style={{
-                    background: weekBarValidityMap.get("week-3").has(bugSegment)
-                      ? "#16803B"
-                      : "",
-                  }}
-                  className="border-solid border-r-[1px] border-gray-300 w-[4%]"
-                ></div>
-                <div
-                  style={{
-                    background: weekBarValidityMap.get("week-2").has(bugSegment)
-                      ? "#16803B"
-                      : "",
-                  }}
-                  className="border-solid border-r-[1px] border-gray-300 w-[4%]"
-                ></div>
-                <div
-                  style={{
-                    background: weekBarValidityMap.get("week-1").has(bugSegment)
-                      ? "#16803B"
-                      : "",
-                  }}
-                  className="border-solid border-r-[1px] border-gray-300 w-[4%]"
-                ></div>
-                <div
-                  style={{
-                    background: weekBarValidityMap.get("week-0").has(bugSegment)
-                      ? "#16803B"
-                      : "",
-                  }}
-                  className=" rounded-r-md border-solid border-r-[1px] border-gray-300 w-[2%]"
-                ></div>
-              </div>
-            </div> */}
-
-            {/* data block, contains charts and table */}
-            <div className="w-full flex flex-col space-y-4 px-0">
-              {/* level 1 charts */}
-              <div className="flex flex-col space-y-3 pt-3 items-center pt-1 pb-2 px-8 bg-blue-gray-200">
                 {userId !== "all" ? (
                   <>
-                    <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-full font-bold text-lg text-green-800 ">
-                      {" "}
-                      {segmentFullNameMap.get(locSegment)}
-                      {" : "}
-                      {contextData.locTable.dates[locSegment]
-                        ? contextData.locTable.dates[locSegment]["lower limit"]
-                        : ""}
-                      {" - "}
-                      {contextData.locTable.dates[locSegment]
-                        ? contextData.locTable.dates[locSegment]["upper limit"]
-                        : ""}{" "}
-                    </Card>
-                    <Card
-                      className={`pb-3 pt-1 px-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ${
-                        tableOpen ? "bg-white" : "bg-gray-300"
-                      } `}
-                    >
-                      <div className=" w-full flex flex-row">
-                        <div className="w-1/3"></div>
-                        <div className="w-1/3 flex flex-row justify-center">
-                          <div className="w-fit ">
-                            <Tabs value={tableOpen ? "table" : "graph"}>
-                              <TabsHeader
+                    <hr className="border-[1px] border-blue-gray-200" />
+                    <div className="w-full  h-16 flex flex-row justify-evenly items-center pt-1">
+                      <div className="w-1/5 h-full  flex flex-col">
+                        <div className={`h-3/10 w-full text-center `}>
+                          {" "}
+                          <span
+                            className={
+                              locSegment === "month"
+                                ? "font-bold text-white bg-green-700 px-2 py-[3px] rounded-md"
+                                : "font-semibold text-blue-gray-500"
+                            }
+                          >
+                            Monthly
+                          </span>
+                        </div>
+                        <div className="h-7/10 w-full flex flex-col justify-center">
+                          <div className="flex w-full flex-row  justify-center space-x-6 items-center ">
+                            <div className="h-fit w-1/2 flex flex-row justify-end pr-2">
+                              <div className="w-[10px] h-[10px] bg-blue-600 rounded-full"></div>
+                            </div>
+                            <div className="h-fit w-1/2 flex flex-row justify-start ">
+                              <span
                                 className={
-                                  tableOpen ? "bg-gray-200" : "bg-gray-400"
+                                  locSegment === "month" ? "font-bold" : ""
                                 }
                               >
-                                <Tab
-                                  className={`${
-                                    tableOpen ? "font-normal" : " font-bold"
-                                  } text-blue-600 z-10`}
-                                  key={"graph"}
-                                  value={"graph"}
-                                  onClick={() => {
-                                    setTableOpen(false);
-                                  }}
-                                >
-                                  {"Graph"}
-                                </Tab>
-                                <Tab
-                                  className={`${
-                                    tableOpen ? "font-bold" : " font-normal"
-                                  } text-blue-600 z-10`}
-                                  key={"table"}
-                                  value={"table"}
-                                  onClick={() => {
-                                    setTableOpen(true);
-                                  }}
-                                >
-                                  {"Table"}
-                                </Tab>
-                              </TabsHeader>
-                            </Tabs>
+                                {monthly_loc}
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                        <div className="w-1/3  flex flex-row items-center justify-end pr-8">
-                          {tableOpen ? (
-                            <>
-                              {tableSortBy === "loc" ? (
-                                <>
-                                  <span
-                                    className="underline hover:cursor-pointer"
-                                    onClick={() => {
-                                      selectTableSortBy("pr");
-                                    }}
-                                  >
-                                    sort by PRs
-                                  </span>
-                                </>
-                              ) : (
-                                <>
-                                  <span
-                                    className="underline hover:cursor-pointer"
-                                    onClick={() => {
-                                      selectTableSortBy("loc");
-                                    }}
-                                  >
-                                    sort by LOC
-                                  </span>
-                                </>
-                              )}
-                            </>
-                          ) : (
-                            <></>
-                          )}
+                          <div className="flex w-full flex-row  justify-center space-x-6 items-center ">
+                            <div className="h-fit w-1/2 flex flex-row justify-end pr-2">
+                              <div className="w-[10px] h-[10px] bg-purple-600 rounded-full"></div>
+                            </div>
+                            <div className="h-fit w-1/2 flex flex-row justify-start ">
+                              <span
+                                className={
+                                  locSegment === "month" ? "font-bold" : ""
+                                }
+                              >
+                                {monthly_pr}
+                              </span>
+                            </div>
+                          </div>
                         </div>
                       </div>
 
-                      {tableOpen && userId !== "all" ? (
-                        <>
-                          <LocAssigneeTable
-                            locSegment={locSegment}
-                            tableData={viewData}
-                            userId={userId}
-                            monthly_loc={monthly_loc}
-                            monthly_pr={monthly_pr}
-                            quarter_loc={quarter_loc}
-                            quarter_pr={quarter_pr}
-                            semi_loc={semi_loc}
-                            semi_pr={semi_pr}
-                          />
-                        </>
-                      ) : (
-                        <>
-                          <div className="flex flex-row space-x-4">
-                            <Card className="pb-3 pt-1 px-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
-                              {diffLocAssignNumbers > 10 &&
-                              !showAllLocAssignees ? (
-                                <>
-                                  <div className=" w-full flex pr-4 flex-row justify-end mb-[-20px] z-10">
-                                    <span
-                                      className="underline hover:cursor-pointer"
-                                      onClick={() => {
-                                        setShowAllLocAssignees(true);
-                                      }}
-                                    >
-                                      show all
-                                    </span>
-                                  </div>
-                                </>
-                              ) : diffLocAssignNumbers > 10 ? (
-                                <>
-                                  <div className=" w-full flex pr-4 flex-row justify-end mb-[-20px] z-10">
-                                    <span
-                                      className="underline hover:cursor-pointer"
-                                      onClick={() => {
-                                        setShowAllLocAssignees(false);
-                                      }}
-                                    >
-                                      show top 10
-                                    </span>
-                                  </div>
-                                </>
-                              ) : (
-                                <></>
-                              )}
-                              <HighchartsReact
-                                highcharts={Highcharts}
-                                options={locAssignedChartOptions}
-                              />
-                            </Card>
-                            <Card className="pb-3 pt-1 px-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
-                              {diffPrAssignNumbers > 10 &&
-                              !showAllPrAssignees ? (
-                                <>
-                                  <div className=" w-full flex pr-4 flex-row justify-end mb-[-20px] z-10">
-                                    <span
-                                      className="underline hover:cursor-pointer"
-                                      onClick={() => {
-                                        setShowAllPrAssignees(true);
-                                      }}
-                                    >
-                                      show all
-                                    </span>
-                                  </div>
-                                </>
-                              ) : diffPrAssignNumbers > 10 ? (
-                                <>
-                                  <div className=" w-full flex pr-4 flex-row justify-end mb-[-20px] z-10">
-                                    <span
-                                      className="underline hover:cursor-pointer"
-                                      onClick={() => {
-                                        setShowAllPrAssignees(false);
-                                      }}
-                                    >
-                                      show top 10
-                                    </span>
-                                  </div>
-                                </>
-                              ) : (
-                                <></>
-                              )}
-                              <HighchartsReact
-                                highcharts={Highcharts}
-                                options={prAssignedChartOptions}
-                              />
-                            </Card>
+                      <div className="w-1/5 h-full  flex flex-col">
+                        <div className={`h-3/10 w-full text-center `}>
+                          {" "}
+                          <span
+                            className={
+                              locSegment === "quarter"
+                                ? "font-bold text-white bg-green-700 px-2 py-[3px] rounded-md"
+                                : "font-semibold text-blue-gray-500"
+                            }
+                          >
+                            Quarterly
+                          </span>
+                        </div>
+                        <div className="h-7/10 w-full flex flex-col justify-center">
+                          <div className="flex w-full flex-row  justify-center space-x-6 items-center ">
+                            <div className="h-fit w-1/2 flex flex-row justify-end pr-2">
+                              <div className="w-[10px] h-[10px] bg-blue-600 rounded-full"></div>
+                            </div>
+                            <div className="h-fit w-1/2 flex flex-row justify-start ">
+                              <span
+                                className={
+                                  locSegment === "quarter" ? "font-bold" : ""
+                                }
+                              >
+                                {quarter_loc}
+                              </span>
+                            </div>
                           </div>
-                        </>
-                      )}
-                    </Card>
+                          <div className="flex w-full flex-row  justify-center space-x-6 items-center ">
+                            <div className="h-fit w-1/2 flex flex-row justify-end pr-2">
+                              <div className="w-[10px] h-[10px] bg-purple-600 rounded-full"></div>
+                            </div>
+                            <div className="h-fit w-1/2 flex flex-row justify-start ">
+                              <span
+                                className={
+                                  locSegment === "quarter" ? "font-bold" : ""
+                                }
+                              >
+                                {quarter_pr}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="w-1/5 h-full  flex flex-col">
+                        <div className={`h-3/10 w-full text-center `}>
+                          {" "}
+                          <span
+                            className={
+                              locSegment === "semi"
+                                ? "font-bold text-white bg-green-700 px-2 py-[3px] rounded-md"
+                                : "font-semibold text-blue-gray-500"
+                            }
+                          >
+                            Semi Annually
+                          </span>
+                        </div>
+                        <div className="h-7/10 w-full flex flex-col justify-center">
+                          <div className="flex w-full flex-row  justify-center space-x-6 items-center ">
+                            <div className="h-fit w-1/2 flex flex-row justify-end pr-2">
+                              <div className="w-[10px] h-[10px] bg-blue-600 rounded-full"></div>
+                            </div>
+                            <div className="h-fit w-1/2 flex flex-row justify-start ">
+                              <span
+                                className={
+                                  locSegment === "semi" ? "font-bold" : ""
+                                }
+                              >
+                                {semi_loc}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex w-full flex-row  justify-center space-x-6 items-center ">
+                            <div className="h-fit w-1/2 flex flex-row justify-end pr-2">
+                              <div className="w-[10px] h-[10px] bg-purple-600 rounded-full"></div>
+                            </div>
+                            <div className="h-fit w-1/2 flex flex-row justify-start ">
+                              <span
+                                className={
+                                  locSegment === "semi" ? "font-bold" : ""
+                                }
+                              >
+                                {semi_pr}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </>
                 ) : (
-                  <>
-                    <Card className="pb-3 pt-1 px-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
-                      <HighchartsReact
-                        highcharts={Highcharts}
-                        options={locSegmentChartOptions}
-                      />
-                    </Card>
-                    <Card className="pb-3 pt-1 px-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
-                      <HighchartsReact
-                        highcharts={Highcharts}
-                        options={prSegmentChartOptions}
-                      />
-                    </Card>
-                  </>
+                  <></>
                 )}
-              </div>
-            </div>
+
+                {/* data block, contains charts and table */}
+                <div className="w-full flex flex-col space-y-4 px-0">
+                  {/* level 1 charts */}
+                  <div className="flex flex-col space-y-3 pt-3 items-center pt-1 pb-2 px-8 bg-blue-gray-200">
+                    {userId !== "all" ? (
+                      <>
+                        <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-full font-bold text-lg text-green-800 ">
+                          {" "}
+                          {segmentFullNameMap.get(locSegment)}
+                          {" : "}
+                          {contextData.locTable.dates[locSegment]
+                            ? contextData.locTable.dates[locSegment][
+                                "lower limit"
+                              ]
+                            : ""}
+                          {" - "}
+                          {contextData.locTable.dates[locSegment]
+                            ? contextData.locTable.dates[locSegment][
+                                "upper limit"
+                              ]
+                            : ""}{" "}
+                        </Card>
+                        <Card
+                          className={`pb-3 pt-1 px-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ${
+                            tableOpen ? "bg-white" : "bg-gray-300"
+                          } `}
+                        >
+                          <div className=" w-full flex flex-row">
+                            <div className="w-1/3"></div>
+                            <div className="w-1/3 flex flex-row justify-center">
+                              <div className="w-fit ">
+                                <Tabs value={tableOpen ? "table" : "graph"}>
+                                  <TabsHeader
+                                    className={
+                                      tableOpen ? "bg-gray-200" : "bg-gray-400"
+                                    }
+                                  >
+                                    <Tab
+                                      className={`${
+                                        tableOpen ? "font-normal" : " font-bold"
+                                      } text-blue-600 z-10`}
+                                      key={"graph"}
+                                      value={"graph"}
+                                      onClick={() => {
+                                        setTableOpen(false);
+                                      }}
+                                    >
+                                      {"Graph"}
+                                    </Tab>
+                                    <Tab
+                                      className={`${
+                                        tableOpen ? "font-bold" : " font-normal"
+                                      } text-blue-600 z-10`}
+                                      key={"table"}
+                                      value={"table"}
+                                      onClick={() => {
+                                        setTableOpen(true);
+                                      }}
+                                    >
+                                      {"Table"}
+                                    </Tab>
+                                  </TabsHeader>
+                                </Tabs>
+                              </div>
+                            </div>
+                            <div className="w-1/3  flex flex-row items-center justify-end pr-8">
+                              {tableOpen ? (
+                                <>
+                                  {tableSortBy === "loc" ? (
+                                    <>
+                                      <span
+                                        className="underline hover:cursor-pointer"
+                                        onClick={() => {
+                                          selectTableSortBy("pr");
+                                        }}
+                                      >
+                                        sort by PRs
+                                      </span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <span
+                                        className="underline hover:cursor-pointer"
+                                        onClick={() => {
+                                          selectTableSortBy("loc");
+                                        }}
+                                      >
+                                        sort by LOC
+                                      </span>
+                                    </>
+                                  )}
+                                </>
+                              ) : (
+                                <></>
+                              )}
+                            </div>
+                          </div>
+
+                          {tableOpen && userId !== "all" ? (
+                            <>
+                              <LocAssigneeTable
+                                locSegment={locSegment}
+                                tableData={viewData}
+                                userId={userId}
+                                monthly_loc={monthly_loc}
+                                monthly_pr={monthly_pr}
+                                quarter_loc={quarter_loc}
+                                quarter_pr={quarter_pr}
+                                semi_loc={semi_loc}
+                                semi_pr={semi_pr}
+                              />
+                            </>
+                          ) : (
+                            <>
+                              <div className="flex flex-row space-x-4">
+                                <Card className="pb-3 pt-1 px-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
+                                  {diffLocAssignNumbers > 10 &&
+                                  !showAllLocAssignees ? (
+                                    <>
+                                      <div className=" w-full flex pr-4 flex-row justify-end mb-[-20px] z-10">
+                                        <span
+                                          className="underline hover:cursor-pointer"
+                                          onClick={() => {
+                                            setShowAllLocAssignees(true);
+                                          }}
+                                        >
+                                          show all
+                                        </span>
+                                      </div>
+                                    </>
+                                  ) : diffLocAssignNumbers > 10 ? (
+                                    <>
+                                      <div className=" w-full flex pr-4 flex-row justify-end mb-[-20px] z-10">
+                                        <span
+                                          className="underline hover:cursor-pointer"
+                                          onClick={() => {
+                                            setShowAllLocAssignees(false);
+                                          }}
+                                        >
+                                          show top 10
+                                        </span>
+                                      </div>
+                                    </>
+                                  ) : (
+                                    <></>
+                                  )}
+                                  <HighchartsReact
+                                    highcharts={Highcharts}
+                                    options={locAssignedChartOptions}
+                                  />
+                                </Card>
+                                <Card className="pb-3 pt-1 px-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
+                                  {diffPrAssignNumbers > 10 &&
+                                  !showAllPrAssignees ? (
+                                    <>
+                                      <div className=" w-full flex pr-4 flex-row justify-end mb-[-20px] z-10">
+                                        <span
+                                          className="underline hover:cursor-pointer"
+                                          onClick={() => {
+                                            setShowAllPrAssignees(true);
+                                          }}
+                                        >
+                                          show all
+                                        </span>
+                                      </div>
+                                    </>
+                                  ) : diffPrAssignNumbers > 10 ? (
+                                    <>
+                                      <div className=" w-full flex pr-4 flex-row justify-end mb-[-20px] z-10">
+                                        <span
+                                          className="underline hover:cursor-pointer"
+                                          onClick={() => {
+                                            setShowAllPrAssignees(false);
+                                          }}
+                                        >
+                                          show top 10
+                                        </span>
+                                      </div>
+                                    </>
+                                  ) : (
+                                    <></>
+                                  )}
+                                  <HighchartsReact
+                                    highcharts={Highcharts}
+                                    options={prAssignedChartOptions}
+                                  />
+                                </Card>
+                              </div>
+                            </>
+                          )}
+                        </Card>
+                      </>
+                    ) : (
+                      <>
+                        <Card className="pb-3 pt-1 px-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
+                          <HighchartsReact
+                            highcharts={Highcharts}
+                            options={locSegmentChartOptions}
+                          />
+                        </Card>
+                        <Card className="pb-3 pt-1 px-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
+                          <HighchartsReact
+                            highcharts={Highcharts}
+                            options={prSegmentChartOptions}
+                          />
+                        </Card>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex flex-col justify-center items-center h-full text-3xl font-bold text-blue-gray-400 ">
+                  <div>
+                    User with this id ({userId}) not found for this page.
+                  </div>
+                  Please select another user.
+                </div>
+              </>
+            )}
           </div>
         </>
       )}
