@@ -38,11 +38,6 @@ const LocViewPage = (props) => {
     ["quarter", "Quarterly"],
     ["semi", "Semi Annually"],
   ]);
-  const weekBarValidityMap = new Map([
-    ["month", new Set(["month", "quarter", "semi"])],
-    ["quarter", new Set(["quarter", "semi"])],
-    ["semi", new Set(["semi"])],
-  ]);
 
   const reverseSegmentMap = new Map();
   segmentFullNameMap.forEach((v, k) => {

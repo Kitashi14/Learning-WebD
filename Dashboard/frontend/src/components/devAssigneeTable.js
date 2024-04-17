@@ -6,11 +6,11 @@ const DevAssigneeTable = (props) => {
   const tableData = props.tableData;
   const contextData = useContext(DataContext);
   const navigate = useNavigate();
-  console.log(tableData);
   var totalCount = 0;
   var rmvCount = 0;
   var oaiCount = 0;
   var jdcuCount = 0;
+  // eslint-disable-next-line
   var nCount = 0;
   const bugType = props.bugType;
   return (
@@ -342,7 +342,7 @@ const DevAssigneeTable = (props) => {
               >
                 <Typography
                   variant="small"
-                  className="font-bold text-blue-gray"
+                  className="font-bold text-black"
                 >
                   {data.countDetails.Total}
                 </Typography>
@@ -356,7 +356,7 @@ const DevAssigneeTable = (props) => {
             >
               <Typography
                 variant="small"
-                className="font-bold text-blue-gray-800"
+                className="font-bold text-black"
               >
                 Total
               </Typography>
@@ -387,7 +387,7 @@ const DevAssigneeTable = (props) => {
                     >
                       <Typography
                         variant="small"
-                        className="font-bold text-blue-gray-800"
+                        className="font-bold text-black"
                       >
                         {count}
                       </Typography>
@@ -408,7 +408,7 @@ const DevAssigneeTable = (props) => {
                     >
                       <Typography
                         variant="small"
-                        className="font-bold text-blue-gray-800"
+                        className="font-bold text-black"
                       >
                         {count}
                       </Typography>
@@ -442,7 +442,7 @@ const DevAssigneeTable = (props) => {
             >
               <Typography
                 variant="small"
-                className="font-bold text-blue-gray-800"
+                className="font-bold text-black"
               >
                 {oaiCount}
               </Typography>
@@ -457,7 +457,7 @@ const DevAssigneeTable = (props) => {
             >
               <Typography
                 variant="small"
-                className="font-bold text-blue-gray-800"
+                className="font-bold text-black"
               >
                 {rmvCount}
               </Typography>
@@ -472,7 +472,7 @@ const DevAssigneeTable = (props) => {
             >
               <Typography
                 variant="small"
-                className="font-bold text-blue-gray-800"
+                className="font-bold text-black"
               >
                 {jdcuCount}
               </Typography>

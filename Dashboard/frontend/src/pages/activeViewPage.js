@@ -39,6 +39,13 @@ const ActiveViewPage = (props) => {
   const userId = useParams().uid; //extracting user id from the route/url
   contextData.setActiveUser(userId);
 
+  //field type full name map
+  const fieldTypeFullName = new Map([
+    ['test',"Only as Test"],
+    ['dev', "Only as Dev"],
+    ['combined',"Combined"]
+  ])
+
   // for finding all parents nodes of the current user
   const previous_parents = [userId];
   let currChild = userId;
@@ -868,7 +875,7 @@ const ActiveViewPage = (props) => {
                       : "All"}
                   </span>
                   <br />
-                  {featureRelease !== "all" || featureStatus !== "all" ? (
+                  {featureRelease !== "all" || featureStatus !== "all" || featureType!=="all" ? (
                     <>
                       {" "}
                       {featureRelease !== "all" ? (
@@ -896,6 +903,22 @@ const ActiveViewPage = (props) => {
                               className="fill-gray-500 hover:fill-red-500 hover:cursor-pointer"
                               onClick={() => {
                                 selectFeatureStatus("all");
+                              }}
+                            />
+                          </span>
+                        </>
+                      ) : (
+                        <></>
+                      )}
+                      {featureType !== "all" ? (
+                        <>
+                          <span className=" bg-gray-100 py-2 pl-3 rounded-md drop-shadow-md text-blue-500 font-medium font-mono text-base">
+                            {fieldTypeFullName.get(featureType)}{" "}
+                            <CloseIcon
+                              style={{ marginRight: 10, fontSize: "0.8em" }}
+                              className="fill-gray-500 hover:fill-red-500 hover:cursor-pointer"
+                              onClick={() => {
+                                selectFeatureType("all");
                               }}
                             />
                           </span>

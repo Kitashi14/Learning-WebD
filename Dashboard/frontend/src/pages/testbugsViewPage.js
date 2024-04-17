@@ -17,6 +17,7 @@ import TestbugsMetricsSegmentTypeRadio from "../components/testbugsSegmentTypeRa
 import TestbugsMetricsTypeRadio from "../components/testbugsTypeRadio";
 import TestbugsAssigneeTable from "../components/testbugsAssigneeTable";
 import TestbugsMetricsTable from "../components/testbugsTable";
+import SearchBar from "../components/SearchBar";
 
 // dashboard view page for any user
 const TestbugsMetricsViewPage = (props) => {
@@ -27,6 +28,9 @@ const TestbugsMetricsViewPage = (props) => {
   const bugSegment = contextData.testbugs_states.bugSegment;
   const bugType = contextData.testbugs_states.bugType;
   const tableOpen = contextData.testbugs_states.tableOpen;
+
+  // level 2 filters
+  const [featureComponent, setFeatureComponent] = useState("all");
 
   const [viewData, setViewData] = useState([]); //it will contain all elements after applying level 1 filter, used for showing lvl 1 charts
   const [viewTableData, setViewTableData] = useState([]); //it will contain all elements after applying level 2 filter, used for filling table
@@ -138,8 +142,10 @@ const TestbugsMetricsViewPage = (props) => {
   };
 
   //function for filtering and loading view table according to level 2 filters
-  const loadTableData = (table) => {
-    const data = table;
+  const loadTableData = (table, component) => {
+    const data = table.filter((elem) => {
+      return component === "all" || component === elem.component;
+    });
     // sorting the data if a feature are previously selected for sorting
     if (sortedFeature.feature !== null) {
       sortViewTableAscending(data, sortedFeature.feature, sortedFeature.order);
@@ -147,6 +153,12 @@ const TestbugsMetricsViewPage = (props) => {
       setViewTableData(data);
       setCurrentPage(1);
     }
+  };
+
+  //filtering the data accoring to pin (lvl 2 filter)
+  const selectFeatureComponent = (component) => {
+    setFeatureComponent(component);
+    loadTableData(viewData, component);
   };
 
   // for rending the whole page when a variable from dependency array changes its value
@@ -261,8 +273,9 @@ const TestbugsMetricsViewPage = (props) => {
           });
           segmentMap.set(segment, data.length);
           if (segment === bugSegment) {
+            setFeatureComponent("all");
             setViewData(data);
-            loadTableData(data);
+            loadTableData(data, "all");
           }
         };
         //api call
@@ -683,6 +696,13 @@ const TestbugsMetricsViewPage = (props) => {
   const setInvalidUserSelected = (value) => {
     SetIsUserValid(value);
   };
+
+  // finding different unique pin for pin filter bar
+  const componentSelectorData = viewData
+    .map((data) => data.component)
+    .filter((x, i, a) => a.indexOf(x) === i)
+    .map((item) => ({ label: item, value: item }));
+  componentSelectorData.unshift({ label: "All", value: "all" });
   return (
     <>
       {contextData.isTestbugsPageLoading ||
@@ -994,7 +1014,7 @@ const TestbugsMetricsViewPage = (props) => {
                       <></>
                     )}
 
-                    <div className="w-full flex flex-row space-x-3 justify-evenly items-center pt-1 px-8">
+                    <div className="w-full flex flex-row space-x-3 justify-evenly items-center pt-1 ">
                       {userId !== "all" ? (
                         <>
                           <Card className=" p-4  flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
@@ -1204,6 +1224,15 @@ const TestbugsMetricsViewPage = (props) => {
                       </span>{" "}
                       <br />
                     </Typography>
+                    {/* level 2 filter block */}
+                    <div className="py-2">
+                      <SearchBar
+                        label={"Feature Component"}
+                        data={componentSelectorData}
+                        value={featureComponent}
+                        selectOption={selectFeatureComponent}
+                      />
+                    </div>
                     <div className="pb-4 flex flex-col justify-center items-center">
                       <div className="bg-gray-100 border-bold border-gray-300 border-[1px] rounded-md flex flex-row max-w-lg  overflow-x-auto select-none">
                         {pageNumbers.map((elem) => {

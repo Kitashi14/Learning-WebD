@@ -11,6 +11,7 @@ const TestbugsAssigneeTable = (props) => {
   var rmvCount = 0;
   var oaiCount = 0;
   var jdcuCount = 0;
+  // eslint-disable-next-line
   var nCount = 0;
   const bugType = props.bugType;
   return (
@@ -380,7 +381,7 @@ const TestbugsAssigneeTable = (props) => {
               >
                 <Typography
                   variant="small"
-                  className="font-bold text-blue-gray"
+                  className="font-bold text-blue-gray-800"
                 >
                   {data.countDetails.Total}
                 </Typography>

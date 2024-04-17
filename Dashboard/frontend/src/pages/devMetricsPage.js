@@ -18,17 +18,23 @@ import DevMetricsTable from "../components/devMetricsTable";
 import { Loader } from "rsuite";
 import DevAssigneeTable from "../components/devAssigneeTable";
 import DevMetricsCategoryRadio from "../components/devMetricsCategoryRadio";
+import SearchBar from "../components/SearchBar";
 
 // dashboard view page for any user
 const DevMetricsViewPage = (props) => {
   //extracting context global data
   const contextData = useContext(DataContext);
+
   // useState containing all filter's states
   // level 1 filters
   const bugSegment = contextData.dev_states.bugSegment;
   const bugType = contextData.dev_states.bugType;
   const bugCategory = contextData.dev_states.bugCategory;
   const tableOpen = contextData.dev_states.tableOpen;
+
+  // level 2 filters
+  const [featureFoundAt, setFeatureFoundAt] = useState("all");
+  const [featureComponent, setFeatureComponent] = useState("all");
 
   const [viewData, setViewData] = useState([]); //it will contain all elements after applying level 1 filter, used for showing lvl 1 charts
   const [viewTableData, setViewTableData] = useState([]); //it will contain all elements after applying level 2 filter, used for filling table
@@ -142,8 +148,13 @@ const DevMetricsViewPage = (props) => {
   };
 
   //function for filtering and loading view table according to level 2 filters
-  const loadTableData = (table) => {
-    const data = table;
+  const loadTableData = (table, foundAt, component) => {
+    const data = table.filter((elem) => {
+      return (
+        (foundAt === "all" || foundAt === elem.found_at) &&
+        (component === "all" || component === elem.component)
+      );
+    });
     // sorting the data if a feature are previously selected for sorting
     if (sortedFeature.feature !== null) {
       sortViewTableAscending(data, sortedFeature.feature, sortedFeature.order);
@@ -151,6 +162,18 @@ const DevMetricsViewPage = (props) => {
       setViewTableData(data);
       setCurrentPage(1);
     }
+  };
+
+  //filtering the data accoring to status (lvl 2 filter)
+  const selectFeatureFoundAt = (foundAt) => {
+    setFeatureFoundAt(foundAt);
+    loadTableData(viewData, foundAt, featureComponent);
+  };
+
+  //filtering the data accoring to pin (lvl 2 filter)
+  const selectFeatureComponent = (component) => {
+    setFeatureComponent(component);
+    loadTableData(viewData, featureFoundAt, component);
   };
 
   // for rending the whole page when a variable from dependency array changes its value
@@ -272,8 +295,10 @@ const DevMetricsViewPage = (props) => {
           });
           segmentMap.set(segment, data.length);
           if (segment === bugSegment) {
+            setFeatureFoundAt("all");
+            setFeatureComponent("all");
             setViewData(data);
-            loadTableData(data);
+            loadTableData(data, "all", "all");
           }
         };
         //api call
@@ -583,7 +608,6 @@ const DevMetricsViewPage = (props) => {
         innerSize: "50%",
         events: {
           click: (e) => {
-            console.log(e.point.options.selected);
             selectBugType(e.point.name);
           },
         },
@@ -646,6 +670,11 @@ const DevMetricsViewPage = (props) => {
       {
         name: "No. of bugs",
         data: diffCategoryCount,
+        events: {
+          click: (e) => {
+            selectBugCategory(e.point.name);
+          },
+        },
       },
     ],
   };
@@ -779,6 +808,20 @@ const DevMetricsViewPage = (props) => {
   const setInvalidUserSelected = (value) => {
     SetIsUserValid(value);
   };
+
+  // finding different unique status for status filter bar
+  const foundAtSelectorData = viewData
+    .map((data) => data.found_at)
+    .filter((x, i, a) => a.indexOf(x) === i)
+    .map((item) => ({ label: item, value: item }));
+  foundAtSelectorData.unshift({ label: "All", value: "all" });
+
+  // finding different unique pin for pin filter bar
+  const componentSelectorData = viewData
+    .map((data) => data.component)
+    .filter((x, i, a) => a.indexOf(x) === i)
+    .map((item) => ({ label: item, value: item }));
+  componentSelectorData.unshift({ label: "All", value: "all" });
   return (
     <>
       {contextData.isDevPageLoading || !contextData.isDevTableLoaded ? (
@@ -1103,7 +1146,7 @@ const DevMetricsViewPage = (props) => {
                       <></>
                     )}
 
-                    <div className="w-full flex flex-row space-x-3 justify-evenly items-center pt-1 px-8">
+                    <div className="w-full flex flex-row space-x-3 justify-evenly items-center pt-1">
                       {userId !== "all" ? (
                         <>
                           <Card className=" p-4  flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
@@ -1343,6 +1386,21 @@ const DevMetricsViewPage = (props) => {
                       </span>{" "}
                       <br />
                     </Typography>
+                    {/* level 2 filter block */}
+                    <div className="py-2">
+                      <SearchBar
+                        label={"Feature Found At"}
+                        data={foundAtSelectorData}
+                        value={featureFoundAt}
+                        selectOption={selectFeatureFoundAt}
+                      />
+                      <SearchBar
+                        label={"Feature Component"}
+                        data={componentSelectorData}
+                        value={featureComponent}
+                        selectOption={selectFeatureComponent}
+                      />
+                    </div>
                     <div className="pb-4 flex flex-col justify-center items-center">
                       <div className="bg-gray-100 border-bold border-gray-300 border-[1px] rounded-md flex flex-row max-w-lg  overflow-x-auto select-none">
                         {pageNumbers.map((elem) => {

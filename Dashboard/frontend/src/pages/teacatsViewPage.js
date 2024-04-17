@@ -17,6 +17,7 @@ import TeacatsTypeRadio from "../components/teacatsTypeRadio";
 import TeacatsSegmentRadio from "../components/teacatsSegmentRadio";
 import TeacatsTable from "../components/teacatsTable";
 import TeacatsAssigneeTable from "../components/teacatsAssigneeTable";
+import SearchBar from "../components/SearchBar";
 
 // dashboard view page for any user
 const TeacatsViewPage = (props) => {
@@ -27,6 +28,9 @@ const TeacatsViewPage = (props) => {
   const bugSegment = contextData.teacats_states.bugSegment;
   const bugType = contextData.teacats_states.bugType;
   const tableOpen = contextData.teacats_states.tableOpen;
+
+  // level 2 filters
+  const [featureComponent, setFeatureComponent] = useState("all");
 
   const [viewData, setViewData] = useState([]); //it will contain all elements after applying level 1 filter, used for showing lvl 1 charts
   const [viewTableData, setViewTableData] = useState([]); //it will contain all elements after applying level 2 filter, used for filling table
@@ -128,14 +132,22 @@ const TeacatsViewPage = (props) => {
   };
 
   //function for filtering and loading view table according to level 2 filters
-  const loadTableData = (table) => {
-    const data = table;
+  const loadTableData = (table, component) => {
+    const data = table.filter((elem) => {
+      return component === "all" || component === elem.component;
+    });
     // sorting the data if a feature are previously selected for sorting
     if (sortedFeature.feature !== null) {
       sortViewTableAscending(data, sortedFeature.feature, sortedFeature.order);
     } else {
       setViewTableData(data);
     }
+  };
+
+  //filtering the data accoring to pin (lvl 2 filter)
+  const selectFeatureComponent = (component) => {
+    setFeatureComponent(component);
+    loadTableData(viewData, component);
   };
 
   // for rending the whole page when a variable from dependency array changes its value
@@ -315,8 +327,9 @@ const TeacatsViewPage = (props) => {
           data = data.filter((elem) => {
             return bugType.includes(elem.state) || bugType === "all";
           });
+          setFeatureComponent("all");
           setViewData(data);
-          loadTableData(data);
+          loadTableData(data, "all");
         };
 
         const segmentData = async (table) => {
@@ -971,6 +984,13 @@ const TeacatsViewPage = (props) => {
   const setInvalidUserSelected = (value) => {
     SetIsUserValid(value);
   };
+
+  // finding different unique pin for pin filter bar
+  const componentSelectorData = viewData
+    .map((data) => data.component)
+    .filter((x, i, a) => a.indexOf(x) === i)
+    .map((item) => ({ label: item, value: item }));
+  componentSelectorData.unshift({ label: "All", value: "all" });
   return (
     <>
       {contextData.isTeacatsPageLoading ||
@@ -1647,7 +1667,15 @@ const TeacatsViewPage = (props) => {
                       </span>{" "}
                       <br />
                     </Typography>
-
+                    {/* level 2 filter block */}
+                    <div className="py-2">
+                      <SearchBar
+                        label={"Feature Component"}
+                        data={componentSelectorData}
+                        value={featureComponent}
+                        selectOption={selectFeatureComponent}
+                      />
+                    </div>
                     <TeacatsTable
                       userId={userId}
                       data={viewTableData}
