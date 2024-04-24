@@ -135,6 +135,10 @@ export const DataContextProvider = (props) => {
       order: null,
     },
     tableOpen: false,
+    customDates:{
+      upper_limit : null,
+      lower_limit : null,
+    }
   });
   const [loc_states,setLocStates] = useState({
     locSegment : "semi",

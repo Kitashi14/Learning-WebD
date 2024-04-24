@@ -11,10 +11,9 @@ const DevMetricsSegmentTypeRadio = (props) => {
   const segmentMap = props.data;
   const segmentFullNameMap = [];
   segmentMap.forEach((v, k) => {
-    segmentFullNameMap.push([k, v]);
+    if (k != "custom") segmentFullNameMap.push([k, v]);
   });
-  if(props.type==="dev")
-  segmentFullNameMap.reverse();
+  if (props.type === "dev") segmentFullNameMap.reverse();
 
   const contextData = useContext(DataContext);
   const selectType = (e) => {
