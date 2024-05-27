@@ -27,7 +27,7 @@ const LocAssigneeTable = (props) => {
             </th>
             <th
               key="LOC"
-              colSpan={3}
+              colSpan={locSegment==="custom"?4:3}
               className="border-b border-r border-blue-gray-100 p-4"
             >
               <Typography
@@ -60,7 +60,7 @@ const LocAssigneeTable = (props) => {
             </th>
             <th
               key="PR"
-              colSpan={3}
+              colSpan={locSegment==="custom"?4:3}
               className="border-b rounded-tr-lg border-blue-gray-100 p-4"
             >
               <Typography
@@ -138,6 +138,22 @@ const LocAssigneeTable = (props) => {
                 <span>Semi Annually</span>
               </Typography>
             </th>
+            {locSegment==="custom"? <>
+            <th
+              key="custom"
+              style={{
+                background: locSegment === "semi" ? "#B8F4D1" : "",
+              }}
+              className="border-b border-r border-blue-gray-100 p-4"
+            >
+              <Typography
+                variant="small"
+                color="blue-gray"
+                className="font-normal flex flex-row justify-center items-center space-x-2 leading-none opacity-70"
+              >
+                <span>Custom Segment</span>
+              </Typography>
+            </th></>:<></>}
             <th
               key="month"
               style={{
@@ -183,6 +199,22 @@ const LocAssigneeTable = (props) => {
                 <span>Semi Annually</span>
               </Typography>
             </th>
+            {locSegment==="custom"? <>
+            <th
+              key="custom"
+              style={{
+                background: locSegment === "semi" ? "#B8F4D1" : "",
+              }}
+              className="border-b border-r border-blue-gray-100 p-4"
+            >
+              <Typography
+                variant="small"
+                color="blue-gray"
+                className="font-normal flex flex-row justify-center items-center space-x-2 leading-none opacity-70"
+              >
+                <span>Custom Segment</span>
+              </Typography>
+            </th></>:<></>}
           </tr>
         </thead>
         <tbody>
@@ -261,6 +293,24 @@ const LocAssigneeTable = (props) => {
                     {data.countDetails["loc_semi"]}
                   </Typography>
                 </td>
+                {locSegment==="custom"?<>
+                <td
+                  style={{
+                    background: locSegment === "custom" ? "#E3F7F6" : "",
+                  }}
+                  className="py-4 w-[160px] border-b border-r border-blue-gray-100"
+                >
+                  <Typography
+                    variant="small"
+                    className={` ${
+                      data.countDetails["loc_custom"] === 0
+                        ? "text-blue-gray-800 font-normal"
+                        : "text-blue-500 font-bold"
+                    } `}
+                  >
+                    {data.countDetails["loc_custom"]}
+                  </Typography>
+                </td></>:<></>}
                 <td
                   style={{
                     background: locSegment === "month" ? "#E3F7F6" : "",
@@ -312,6 +362,25 @@ const LocAssigneeTable = (props) => {
                     {data.countDetails["pr_semi"]}
                   </Typography>
                 </td>
+
+                {locSegment==="custom"?<>
+                <td
+                  style={{
+                    background: locSegment === "custom" ? "#E3F7F6" : "",
+                  }}
+                  className="py-4 w-[160px] border-b border-r border-blue-gray-100"
+                >
+                  <Typography
+                    variant="small"
+                    className={` ${
+                      data.countDetails["pr_custom"] === 0
+                        ? "text-blue-gray-800 font-normal"
+                        : "text-purple-500 font-bold"
+                    } `}
+                  >
+                    {data.countDetails["pr_custom"]}
+                  </Typography>
+                </td></>:<></>}
               </tr>
             );
           })}
@@ -361,6 +430,19 @@ const LocAssigneeTable = (props) => {
                 </span>
               </Typography>
             </td>
+            {locSegment==="custom"?<>
+            <td
+              style={{
+                background: locSegment === "custom" ? "#E3F7F6" : "",
+              }}
+              className="py-4 w-[160px] border-b  border-r border-blue-gray-100"
+            >
+              <Typography variant="small" className="font-bold text-white">
+                <span className="bg-blue-500 py-1 px-2 rounded-lg">
+                  {props.custom_loc}
+                </span>
+              </Typography>
+            </td></>:<></>}
             <td
               style={{
                 background: locSegment === "month" ? "#E3F7F6" : "",
@@ -397,6 +479,19 @@ const LocAssigneeTable = (props) => {
                 </span>
               </Typography>
             </td>
+            {locSegment==="custom"?<>
+            <td
+              style={{
+                background: locSegment === "custom" ? "#E3F7F6" : "",
+              }}
+              className="py-4 w-[160px] border-b  border-r border-blue-gray-100"
+            >
+              <Typography variant="small" className="font-bold text-white">
+                <span className="bg-purple-500 py-1 px-2 rounded-lg">
+                  {props.custom_pr}
+                </span>
+              </Typography>
+            </td></>:<></>}
           </tr>
         </tbody>
       </table>

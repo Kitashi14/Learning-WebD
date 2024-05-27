@@ -196,10 +196,11 @@ const TestbugsMetricsViewPage = (props) => {
             };
             table.forEach((elem) => {
               if (
-                elem.emp_id === userId ||
-                ((elem.emp_id === "" ||
-                  !contextData.userFullNameMap.has(elem.emp_id)) &&
-                  elem.mgr_id === userId)
+                (elem.emp_id === userId ||
+                  ((elem.emp_id === "" ||
+                    !contextData.userFullNameMap.has(elem.emp_id)) &&
+                    elem.mgr_id === userId)) &&
+                "OAIRMVJDCUN".includes(elem.state)
               ) {
                 data.push({ ...elem, assigned_under: "self" });
                 selfCount[elem.state]++;
@@ -219,10 +220,11 @@ const TestbugsMetricsViewPage = (props) => {
                 : [];
               table.forEach((elem) => {
                 if (
-                  elem.emp_id === curr ||
-                  ((elem.emp_id === "" ||
-                    !contextData.userFullNameMap.has(elem.emp_id)) &&
-                    elem.mgr_id === curr)
+                  (elem.emp_id === curr ||
+                    ((elem.emp_id === "" ||
+                      !contextData.userFullNameMap.has(elem.emp_id)) &&
+                      elem.mgr_id === curr)) &&
+                  "OAIRMVJDCUN".includes(elem.state)
                 ) {
                   data.push({ ...elem, assigned_under: ultimate_parent });
                   assigneeObj[elem.state]++;

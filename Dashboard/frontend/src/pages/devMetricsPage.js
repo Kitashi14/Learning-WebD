@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import ProfileSearchBar from "../components/profileSearchBar";
 import {
   Card,
@@ -15,11 +15,10 @@ import DataContext from "../context/dataContext";
 import DevMetricsTypeRadio from "../components/devMetricsTypeRadio";
 import DevMetricsSegmentTypeRadio from "../components/devMetricsSegmentTypeRadio";
 import DevMetricsTable from "../components/devMetricsTable";
-import { Loader, DatePicker } from "rsuite";
+import { Loader, SelectPicker } from "rsuite";
 import DevAssigneeTable from "../components/devAssigneeTable";
 import DevMetricsCategoryRadio from "../components/devMetricsCategoryRadio";
 import SearchBar from "../components/SearchBar";
-import isAfter from "date-fns/isAfter";
 
 // dashboard view page for any user
 const DevMetricsViewPage = (props) => {
@@ -48,9 +47,8 @@ const DevMetricsViewPage = (props) => {
   //for invalid userId
   const [isUserValid, SetIsUserValid] = useState(true);
 
-  //custom dates ref
-  const cd_upper_limit = useRef();
-  const cd_lower_limit = useRef();
+  //custom date state
+  const [selectedCustomDate, setSelectedCustomDate] = useState(null);
 
   // getting the bugs details that was sorted
   const sortedFeature = {
@@ -151,6 +149,7 @@ const DevMetricsViewPage = (props) => {
         },
         tableOpen: currentDevStatus.tableOpen,
         customDates: {
+          name: currentDevStatus.customDates.name,
           upper_limit: currentDevStatus.customDates.upper_limit,
           lower_limit: currentDevStatus.customDates.lower_limit,
         },
@@ -286,7 +285,6 @@ const DevMetricsViewPage = (props) => {
               };
               dfs_search(child, child, assigneeCount);
 
-            console.log(assigneeCount);
               if (assigneeCount.Total > 0)
                 assigneeCountMap.push({
                   assignee: child,
@@ -415,7 +413,7 @@ const DevMetricsViewPage = (props) => {
   const segmentChartOptions = {
     chart: {
       type: "column",
-      height: userId === "all" ? 480 : 400,
+      height: userId === "all" ? 435 : 355,
       width: 1300,
     },
     title: {
@@ -780,6 +778,7 @@ const DevMetricsViewPage = (props) => {
       sortedFeature: currentDevStatus.sortedFeature,
       tableOpen: currentDevStatus.tableOpen,
       customDates: {
+        name: currentDevStatus.customDates.name,
         upper_limit: currentDevStatus.customDates.upper_limit,
         lower_limit: currentDevStatus.customDates.lower_limit,
       },
@@ -796,6 +795,7 @@ const DevMetricsViewPage = (props) => {
       sortedFeature: currentDevStatus.sortedFeature,
       tableOpen: currentDevStatus.tableOpen,
       customDates: {
+        name: currentDevStatus.customDates.name,
         upper_limit: currentDevStatus.customDates.upper_limit,
         lower_limit: currentDevStatus.customDates.lower_limit,
       },
@@ -812,6 +812,7 @@ const DevMetricsViewPage = (props) => {
       sortedFeature: currentDevStatus.sortedFeature,
       tableOpen: value,
       customDates: {
+        name: currentDevStatus.customDates.name,
         upper_limit: currentDevStatus.customDates.upper_limit,
         lower_limit: currentDevStatus.customDates.lower_limit,
       },
@@ -828,6 +829,7 @@ const DevMetricsViewPage = (props) => {
       sortedFeature: currentDevStatus.sortedFeature,
       tableOpen: currentDevStatus.tableOpen,
       customDates: {
+        name: currentDevStatus.customDates.name,
         upper_limit: currentDevStatus.customDates.upper_limit,
         lower_limit: currentDevStatus.customDates.lower_limit,
       },
@@ -860,19 +862,10 @@ const DevMetricsViewPage = (props) => {
   componentSelectorData.unshift({ label: "All", value: "all" });
 
   const setCustomDates = async () => {
-    var upper_limit = cd_upper_limit.current.target.value;
-    var lower_limit = cd_lower_limit.current.target.value;
-    if(upper_limit===""){
-      upper_limit = customDates.upper_limit;
-    }
-    if(lower_limit===""){
-      lower_limit = customDates.lower_limit;
-    }
+    const name = selectedCustomDate.name;
+    const upper_limit = selectedCustomDate.upper_limit;
+    const lower_limit = selectedCustomDate.lower_limit;
 
-    if (upper_limit < lower_limit) {
-      alert("Please select a valid pair of date, upper limit can't be smaller than lower limit");
-      return;
-    }
     const data = {
       upper_limit,
       lower_limit,
@@ -904,6 +897,7 @@ const DevMetricsViewPage = (props) => {
         sortedFeature: currentDevStatus.sortedFeature,
         tableOpen: currentDevStatus.tableOpen,
         customDates: {
+          name,
           upper_limit,
           lower_limit,
         },
@@ -913,6 +907,76 @@ const DevMetricsViewPage = (props) => {
       alert("Something went wrong, can't find data for custom selected dates");
     }
   };
+
+  const customSegmentDates = [];
+
+  const setCustomSegmentDates = () => {
+    const Months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "June",
+      "July",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+    const currDate = new Date();
+    var y = currDate.getFullYear();
+    var m = currDate.getMonth() + 1;
+    var d = currDate.getDate();
+
+    customSegmentDates.push({
+      label: Months[m - 1] + " (" + y + ")",
+      value: {
+        name: Months[m - 1] + " (" + y + ")",
+        upper_limit:
+          y.toString() +
+          "-" +
+          (m > 9 ? m.toString() : "0" + m.toString()) +
+          "-" +
+          d.toString(),
+        lower_limit:
+          y.toString() +
+          "-" +
+          (m > 9 ? m.toString() : "0" + m.toString()) +
+          "-" +
+          "01",
+      },
+    });
+    m--;
+    for (var i = 0; i < 11; i++) {
+      var date = new Date(y, m, 0);
+      y = date.getFullYear();
+      m = date.getMonth() + 1;
+      d = date.getDate();
+      customSegmentDates.push({
+        label: Months[m - 1] + " (" + y + ")",
+        value: {
+          name: Months[m - 1] + " (" + y + ")",
+          upper_limit:
+            y.toString() +
+            "-" +
+            (m > 9 ? m.toString() : "0" + m.toString()) +
+            "-" +
+            d.toString(),
+          lower_limit:
+            y.toString() +
+            "-" +
+            (m > 9 ? m.toString() : "0" + m.toString()) +
+            "-" +
+            "01",
+        },
+      });
+      m--;
+    }
+  };
+
+  setCustomSegmentDates();
   return (
     <>
       {contextData.isDevPageLoading || !contextData.isDevTableLoaded ? (
@@ -967,47 +1031,27 @@ const DevMetricsViewPage = (props) => {
                       />
                       <div className="flex flex-row space-x-4 items-center">
                         <Typography
-                          className={`text-sm ${
-                            bugSegment === "custom" ? "text-blue-500" : ""
+                          className={`text-sm font-semi ${
+                            bugSegment === "custom" ? "text-blue-500 font-bold" : ""
                           }`}
                         >
                           {" "}
                           Custom Segment:{" "}
                         </Typography>
-                        <DatePicker
-                          ref={cd_lower_limit}
-                          placeholder={
-                            bugSegment === "custom"
-                              ? customDates.lower_limit
-                              : "From"
-                          }
-                          className={`${
-                            bugSegment === "custom"
-                              ? "text-blue-500 font-bold border-blue-500"
-                              : ""
-                          }`}
-                          placement="leftStart"
-                          shouldDisableDate={(date) =>
-                            isAfter(date, new Date())
-                          }
-                        />
-                        <DatePicker
-                          ref={cd_upper_limit}
-                          placeholder={
-                            bugSegment === "custom"
-                              ? customDates.upper_limit
-                              : "To"
-                          }
-                          className={`${
-                            bugSegment === "custom"
-                              ? "text-blue-500 font-bold border-blue-500"
-                              : ""
-                          }`}
-                          placement="rightStart"
-                          shouldDisableDate={(date) =>
-                            isAfter(date, new Date())
-                          }
-                        />
+                        <SelectPicker
+                            data={customSegmentDates}
+                            searchable={false}
+                            style={{ width: 124 }}
+                            placement="rightStart"
+                            onChange={(e) => {
+                              setSelectedCustomDate(e);
+                            }}
+                            placeholder={
+                              bugSegment === "custom"
+                                ? customDates.name
+                                : "Select"
+                            }
+                          />
                         <div
                           className="rounded-md p-2 bg-blue-400 hover:bg-blue-500"
                           onClick={setCustomDates}

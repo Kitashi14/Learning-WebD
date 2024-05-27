@@ -33,7 +33,7 @@ const ProfileSearchBar = (props) => {
           .filter((x, i, a) => a.indexOf(x) === i)
           .forEach((manager) => callParent(manager));
       })
-    : (props.type === "dev" || props.type==="testbugs")
+    : props.type === "dev" || props.type === "testbugs"
     ? props.table.forEach((elem) => {
         if ("OAIRMVJDCUN".includes(elem.state))
           callParent(
@@ -44,7 +44,7 @@ const ProfileSearchBar = (props) => {
       })
     : props.type === "autons"
     ? props.table.forEach((elem) => {
-        elem=elem.bug_info;
+        elem = elem.bug_info;
         callParent(
           elem.emp_id === "" || !contextData.userFullNameMap.has(elem.emp_id)
             ? elem.mgr_id
@@ -53,14 +53,26 @@ const ProfileSearchBar = (props) => {
       })
     : props.type === "teacats"
     ? props.table.forEach((elem) => {
-        elem=elem.bug_info;
+        elem = elem.bug_info;
         callParent(
           elem.emp_id === "" || !contextData.userFullNameMap.has(elem.emp_id)
             ? elem.mgr_id
             : elem.emp_id
         );
       })
-    :props.table.forEach((elem) => {
+    : props.type === "loc"
+    ? props.table.forEach((elem) => {
+        callParent(elem.emp_id);
+        elem.reviewer
+          .split(",")
+          .map((p) => {
+            return p.trim();
+          })
+          .forEach((e) => {
+            callParent(e);
+          });
+      })
+    : props.table.forEach((elem) => {
         callParent(elem.emp_id);
       });
 
@@ -78,9 +90,9 @@ const ProfileSearchBar = (props) => {
     props.selectUserId(e == null ? "all" : e);
   };
 
-  if(s.has(props.userId) || props.userId==="all"){
+  if (s.has(props.userId) || props.userId === "all") {
     props.setInvalidUserSelected(true);
-  }else{
+  } else {
     props.setInvalidUserSelected(false);
   }
 

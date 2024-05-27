@@ -136,6 +136,7 @@ export const DataContextProvider = (props) => {
     },
     tableOpen: false,
     customDates:{
+      name: null,
       upper_limit : null,
       lower_limit : null,
     }
@@ -144,6 +145,11 @@ export const DataContextProvider = (props) => {
     locSegment : "semi",
     tableOpen: false,
     tableSortBy: "loc",
+    customDates:{
+      name: null,
+      upper_limit : null,
+      lower_limit : null,
+    }
   })
   const [autons_states,setAutonsStates] = useState({
     bugSegment : "semi",

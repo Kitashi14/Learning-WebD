@@ -12,7 +12,7 @@ import HighchartsReact from "highcharts-react-official";
 import { useNavigate, useParams } from "react-router-dom";
 import DataContext from "../context/dataContext";
 import DevMetricsSegmentTypeRadio from "../components/devMetricsSegmentTypeRadio";
-import { Loader } from "rsuite";
+import { Loader, SelectPicker } from "rsuite";
 import LocAssigneeTable from "../components/locAssigneeTable";
 
 // dashboard view page for any user
@@ -23,11 +23,15 @@ const LocViewPage = (props) => {
   // level 1 filters
   const locSegment = contextData.loc_states.locSegment;
   const tableOpen = contextData.loc_states.tableOpen;
+  const customDates = contextData.loc_states.customDates;
 
   const [viewData, setViewData] = useState([]); //it will contain all elements after applying level 1 filter, used for showing lvl 1 charts
 
   //for invalid userId
   const [isUserValid, SetIsUserValid] = useState(true);
+
+  //custom date state
+  const [selectedCustomDate, setSelectedCustomDate] = useState(null);
 
   const [showAllLocAssignees, setShowAllLocAssignees] = useState(false);
   const [showAllPrAssignees, setShowAllPrAssignees] = useState(false);
@@ -37,6 +41,7 @@ const LocViewPage = (props) => {
     ["month", "Monthly"],
     ["quarter", "Quarterly"],
     ["semi", "Semi Annually"],
+    ["custom", "Custom Segment"],
   ]);
 
   const reverseSegmentMap = new Map();
@@ -61,55 +66,39 @@ const LocViewPage = (props) => {
   useEffect(
     () => {
       const mainFunction = async () => {
-        const loadData = async (tableMap) => {
+        const loadData = async (table) => {
           let data = [];
-
-          //condition check is a valid is selected
           if (userId === "all") {
             const dataCount = {
               loc_month: 0,
               loc_quarter: 0,
               loc_semi: 0,
+              loc_custom: 0,
               pr_month: 0,
               pr_quarter: 0,
               pr_semi: 0,
+              pr_custom: 0,
             };
-            tableMap.forEach((v, k) => {
-              dataCount.loc_month =
-                dataCount.loc_month +
-                parseInt(
-                  v.total_loc_monthly === null ? 0 : v.total_loc_monthly
-                );
-              dataCount.loc_quarter =
-                dataCount.loc_quarter +
-                parseInt(
-                  v.total_loc_quarterly === null ? 0 : v.total_loc_quarterly
-                );
-              dataCount.loc_semi =
-                dataCount.loc_semi +
-                parseInt(
-                  v.total_loc_semiannually === null
-                    ? 0
-                    : v.total_loc_semiannually
-                );
-              dataCount.pr_month =
-                dataCount.pr_month +
-                parseInt(
-                  v.pr_reviewed_monthly === null ? 0 : v.pr_reviewed_monthly
-                );
-              dataCount.pr_quarter =
-                dataCount.pr_quarter +
-                parseInt(
-                  v.pr_reviewed_quarterly === null ? 0 : v.pr_reviewed_quarterly
-                );
-              dataCount.pr_semi =
-                dataCount.pr_semi +
-                parseInt(
-                  v.pr_reviewed_semiannually === null
-                    ? 0
-                    : v.pr_reviewed_semiannually
-                );
+            table["month"]["bugs"].forEach((e) => {
+              dataCount.loc_month = dataCount.loc_month + e.loc;
+              if (e.reviewer !== "") dataCount.pr_month++;
             });
+
+            table["quarter"]["bugs"].forEach((e) => {
+              dataCount.loc_quarter = dataCount.loc_quarter + e.loc;
+              if (e.reviewer !== "") dataCount.pr_quarter++;
+            });
+
+            table["semi"]["bugs"].forEach((e) => {
+              dataCount.loc_semi = dataCount.loc_semi + e.loc;
+              if (e.reviewer !== "") dataCount.pr_semi++;
+            });
+
+            table["custom"]["bugs"].forEach((e) => {
+              dataCount.loc_custom = dataCount.loc_custom + e.loc;
+              if (e.reviewer !== "") dataCount.pr_custom++;
+            });
+
             data.push({
               assignee: "all",
               countDetails: dataCount,
@@ -123,55 +112,84 @@ const LocViewPage = (props) => {
             // filtering bugs assigned directly to user
             const assigneeCountMap = [];
             const selfCount = {
-              loc_month: tableMap.has(userId)
-                ? parseInt(
-                    tableMap.get(userId).total_loc_monthly === null
-                      ? 0
-                      : tableMap.get(userId).total_loc_monthly
-                  )
-                : 0,
-              loc_quarter: tableMap.has(userId)
-                ? parseInt(
-                    tableMap.get(userId).total_loc_quarterly === null
-                      ? 0
-                      : tableMap.get(userId).total_loc_quarterly
-                  )
-                : 0,
-              loc_semi: tableMap.has(userId)
-                ? parseInt(
-                    tableMap.get(userId).total_loc_semiannually === null
-                      ? 0
-                      : tableMap.get(userId).total_loc_semiannually
-                  )
-                : 0,
-              pr_month: tableMap.has(userId)
-                ? parseInt(
-                    tableMap.get(userId).pr_reviewed_monthly === null
-                      ? 0
-                      : tableMap.get(userId).pr_reviewed_monthly
-                  )
-                : 0,
-              pr_quarter: tableMap.has(userId)
-                ? parseInt(
-                    tableMap.get(userId).pr_reviewed_quarterly === null
-                      ? 0
-                      : tableMap.get(userId).pr_reviewed_quarterly
-                  )
-                : 0,
-              pr_semi: tableMap.has(userId)
-                ? parseInt(
-                    tableMap.get(userId).pr_reviewed_semiannually === null
-                      ? 0
-                      : tableMap.get(userId).pr_reviewed_semiannually
-                  )
-                : 0,
+              loc_month: 0,
+              loc_quarter: 0,
+              loc_semi: 0,
+              loc_custom: 0,
+              pr_month: 0,
+              pr_quarter: 0,
+              pr_semi: 0,
+              pr_custom: 0,
             };
+
+            table["month"]["bugs"].forEach((e) => {
+              if (e.emp_id === userId) {
+                selfCount.loc_month = selfCount.loc_month + e.loc;
+              }
+              const reviewers = e.reviewer
+                ? new Set(
+                    e.reviewer.split(",").map((p) => {
+                      return p.trim();
+                    })
+                  )
+                : new Set();
+
+              if (reviewers.has(userId)) selfCount.pr_month++;
+            });
+
+            table["quarter"]["bugs"].forEach((e) => {
+              if (e.emp_id === userId) {
+                selfCount.loc_quarter = selfCount.loc_quarter + e.loc;
+              }
+              const reviewers = e.reviewer
+                ? new Set(
+                    e.reviewer.split(",").map((p) => {
+                      return p.trim();
+                    })
+                  )
+                : new Set();
+
+              if (reviewers.has(userId)) selfCount.pr_quarter++;
+            });
+
+            table["semi"]["bugs"].forEach((e) => {
+              if (e.emp_id === userId) {
+                selfCount.loc_semi = selfCount.loc_semi + e.loc;
+              }
+              const reviewers = e.reviewer
+                ? new Set(
+                    e.reviewer.split(",").map((p) => {
+                      return p.trim();
+                    })
+                  )
+                : new Set();
+
+              if (reviewers.has(userId)) selfCount.pr_semi++;
+            });
+
+            table["custom"]["bugs"].forEach((e) => {
+              if (e.emp_id === userId) {
+                selfCount.loc_custom = selfCount.loc_custom + e.loc;
+              }
+              const reviewers = e.reviewer
+                ? new Set(
+                    e.reviewer.split(",").map((p) => {
+                      return p.trim();
+                    })
+                  )
+                : new Set();
+
+              if (reviewers.has(userId)) selfCount.pr_custom++;
+            });
+
             if (
               selfCount.loc_month +
                 selfCount.loc_quarter +
                 selfCount.loc_semi +
+                selfCount.loc_custom +
                 selfCount.pr_month +
                 selfCount.pr_quarter +
+                selfCount.pr_custom +
                 selfCount.pr_semi >
               0
             )
@@ -181,90 +199,107 @@ const LocViewPage = (props) => {
               });
 
             // dfs search in the tree
-            const dfs_search = (curr, ultimate_parent, assigneeObj) => {
+            const dfs_search = (curr, assigneeObj) => {
               const childNodes = contextData.parentChildMap.has(curr)
                 ? contextData.parentChildMap.get(curr)
                 : [];
-              assigneeObj.loc_month =
-                assigneeObj.loc_month +
-                (tableMap.has(curr)
-                  ? parseInt(
-                      tableMap.get(curr).total_loc_monthly === null
-                        ? 0
-                        : tableMap.get(curr).total_loc_monthly
-                    )
-                  : 0);
 
-              assigneeObj.loc_quarter =
-                assigneeObj.loc_quarter +
-                (tableMap.has(curr)
-                  ? parseInt(
-                      tableMap.get(curr).total_loc_quarterly === null
-                        ? 0
-                        : tableMap.get(curr).total_loc_quarterly
+              table["month"]["bugs"].forEach((e) => {
+                if (e.emp_id === curr) {
+                  assigneeObj.loc_month = assigneeObj.loc_month + e.loc;
+                }
+                const reviewers = e.reviewer
+                  ? new Set(
+                      e.reviewer.split(",").map((p) => {
+                        return p.trim();
+                      })
                     )
-                  : 0);
+                  : new Set();
 
-              assigneeObj.loc_semi =
-                assigneeObj.loc_semi +
-                (tableMap.has(curr)
-                  ? parseInt(
-                      tableMap.get(curr).total_loc_semiannually === null
-                        ? 0
-                        : tableMap.get(curr).total_loc_semiannually
-                    )
-                  : 0);
+                if (reviewers.has(curr)) assigneeObj.pr_month.add(e.cdet_id);
+              });
 
-              assigneeObj.pr_month =
-                assigneeObj.pr_month +
-                (tableMap.has(curr)
-                  ? parseInt(
-                      tableMap.get(curr).pr_reviewed_monthly === null
-                        ? 0
-                        : tableMap.get(curr).pr_reviewed_monthly
+              table["quarter"]["bugs"].forEach((e) => {
+                if (e.emp_id === curr) {
+                  assigneeObj.loc_quarter = assigneeObj.loc_quarter + e.loc;
+                }
+                const reviewers = e.reviewer
+                  ? new Set(
+                      e.reviewer.split(",").map((p) => {
+                        return p.trim();
+                      })
                     )
-                  : 0);
+                  : new Set();
 
-              assigneeObj.pr_quarter =
-                assigneeObj.pr_quarter +
-                (tableMap.has(curr)
-                  ? parseInt(
-                      tableMap.get(curr).pr_reviewed_quarterly === null
-                        ? 0
-                        : tableMap.get(curr).pr_reviewed_quarterly
+                if (reviewers.has(curr)) assigneeObj.pr_quarter.add(e.cdet_id);
+              });
+
+              table["semi"]["bugs"].forEach((e) => {
+                if (e.emp_id === curr) {
+                  assigneeObj.loc_semi = assigneeObj.loc_semi + e.loc;
+                }
+                const reviewers = e.reviewer
+                  ? new Set(
+                      e.reviewer.split(",").map((p) => {
+                        return p.trim();
+                      })
                     )
-                  : 0);
-              assigneeObj.pr_semi =
-                assigneeObj.pr_semi +
-                (tableMap.has(curr)
-                  ? parseInt(
-                      tableMap.get(curr).pr_reviewed_semiannually === null
-                        ? 0
-                        : tableMap.get(curr).pr_reviewed_semiannually
+                  : new Set();
+
+                if (reviewers.has(curr)) assigneeObj.pr_semi.add(e.cdet_id);
+              });
+
+              table["custom"]["bugs"].forEach((e) => {
+                if (e.emp_id === curr) {
+                  assigneeObj.loc_custom = assigneeObj.loc_custom + e.loc;
+                }
+                const reviewers = e.reviewer
+                  ? new Set(
+                      e.reviewer.split(",").map((p) => {
+                        return p.trim();
+                      })
                     )
-                  : 0);
+                  : new Set();
+
+                if (reviewers.has(curr)) assigneeObj.pr_custom.add(e.cdet_id);
+              });
+
               childNodes.forEach((childNode) => {
-                dfs_search(childNode, ultimate_parent, assigneeObj);
+                dfs_search(childNode, assigneeObj);
               });
             };
 
             // itterating to all nodes under a direct children one by one using dfs
             childrens.forEach((child) => {
-              const assigneeCount = {
+              const assigneeCountInitial = {
                 loc_month: 0,
                 loc_quarter: 0,
                 loc_semi: 0,
-                pr_month: 0,
-                pr_quarter: 0,
-                pr_semi: 0,
+                loc_custom: 0,
+                pr_month: new Set(),
+                pr_quarter: new Set(),
+                pr_semi: new Set(),
+                pr_custom: new Set(),
               };
-              dfs_search(child, child, assigneeCount);
+              dfs_search(child, assigneeCountInitial);
+              const assigneeCount = {
+                loc_month: assigneeCountInitial.loc_month,
+                loc_quarter: assigneeCountInitial.loc_quarter,
+                loc_semi: assigneeCountInitial.loc_semi,
+                loc_custom: assigneeCountInitial.loc_custom,
+                pr_month: assigneeCountInitial.pr_month.size,
+                pr_quarter: assigneeCountInitial.pr_quarter.size,
+                pr_semi: assigneeCountInitial.pr_semi.size,
+                pr_custom: assigneeCountInitial.pr_custom.size,
+              };
               if (
                 assigneeCount.loc_month +
                   assigneeCount.loc_quarter +
                   assigneeCount.loc_semi +
+                  assigneeCount.loc_custom +
                   assigneeCount.pr_month +
                   assigneeCount.pr_quarter +
+                  assigneeCount.pr_custom +
                   assigneeCount.pr_semi >
                 0
               )
@@ -283,10 +318,10 @@ const LocViewPage = (props) => {
         const fetchData = async () => {
           try {
             const response = await fetch(
-              `${process.env.REACT_APP_BACKEND_URL}/loc/details`
+              `${process.env.REACT_APP_BACKEND_URL}/loc/details_new`
             );
             const responseData = await response.json();
-            contextData.setLocTable(responseData.data);
+            contextData.setLocTable(responseData);
           } catch (err) {
             console.log(err);
             alert("Can't fetch loc metrics details at the moment");
@@ -298,11 +333,7 @@ const LocViewPage = (props) => {
           await fetchData();
           contextData.setIsLocTableLoaded(true);
         } else {
-          const tableMapToUse = new Map();
-          contextData.locTable.loc_data.forEach((e) => {
-            tableMapToUse.set(e.emp_id, e);
-          });
-          loadData(tableMapToUse);
+          loadData(contextData.locTable.loc_data);
         }
       };
       try {
@@ -315,9 +346,8 @@ const LocViewPage = (props) => {
       }
     },
     // eslint-disable-next-line
-    [userId, contextData.isLocTableLoaded] // dependency array
+    [userId, contextData.isLocTableLoaded, locSegment, customDates] // dependency array
   );
-
   var total_loc_count = 0;
   var total_pr_count = 0;
   var monthly_loc = 0;
@@ -326,6 +356,8 @@ const LocViewPage = (props) => {
   var quarter_pr = 0;
   var semi_loc = 0;
   var semi_pr = 0;
+  var custom_loc = 0;
+  var custom_pr = 0;
 
   viewData.forEach((elem) => {
     monthly_loc = monthly_loc + elem.countDetails.loc_month;
@@ -334,12 +366,17 @@ const LocViewPage = (props) => {
     quarter_pr = quarter_pr + elem.countDetails.pr_quarter;
     semi_loc = semi_loc + elem.countDetails.loc_semi;
     semi_pr = semi_pr + elem.countDetails.pr_semi;
+    custom_loc = custom_loc + elem.countDetails.loc_custom;
+    custom_pr = custom_pr + elem.countDetails.pr_custom;
     if (locSegment === "month") {
       total_loc_count = total_loc_count + elem.countDetails.loc_month;
       total_pr_count = total_pr_count + elem.countDetails.pr_month;
     } else if (locSegment === "quarter") {
       total_loc_count = total_loc_count + elem.countDetails.loc_quarter;
       total_pr_count = total_pr_count + elem.countDetails.pr_quarter;
+    } else if (locSegment === "custom") {
+      total_loc_count = total_loc_count + elem.countDetails.loc_custom;
+      total_pr_count = total_pr_count + elem.countDetails.pr_custom;
     } else {
       total_loc_count = total_loc_count + elem.countDetails.loc_semi;
       total_pr_count = total_pr_count + elem.countDetails.pr_semi;
@@ -440,7 +477,7 @@ const LocViewPage = (props) => {
       },
     ],
   };
-
+  const logBase = (b, n) => Math.log(n) / Math.log(b);
   const getAssigneeCount = (sortBy) => {
     const loc = [];
     const pr = [];
@@ -456,8 +493,17 @@ const LocViewPage = (props) => {
         );
       viewData.forEach((elem) => {
         loc.push({
-          name: elem.countDetails.loc_month,
-          y: elem.countDetails.loc_month,
+          name: parseFloat(
+            elem.countDetails.loc_month === 0
+              ? 0
+              : logBase(100, elem.countDetails.loc_month).toFixed(3)
+          ),
+          y: parseFloat(
+            elem.countDetails.loc_month === 0
+              ? 0
+              : logBase(100, elem.countDetails.loc_month).toFixed(3)
+          ),
+          yy: elem.countDetails.loc_month,
         });
         pr.push({
           name: elem.countDetails.pr_month,
@@ -475,12 +521,49 @@ const LocViewPage = (props) => {
         );
       viewData.forEach((elem) => {
         loc.push({
-          name: elem.countDetails.loc_quarter,
-          y: elem.countDetails.loc_quarter,
+          name: parseFloat(
+            elem.countDetails.loc_quarter === 0
+              ? 0
+              : logBase(100, elem.countDetails.loc_quarter).toFixed(3)
+          ),
+          y: parseFloat(
+            elem.countDetails.loc_quarter === 0
+              ? 0
+              : logBase(100, elem.countDetails.loc_quarter).toFixed(3)
+          ),
+          yy: elem.countDetails.loc_quarter,
         });
         pr.push({
           name: elem.countDetails.pr_quarter,
           y: elem.countDetails.pr_quarter,
+        });
+      });
+    } else if (locSegment === "custom") {
+      if (sortBy === "loc")
+        viewData.sort(
+          (a, b) => b.countDetails.loc_custom - a.countDetails.loc_custom
+        );
+      else
+        viewData.sort(
+          (a, b) => b.countDetails.pr_custom - a.countDetails.pr_custom
+        );
+      viewData.forEach((elem) => {
+        loc.push({
+          name: parseFloat(
+            elem.countDetails.loc_custom === 0
+              ? 0
+              : logBase(100, elem.countDetails.loc_custom).toFixed(3)
+          ),
+          y: parseFloat(
+            elem.countDetails.loc_custom === 0
+              ? 0
+              : logBase(100, elem.countDetails.loc_custom).toFixed(3)
+          ),
+          yy: elem.countDetails.loc_custom,
+        });
+        pr.push({
+          name: elem.countDetails.pr_custom,
+          y: elem.countDetails.pr_custom,
         });
       });
     } else {
@@ -494,8 +577,17 @@ const LocViewPage = (props) => {
         );
       viewData.forEach((elem) => {
         loc.push({
-          name: elem.countDetails.loc_semi,
-          y: elem.countDetails.loc_semi,
+          name: parseFloat(
+            elem.countDetails.loc_semi === 0
+              ? 0
+              : logBase(100, elem.countDetails.loc_semi).toFixed(3)
+          ),
+          y: parseFloat(
+            elem.countDetails.loc_semi === 0
+              ? 0
+              : logBase(100, elem.countDetails.loc_semi).toFixed(3)
+          ),
+          yy: elem.countDetails.loc_semi,
         });
         pr.push({
           name: elem.countDetails.pr_semi,
@@ -528,14 +620,14 @@ const LocViewPage = (props) => {
   const locAssignedChartOptions = {
     chart: {
       type: "bar",
-      height: 430,
+      height: 385,
       width: 630,
     },
     title: {
       text:
         diffLocAssignNumbers > 10 && !showAllLocAssignees
-          ? "LOC Distribution Chart (Top 10)"
-          : "LOC Distribution Chart",
+          ? "LOC Distribution LOG Chart (Top 10)"
+          : "LOC Distribution <i>(log chart)</i>",
     },
     // colors: ['#D789D7'],
     plotOptions: {
@@ -563,7 +655,7 @@ const LocViewPage = (props) => {
     },
     series: [
       {
-        name: "No. of LOC",
+        name: "logBase100(No. of LOC)",
         data: diffLocAssignCount,
         innerSize: "50%",
         events: {
@@ -582,7 +674,7 @@ const LocViewPage = (props) => {
         let s = `<strong>${
           this.x === "self" ? "Self" : contextData.userFullNameMap.get(this.x)
         }</strong>`;
-        s += `<br>No. of LOC: ${this.points[0].y}`;
+        s += `<br>No. of LOC: ${this.point.yy}`;
         return s;
       },
     },
@@ -606,14 +698,14 @@ const LocViewPage = (props) => {
   const prAssignedChartOptions = {
     chart: {
       type: "bar",
-      height: 430,
+      height: 385,
       width: 630,
     },
     title: {
       text:
         diffPrAssignNumbers > 10 && !showAllPrAssignees
-          ? "PRs Distribution Chart (Top 10)"
-          : "PRs Distribution Chart",
+          ? "PRs Distribution (Top 10)"
+          : "PRs Distribution ",
     },
     colors: ["#8E24AA"],
     plotOptions: {
@@ -670,6 +762,7 @@ const LocViewPage = (props) => {
   const selectUserId = (user) => {
     if (user !== userId) {
       contextData.setIsLocPageLoading(true);
+      if (user === "all") selectLocSegment("semi");
       navigate(`/loc/view/${user}`);
     }
   };
@@ -681,6 +774,11 @@ const LocViewPage = (props) => {
       locSegment: currentLocStatus.locSegment,
       tableOpen: value,
       tableSortBy: currentLocStatus.tableSortBy,
+      customDates: {
+        name: currentLocStatus.customDates.name,
+        upper_limit: currentLocStatus.customDates.upper_limit,
+        lower_limit: currentLocStatus.customDates.lower_limit,
+      },
     });
   };
 
@@ -691,6 +789,11 @@ const LocViewPage = (props) => {
       locSegment: segment,
       tableOpen: currentLocStatus.tableOpen,
       tableSortBy: currentLocStatus.tableSortBy,
+      customDates: {
+        name: currentLocStatus.customDates.name,
+        upper_limit: currentLocStatus.customDates.upper_limit,
+        lower_limit: currentLocStatus.customDates.lower_limit,
+      },
     });
   };
 
@@ -700,9 +803,15 @@ const LocViewPage = (props) => {
       locSegment: currentLocStatus.locSegment,
       tableOpen: currentLocStatus.tableOpen,
       tableSortBy: sortBy,
+      customDates: {
+        name: currentLocStatus.customDates.name,
+        upper_limit: currentLocStatus.customDates.upper_limit,
+        lower_limit: currentLocStatus.customDates.lower_limit,
+      },
     });
   };
 
+  //resorting the assignee table
   if (tableSortBy === "loc") {
     getAssigneeCount("loc");
   } else {
@@ -712,6 +821,120 @@ const LocViewPage = (props) => {
   const setInvalidUserSelected = (value) => {
     SetIsUserValid(value);
   };
+
+  const setCustomDates = async () => {
+    const name = selectedCustomDate.name;
+    const upper_limit = selectedCustomDate.upper_limit;
+    const lower_limit = selectedCustomDate.lower_limit;
+
+    const data = {
+      upper_limit,
+      lower_limit,
+    };
+    try {
+      contextData.setIsDevPageLoading(true);
+      const response = await fetch(
+        `${process.env.REACT_APP_BACKEND_URL}/loc/details_new_customDates`,
+        {
+          method: "POST",
+          headers: {
+            "Content-type": "application/json",
+          },
+          body: JSON.stringify(data),
+        }
+      );
+      const responseData = await response.json();
+
+      const currLocTable = JSON.parse(JSON.stringify(contextData.locTable));
+      currLocTable.dates["custom"] = responseData.dates["custom"];
+      currLocTable.loc_data["custom"] = responseData.data["custom"];
+      contextData.setLocTable(currLocTable);
+      const currentLocStatus = contextData.loc_states;
+      contextData.setLoc({
+        locSegment: "custom",
+        tableOpen: currentLocStatus.tableOpen,
+        tableSortBy: currLocTable.tableSortBy,
+        customDates: {
+          name,
+          upper_limit,
+          lower_limit,
+        },
+      });
+    } catch (err) {
+      console.log(err);
+      alert("Something went wrong, can't find data for custom selected dates");
+    }
+  };
+
+  const customSegmentDates = [];
+
+  const setCustomSegmentDates = () => {
+    const Months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "June",
+      "July",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+    const currDate = new Date();
+    var y = currDate.getFullYear();
+    var m = currDate.getMonth() + 1;
+    var d = currDate.getDate();
+
+    customSegmentDates.push({
+      label: Months[m - 1] + " (" + y + ")",
+      value: {
+        name: Months[m - 1] + " (" + y + ")",
+        upper_limit:
+          y.toString() +
+          "-" +
+          (m > 9 ? m.toString() : "0" + m.toString()) +
+          "-" +
+          d.toString(),
+        lower_limit:
+          y.toString() +
+          "-" +
+          (m > 9 ? m.toString() : "0" + m.toString()) +
+          "-" +
+          "01",
+      },
+    });
+    m--;
+    for (var i = 0; i < 11; i++) {
+      var date = new Date(y, m, 0);
+      y = date.getFullYear();
+      m = date.getMonth() + 1;
+      d = date.getDate();
+      customSegmentDates.push({
+        label: Months[m - 1] + " (" + y + ")",
+        value: {
+          name: Months[m - 1] + " (" + y + ")",
+          upper_limit:
+            y.toString() +
+            "-" +
+            (m > 9 ? m.toString() : "0" + m.toString()) +
+            "-" +
+            d.toString(),
+          lower_limit:
+            y.toString() +
+            "-" +
+            (m > 9 ? m.toString() : "0" + m.toString()) +
+            "-" +
+            "01",
+        },
+      });
+      m--;
+    }
+  };
+
+  setCustomSegmentDates();
 
   return (
     <>
@@ -733,7 +956,11 @@ const LocViewPage = (props) => {
             </div>
             <ProfileSearchBar
               selectUserId={selectUserId}
-              table={contextData.locTable ? contextData.locTable.loc_data : []}
+              table={
+                contextData.locTable
+                  ? contextData.locTable.loc_data["semi"]["bugs"]
+                  : []
+              }
               userId={userId}
               type={"loc"}
               setInvalidUserSelected={setInvalidUserSelected}
@@ -761,6 +988,44 @@ const LocViewPage = (props) => {
                             data={segmentFullNameMap}
                             type={"loc"}
                           />
+                        </div>
+                        <div className="flex flex-row space-x-4 items-center">
+                          <Typography
+                            className={`text-sm font-semi ${
+                              locSegment === "custom"
+                                ? "text-blue-500 font-bold"
+                                : ""
+                            }`}
+                          >
+                            {" "}
+                            Custom Segment:{" "}
+                          </Typography>
+                          <SelectPicker
+                            data={customSegmentDates}
+                            searchable={false}
+                            style={{ width: 124 }}
+                            placement="rightStart"
+                            onChange={(e) => {
+                              setSelectedCustomDate(e);
+                            }}
+                            placeholder={
+                              locSegment === "custom"
+                                ? customDates.name
+                                : "Select"
+                            }
+                          />
+                          <div
+                            className="rounded-md p-2 bg-blue-400 hover:bg-blue-500"
+                            onClick={setCustomDates}
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 512 512"
+                              className="w-4 h-4 hover:cursor-pointer hover:text-blue-800 fill-white"
+                            >
+                              <path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z" />
+                            </svg>
+                          </div>
                         </div>
                         <div className="flex flex-row space-x-8">
                           <Typography variant="h5" className="pl-4 text-center">
@@ -946,6 +1211,56 @@ const LocViewPage = (props) => {
                           </div>
                         </div>
                       </div>
+                      {locSegment === "custom" ? (
+                        <>
+                          <div className="w-1/5 h-full  flex flex-col">
+                            <div className={`h-3/10 w-full text-center `}>
+                              {" "}
+                              <span
+                                className={
+                                  locSegment === "custom"
+                                    ? "font-bold text-white bg-green-700 px-2 py-[3px] rounded-md"
+                                    : "font-semibold text-blue-gray-500"
+                                }
+                              >
+                                Custom Segment
+                              </span>
+                            </div>
+                            <div className="h-7/10 w-full flex flex-col justify-center">
+                              <div className="flex w-full flex-row  justify-center space-x-6 items-center ">
+                                <div className="h-fit w-1/2 flex flex-row justify-end pr-2">
+                                  <div className="w-[10px] h-[10px] bg-blue-600 rounded-full"></div>
+                                </div>
+                                <div className="h-fit w-1/2 flex flex-row justify-start ">
+                                  <span
+                                    className={
+                                      locSegment === "custom" ? "font-bold" : ""
+                                    }
+                                  >
+                                    {custom_loc}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="flex w-full flex-row  justify-center space-x-6 items-center ">
+                                <div className="h-fit w-1/2 flex flex-row justify-end pr-2">
+                                  <div className="w-[10px] h-[10px] bg-purple-600 rounded-full"></div>
+                                </div>
+                                <div className="h-fit w-1/2 flex flex-row justify-start ">
+                                  <span
+                                    className={
+                                      locSegment === "custom" ? "font-bold" : ""
+                                    }
+                                  >
+                                    {custom_pr}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <></>
+                      )}
                     </div>
                   </>
                 ) : (
@@ -1062,6 +1377,8 @@ const LocViewPage = (props) => {
                                 quarter_pr={quarter_pr}
                                 semi_loc={semi_loc}
                                 semi_pr={semi_pr}
+                                custom_loc={custom_loc}
+                                custom_pr={custom_pr}
                               />
                             </>
                           ) : (
