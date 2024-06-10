@@ -1,34 +1,70 @@
 import { Card, Typography } from "@material-tailwind/react";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DataContext from "../context/dataContext";
 
 // table heads
-export default function TeacatsTable(props) {
+export default function PrecommitsMetricsTable(props) {
   const TABLE_HEAD = [
     "Bug ID",
-    "Headline",
     "State",
+    "Run On",
+    "Request Link",
     "Manager",
     "Engineer",
     "Component",
+    "PR Link",
+    "Analysis",
   ];
 
   const navigate = useNavigate();
   const contextData = useContext(DataContext);
 
+  const [editId, setEditId] = useState(null);
+
   //table rows passed through props (viewTableData)
   const TABLE_ROWS = props.data;
-  const typeColors = ["#D789D7", "#9D65C9", "#5D54A4", "#2A3D66", "#000000"];
-  const stateOrder = ["AMINO", "RJDCU"];
+  const typeColors = [
+    "#D789D7",
+    "#9D65C9",
+    "#5D54A4",
+    "#2A3D66",
+    "#A21CAF",
+    "#d946ef",
+    "#e879f9",
+    "#f0abfc",
+    "#d8b4fe",
+    "#6366f1",
+  ];
+  const stateOrder = props.states;
+
+  const setAnalysisText = async (id, value) => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/test/precommits`, {
+        method: "PATCH",
+        headers: {
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify({
+          id,
+          value,
+        }),
+      });
+      if (response.status === 200)
+        contextData.setIsPrecommitsTableLoaded(false);
+      else throw Error("something went wrong");
+    } catch (err) {
+      console.log(err);
+      alert("Analysis update failed. Please try again later.");
+    }
+  };
 
   //features with sorting option
   const featuresToSort = new Map([
     ["Bug ID", "bug_id"],
-    ["Headline", "headline"],
     ["State", "state"],
-    ["Employee ID", "emp_id"],
     ["Bug under", "assigned_under"],
+    ["Run On", "run_on"],
     ["Engineer", "emp_id"],
     ["Manager", "mgr_id"],
     ["Component", "component"],
@@ -36,9 +72,31 @@ export default function TeacatsTable(props) {
 
   //for navigating to different routes
   if (props.userId !== "all") {
-    TABLE_HEAD.splice(3, 0, "Bug under");
+    TABLE_HEAD.splice(4, 0, "Bug under");
   }
 
+  const Months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "June",
+    "July",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+
+  const getDate = (date) => {
+    const dt = new Date(date);
+    const y = dt.getFullYear();
+    const m = dt.getMonth();
+    const d = dt.getDate();
+    return Months[m] + " " + d + ", " + y;
+  };
   return (
     <Card className=" w-full overflow-scroll">
       <table className="w-full min-w-max table-auto items-center text-center">
@@ -150,7 +208,7 @@ export default function TeacatsTable(props) {
 
         <tbody>
           {/* table data rows */}
-          {TABLE_ROWS.map((data) => (
+          {TABLE_ROWS.slice(props.lowerIndex, props.upperIndex).map((data) => (
             <tr
               key={data.bug_id}
               className="even:bg-blue-gray-100 hover:bg-blue-100"
@@ -173,35 +231,34 @@ export default function TeacatsTable(props) {
               <td className="p-4">
                 <Typography
                   variant="small"
-                  color="blue-gray"
-                  className="font-normal"
+                  color="white"
+                  style={{
+                    background: typeColors[stateOrder.indexOf(data.state)],
+                  }}
+                  className={`font-normal rounded py-1 px-3`}
                 >
-                  {data.headline}
+                  {data.state}
                 </Typography>
               </td>
               <td className="p-4">
                 <Typography
                   variant="small"
-                  color="white"
-                  style={{
-                    background:
-                      props.bugType === "all"
-                        ? typeColors[
-                            stateOrder.findIndex((v, i, a) => {
-                              return v.includes(data.state);
-                            })
-                          ]
-                        : typeColors[
-                            stateOrder[
-                              stateOrder.findIndex((v, i, a) => {
-                                return v.includes(data.state);
-                              })
-                            ].indexOf(data.state)
-                          ],
-                  }}
-                  className={`font-normal rounded py-1 px-3`}
+                  color="blue-gray"
+                  className="font-normal"
                 >
-                  {data.state}
+                  {getDate(data.run_on)}
+                </Typography>
+              </td>
+              <td className="p-4">
+                <Typography
+                  variant="small"
+                  color="blue-gray"
+                  className="font-normal hover:cursor-pointer underline text-blue-600"
+                  onClick={() => {
+                    window.open(data.request_url, "blank");
+                  }}
+                >
+                  <span title="open in jira">{data.request_id}</span>
                 </Typography>
               </td>
               {props.userId !== "all" ? (
@@ -213,11 +270,11 @@ export default function TeacatsTable(props) {
                       className="font-normal hover:cursor-pointer"
                       onClick={() => {
                         if (
-                          contextData.teacats_currentUser !==
+                          contextData.precommits_currentUser !==
                           data.assigned_under
                         ) {
-                          contextData.setIsTeacatsPageLoading(true);
-                          navigate(`/teacats/view/${data.assigned_under}`);
+                          contextData.setIsPrecommitsPageLoading(true);
+                          navigate(`/precommits/view/${data.assigned_under}`);
                         }
                       }}
                     >
@@ -235,11 +292,11 @@ export default function TeacatsTable(props) {
                   className="font-normal hover:cursor-pointer"
                   onClick={() => {
                     if (
-                      contextData.teacats_currentUser !== data.mgr_id &&
+                      contextData.precommits_currentUser !== data.mgr_id &&
                       data.mgr_id !== ""
                     ) {
-                      contextData.setIsTeacatsPageLoading(true);
-                      navigate(`/teacats/view/${data.mgr_id}`);
+                      contextData.setIsPrecommitsPageLoading(true);
+                      navigate(`/precommits/view/${data.mgr_id}`);
                     }
                   }}
                 >
@@ -253,11 +310,11 @@ export default function TeacatsTable(props) {
                   className="font-normal hover:cursor-pointer"
                   onClick={() => {
                     if (
-                      contextData.teacats_currentUser !== data.emp_id &&
+                      contextData.precommits_currentUser !== data.emp_id &&
                       data.emp_id !== ""
                     ) {
-                      contextData.setIsTeacatsPageLoading(true);
-                      navigate(`/teacats/view/${data.emp_id}`);
+                      contextData.setIsPrecommitsPageLoading(true);
+                      navigate(`/precommits/view/${data.emp_id}`);
                     }
                   }}
                 >
@@ -272,6 +329,85 @@ export default function TeacatsTable(props) {
                 >
                   {data.component}
                 </Typography>
+              </td>
+              <td className="p-4">
+                <Typography
+                  variant="small"
+                  color="blue-gray"
+                  className="font-normal hover:cursor-pointer underline text-blue-600"
+                  onClick={() => {
+                    window.open(data.pr_url, "blank");
+                  }}
+                >
+                  <span title="open in jira">{data.pr_id}</span>
+                </Typography>
+              </td>
+              <td
+                className="p-4 w-[250px] flex justify-center"
+                key={data.bug_id}
+              >
+                {data.analysis &&
+                data.analysis.trim() !== "" &&
+                editId !== data.bug_id ? (
+                  <>
+                    <div className="flex flex-row space-x-2 items-center justify-center">
+                      {" "}
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="font-normal w-[150px]"
+                      >
+                        {data.analysis}
+                      </Typography>
+                      <div
+                        className="bg-gradient-to-b from-orange-300 to-orange-700 rounded py-1 w-fit px-3 text-white hover:cursor-pointer shadow-md active:shadow-none select-none "
+                        onClick={(e) => {
+                          setEditId(data.bug_id);
+                        }}
+                      >
+                        Edit
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <form
+                      className="flex flex-row space-x-2"
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        const id = data.bug_id;
+                        const value = e.target[0].value.trim();
+                        setEditId(null);
+                        if (value === "") return;
+                        if (data.analysis && data.analysis.trim() !== "") {
+                          if (data.analysis.trim() === value) return;
+                        }
+                        setAnalysisText(id, value);
+                      }}
+                    >
+                      {" "}
+                      <input
+                        className="p-1 rounded border-blue-gray-300 text-center drop-shadow-md hover:drop-shadow-xl w-[150px]"
+                        type="text"
+                        defaultValue={
+                          data.analysis && data.analysis.trim() !== ""
+                            ? data.analysis
+                            : ""
+                        }
+                        placeholder={
+                          data.analysis && data.analysis.trim() !== ""
+                            ? data.analysis
+                            : "Enter text"
+                        }
+                      />
+                      <input
+                        type="submit"
+                        className="bg-gradient-to-b from-green-300 to-green-600 rounded py-1 px-2 text-white hover:cursor-pointer shadow-md active:shadow-none select-none "
+                        value="Save"
+                      />
+                    </form>
+                  </>
+                )}
               </td>
             </tr>
           ))}

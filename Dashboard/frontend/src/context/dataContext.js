@@ -12,24 +12,28 @@ import // activeReleaseTable,
 //creating global variables that can be used anywhere inside the react-app
 const DataContext = createContext({
   isLoading: true,
-  isLocTableLoaded:false,
+  isLocTableLoaded: false,
   isLocPageLoading: true,
-  isAutonsTableLoaded:false,
+  isAutonsTableLoaded: false,
   isAutonsPageLoading: true,
-  isTeacatsTableLoaded:false,
+  isTeacatsTableLoaded: false,
   isTeacatsPageLoading: true,
-  isTestbugsTableLoaded:false,
+  isTestbugsTableLoaded: false,
   isTestbugsPageLoading: true,
+  isPrecommitsTableLoaded: false,
+  isPrecommitsPageLoading: true,
   isDevTableLoaded: false,
   isDevPageLoading: true,
-  setIsLocPageLoading: ()=>{},
-  setIsLocTableLoaded: ()=>{},
-  setIsAutonsPageLoading: ()=>{},
-  setIsAutonsTableLoaded: ()=>{},
-  setIsTeacatsPageLoading: ()=>{},
-  setIsTeacatsTableLoaded: ()=>{},
-  setIsTestbugsPageLoading: ()=>{},
-  setIsTestbugsTableLoaded: ()=>{},
+  setIsLocPageLoading: () => {},
+  setIsLocTableLoaded: () => {},
+  setIsAutonsPageLoading: () => {},
+  setIsAutonsTableLoaded: () => {},
+  setIsTeacatsPageLoading: () => {},
+  setIsTeacatsTableLoaded: () => {},
+  setIsTestbugsPageLoading: () => {},
+  setIsTestbugsTableLoaded: () => {},
+  setIsPrecommitsPageLoading: () => {},
+  setIsPrecommitsTableLoaded: () => {},
   setIsDevPageLoading: () => {},
   setIsDevTableLoaded: () => {},
   setLoading: () => {},
@@ -37,19 +41,21 @@ const DataContext = createContext({
   jiraTable: [],
   devMetricsTable: {},
   locTable: [],
-  autonsTable:[],
-  teacatsTable:[],
-  testbugsTable:[],
+  autonsTable: [],
+  teacatsTable: [],
+  testbugsTable: [],
+  precommitsTable: [],
   childParentMap: new Map(),
   parentChildMap: new Map(),
   userFullNameMap: new Map(),
   dpl_currentUser: "psesham",
   active_currentUser: "psesham",
   devMetrics_currentUser: "psesham",
-  loc_currentUser:  "psesham",
+  loc_currentUser: "psesham",
   autons_currentUser: "psesham",
   teacats_currentUser: "psesham",
   testbugs_currentUser: "psesham",
+  precommits_currentUser: "psesham",
   dev_states: {},
   dpl_states: {},
   active_states: {},
@@ -57,57 +63,65 @@ const DataContext = createContext({
   autons_states: {},
   teacats_states: {},
   testbugs_states: {},
+  precommits_states: {},
   setDplUser: () => {},
   setActiveUser: () => {},
   setDevMetricsUser: () => {},
-  setLocUser: ()=>{},
-  setAutonsUser: ()=>{},
-  setTeacatsUser: ()=>{},
-  setTestbugsUser: ()=>{},
+  setLocUser: () => {},
+  setAutonsUser: () => {},
+  setTeacatsUser: () => {},
+  setTestbugsUser: () => {},
+  setPrecommitsUser: () => {},
   setDpl: () => {},
   setActive: () => {},
   setDevMetricsStates: () => {},
-  setLoc: ()=>{},
-  setAutonsStates: ()=>{},
-  setTeacatsStates: ()=>{},
-  setTestbugsStates: ()=>{},
+  setLoc: () => {},
+  setAutonsStates: () => {},
+  setTeacatsStates: () => {},
+  setTestbugsStates: () => {},
+  setPrecommitsStates: () => {},
   setDevTable: () => {},
-  setLocTable: ()=>{},
-  setAutonsTable: ()=>{},
-  setTeacatsTable: ()=>{},
-  setTestbugsTable: ()=>{},
-
+  setLocTable: () => {},
+  setAutonsTable: () => {},
+  setTeacatsTable: () => {},
+  setTestbugsTable: () => {},
+  setPrecommitsTable: () => {},
 });
 
 export const DataContextProvider = (props) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isDevTableLoaded, setIsDevTableLoaded] = useState(false);
   const [isDevPageLoading, setIsDevPageLoading] = useState(true);
-  const [isLocTableLoaded,setIsLocTableLoaded] = useState(false);
-  const [isLocPageLoading,setIsLocPageLoading] = useState(true);
-  const [isAutonsTableLoaded,setIsAutonsTableLoaded] = useState(false);
-  const [isAutonsPageLoading,setIsAutonsPageLoading] = useState(true);
-  const [isTeacatsTableLoaded,setIsTeacatsTableLoaded] = useState(false);
-  const [isTeacatsPageLoading,setIsTeacatsPageLoading] = useState(true);
-  const [isTestbugsTableLoaded,setIsTestbugsTableLoaded] = useState(false);
-  const [isTestbugsPageLoading,setIsTestbugsPageLoading] = useState(true);
+  const [isLocTableLoaded, setIsLocTableLoaded] = useState(false);
+  const [isLocPageLoading, setIsLocPageLoading] = useState(true);
+  const [isAutonsTableLoaded, setIsAutonsTableLoaded] = useState(false);
+  const [isAutonsPageLoading, setIsAutonsPageLoading] = useState(true);
+  const [isTeacatsTableLoaded, setIsTeacatsTableLoaded] = useState(false);
+  const [isTeacatsPageLoading, setIsTeacatsPageLoading] = useState(true);
+  const [isTestbugsTableLoaded, setIsTestbugsTableLoaded] = useState(false);
+  const [isTestbugsPageLoading, setIsTestbugsPageLoading] = useState(true);
+  const [isPrecommitsTableLoaded, setIsPrecommitsTableLoaded] = useState(false);
+  const [isPrecommitsPageLoading, setIsPrecommitsPageLoading] = useState(true);
   const [dplTable, setDplTable] = useState([]);
   const [jiraTable, setJiraTable] = useState([]);
   const [devMetricsTable, setDevMetricsTable] = useState({});
-  const [locTable,setLocTable] = useState([]);
-  const [autonsTable,setAutonsTable] = useState([]);
-  const [teacatsTable,setTeacatsTable] = useState([]);
-  const [testbugsTable,setTestbugsTable] = useState([]);
+  const [locTable, setLocTable] = useState([]);
+  const [autonsTable, setAutonsTable] = useState([]);
+  const [teacatsTable, setTeacatsTable] = useState([]);
+  const [testbugsTable, setTestbugsTable] = useState([]);
+  const [precommitsTable, setPrecommitsTable] = useState([]);
   const [childParentMap, setChildParentMap] = useState(new Map());
   const [parentChildMap, setParentChildMap] = useState(new Map());
   const [userFullNameMap, setUserFullNameMap] = useState(new Map());
   const [dpl_currentUser, setDplCurrentUser] = useState("psesham");
   const [active_currentUser, setActiveCurrentUser] = useState("psesham");
-  const [devMetrics_currentUser, setDevMetricsCurrentUser] = useState("psesham");
-  const [loc_currentUser,setLocCurrentUser] = useState("psesham");
-  const [autons_currentUser,setAutonsCurrentUser] = useState("psesham");
-  const [teacats_currentUser,setTeacatsCurrentUser] = useState("psesham");
-  const [testbugs_currentUser,setTestbugsCurrentUser] = useState("psesham");
+  const [devMetrics_currentUser, setDevMetricsCurrentUser] =
+    useState("psesham");
+  const [loc_currentUser, setLocCurrentUser] = useState("psesham");
+  const [autons_currentUser, setAutonsCurrentUser] = useState("psesham");
+  const [teacats_currentUser, setTeacatsCurrentUser] = useState("psesham");
+  const [testbugs_currentUser, setTestbugsCurrentUser] = useState("psesham");
+  const [precommits_currentUser, setPrecommitsCurrentUser] = useState("psesham");
   const [dpl_states, setDplStates] = useState({
     featureRelease: "all",
     featureTag: "all",
@@ -135,41 +149,41 @@ export const DataContextProvider = (props) => {
       order: null,
     },
     tableOpen: false,
-    customDates:{
+    customDates: {
       name: null,
-      upper_limit : null,
-      lower_limit : null,
-    }
+      upper_limit: null,
+      lower_limit: null,
+    },
   });
-  const [loc_states,setLocStates] = useState({
-    locSegment : "semi",
+  const [loc_states, setLocStates] = useState({
+    locSegment: "semi",
     tableOpen: false,
     tableSortBy: "loc",
-    customDates:{
+    customDates: {
       name: null,
-      upper_limit : null,
-      lower_limit : null,
-    }
-  })
-  const [autons_states,setAutonsStates] = useState({
-    bugSegment : "semi",
+      upper_limit: null,
+      lower_limit: null,
+    },
+  });
+  const [autons_states, setAutonsStates] = useState({
+    bugSegment: "semi",
     bugType: "all",
     sortedFeature: {
       feature: null,
       order: null,
     },
     tableOpen: false,
-  })
-  const [teacats_states,setTeacatsStates] = useState({
-    bugSegment : "semi",
+  });
+  const [teacats_states, setTeacatsStates] = useState({
+    bugSegment: "semi",
     bugType: "all",
     sortedFeature: {
       feature: null,
       order: null,
     },
     tableOpen: false,
-  })
-  const [testbugs_states,setTestbugsStates] = useState({
+  });
+  const [testbugs_states, setTestbugsStates] = useState({
     bugSegment: "annual",
     bugType: "all",
     sortedFeature: {
@@ -177,7 +191,17 @@ export const DataContextProvider = (props) => {
       order: null,
     },
     tableOpen: false,
-  })
+  });
+
+  const [precommits_states, setPrecommitsStates] = useState({
+    bugSegment: "Combined",
+    bugState: "all",
+    sortedFeature: {
+      feature: null,
+      order: null,
+    },
+    tableOpen: false,
+  });
 
   const setLoading = (value) => {
     setIsLoading(value);
@@ -236,20 +260,8 @@ export const DataContextProvider = (props) => {
               parent_child_map.set(elem.manager, [elem.cec_id]);
             }
           });
-
-          console.log(
-            employeeDetailResponseData.employee.length,
-            employeeDetailResponseData.org.length
-          );
-          // console.log(
-          //   fullName_eid_map,
-          //   eid_fullName_map,
-          //   child_parent_map,
-          //   parent_child_map
-          // );
         } catch (err) {
           console.log(err);
-          alert("Can't fetch employee details at the moment");
         }
 
         //active release api
@@ -282,7 +294,6 @@ export const DataContextProvider = (props) => {
           setJiraTable(activeReleaseArray);
         } catch (err) {
           console.log(err);
-          alert("Can't fetch active release data at the moment");
         }
 
         //dpl metric api
@@ -392,7 +403,7 @@ export const DataContextProvider = (props) => {
           setDplTable(dplArray);
         } catch (err) {
           console.log(err);
-          alert("Can't fetch dpl metric data at the moment");
+          throw Error(err);
         }
 
         setChildParentMap(child_parent_map);
@@ -401,7 +412,8 @@ export const DataContextProvider = (props) => {
         setIsLoading(false);
       } catch (err) {
         console.log(err);
-        alert("Something went wrong.");
+        setIsLoading(false);
+        alert("Something went wrong. Can't fetch data");
       }
     };
 
@@ -418,6 +430,8 @@ export const DataContextProvider = (props) => {
     isTeacatsPageLoading,
     isTestbugsTableLoaded,
     isTestbugsPageLoading,
+    isPrecommitsTableLoaded,
+    isPrecommitsPageLoading,
     isDevTableLoaded,
     isDevPageLoading,
     setIsLocPageLoading,
@@ -428,6 +442,8 @@ export const DataContextProvider = (props) => {
     setIsTeacatsTableLoaded,
     setIsTestbugsPageLoading,
     setIsTestbugsTableLoaded,
+    setIsPrecommitsPageLoading,
+    setIsPrecommitsTableLoaded,
     setIsDevPageLoading,
     setIsDevTableLoaded,
     setLoading,
@@ -438,6 +454,7 @@ export const DataContextProvider = (props) => {
     autonsTable,
     teacatsTable,
     testbugsTable,
+    precommitsTable,
     childParentMap,
     parentChildMap,
     userFullNameMap,
@@ -448,6 +465,7 @@ export const DataContextProvider = (props) => {
     autons_currentUser,
     teacats_currentUser,
     testbugs_currentUser,
+    precommits_currentUser,
     dpl_states,
     active_states,
     dev_states,
@@ -455,6 +473,7 @@ export const DataContextProvider = (props) => {
     autons_states,
     teacats_states,
     testbugs_states,
+    precommits_states,
     setDplUser,
     setActiveUser,
     setDevMetricsUser: setDevMetricsCurrentUser,
@@ -462,6 +481,7 @@ export const DataContextProvider = (props) => {
     setAutonsUser: setAutonsCurrentUser,
     setTeacatsUser: setTeacatsCurrentUser,
     setTestbugsUser: setTestbugsCurrentUser,
+    setPrecommitsUser: setPrecommitsCurrentUser,
     setDpl,
     setActive,
     setDevMetricsStates: setDevStates,
@@ -469,11 +489,13 @@ export const DataContextProvider = (props) => {
     setAutonsStates,
     setTeacatsStates,
     setTestbugsStates,
+    setPrecommitsStates,
     setDevTable,
     setLocTable,
     setAutonsTable,
     setTeacatsTable,
     setTestbugsTable,
+    setPrecommitsTable,
   };
 
   return (

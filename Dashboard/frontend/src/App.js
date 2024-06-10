@@ -15,6 +15,7 @@ import AutonsViewPage from "./pages/autonsViewPage";
 import TeacatsViewPage from "./pages/teacatsViewPage";
 import TestbugsMetricsViewPage from "./pages/testbugsViewPage";
 import Page404 from "./pages/Page404";
+import PrecommitsMetricsViewPage from "./pages/precommitsViewPage";
 // contains all routes for the client side
 function App() {
   const contextData = useContext(DataContext);
@@ -32,6 +33,7 @@ function App() {
     else if (location.pathname.includes("autons")) setCurrentTab("autons");
     else if (location.pathname.includes("teacats")) setCurrentTab("teacats");
     else if (location.pathname.includes("testbugs")) setCurrentTab("testbugs");
+    else if (location.pathname.includes("precommits")) setCurrentTab("precommits");
     else {
       setCurrentTab(null);
     }
@@ -95,6 +97,11 @@ function App() {
                 exact
                 path="/testbugs/view/:uid"
                 element={<TestbugsMetricsViewPage />}
+              ></Route>
+              <Route
+                exact
+                path="/precommits/view/:uid"
+                element={<PrecommitsMetricsViewPage />}
               ></Route>
               <Route exact path="*" element={<Page404 />} />
             </Routes>

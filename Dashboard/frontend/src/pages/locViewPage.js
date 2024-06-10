@@ -79,25 +79,27 @@ const LocViewPage = (props) => {
               pr_semi: 0,
               pr_custom: 0,
             };
-            table["month"]["bugs"].forEach((e) => {
-              dataCount.loc_month = dataCount.loc_month + e.loc;
-              if (e.reviewer !== "") dataCount.pr_month++;
-            });
+            if (table) {
+              table["month"]["bugs"].forEach((e) => {
+                dataCount.loc_month = dataCount.loc_month + e.loc;
+                if (e.reviewer !== "") dataCount.pr_month++;
+              });
 
-            table["quarter"]["bugs"].forEach((e) => {
-              dataCount.loc_quarter = dataCount.loc_quarter + e.loc;
-              if (e.reviewer !== "") dataCount.pr_quarter++;
-            });
+              table["quarter"]["bugs"].forEach((e) => {
+                dataCount.loc_quarter = dataCount.loc_quarter + e.loc;
+                if (e.reviewer !== "") dataCount.pr_quarter++;
+              });
 
-            table["semi"]["bugs"].forEach((e) => {
-              dataCount.loc_semi = dataCount.loc_semi + e.loc;
-              if (e.reviewer !== "") dataCount.pr_semi++;
-            });
+              table["semi"]["bugs"].forEach((e) => {
+                dataCount.loc_semi = dataCount.loc_semi + e.loc;
+                if (e.reviewer !== "") dataCount.pr_semi++;
+              });
 
-            table["custom"]["bugs"].forEach((e) => {
-              dataCount.loc_custom = dataCount.loc_custom + e.loc;
-              if (e.reviewer !== "") dataCount.pr_custom++;
-            });
+              table["custom"]["bugs"].forEach((e) => {
+                dataCount.loc_custom = dataCount.loc_custom + e.loc;
+                if (e.reviewer !== "") dataCount.pr_custom++;
+              });
+            }
 
             data.push({
               assignee: "all",
@@ -121,66 +123,67 @@ const LocViewPage = (props) => {
               pr_semi: 0,
               pr_custom: 0,
             };
+            if (table) {
+              table["month"]["bugs"].forEach((e) => {
+                if (e.emp_id === userId) {
+                  selfCount.loc_month = selfCount.loc_month + e.loc;
+                }
+                const reviewers = e.reviewer
+                  ? new Set(
+                      e.reviewer.split(",").map((p) => {
+                        return p.trim();
+                      })
+                    )
+                  : new Set();
 
-            table["month"]["bugs"].forEach((e) => {
-              if (e.emp_id === userId) {
-                selfCount.loc_month = selfCount.loc_month + e.loc;
-              }
-              const reviewers = e.reviewer
-                ? new Set(
-                    e.reviewer.split(",").map((p) => {
-                      return p.trim();
-                    })
-                  )
-                : new Set();
+                if (reviewers.has(userId)) selfCount.pr_month++;
+              });
 
-              if (reviewers.has(userId)) selfCount.pr_month++;
-            });
+              table["quarter"]["bugs"].forEach((e) => {
+                if (e.emp_id === userId) {
+                  selfCount.loc_quarter = selfCount.loc_quarter + e.loc;
+                }
+                const reviewers = e.reviewer
+                  ? new Set(
+                      e.reviewer.split(",").map((p) => {
+                        return p.trim();
+                      })
+                    )
+                  : new Set();
 
-            table["quarter"]["bugs"].forEach((e) => {
-              if (e.emp_id === userId) {
-                selfCount.loc_quarter = selfCount.loc_quarter + e.loc;
-              }
-              const reviewers = e.reviewer
-                ? new Set(
-                    e.reviewer.split(",").map((p) => {
-                      return p.trim();
-                    })
-                  )
-                : new Set();
+                if (reviewers.has(userId)) selfCount.pr_quarter++;
+              });
 
-              if (reviewers.has(userId)) selfCount.pr_quarter++;
-            });
+              table["semi"]["bugs"].forEach((e) => {
+                if (e.emp_id === userId) {
+                  selfCount.loc_semi = selfCount.loc_semi + e.loc;
+                }
+                const reviewers = e.reviewer
+                  ? new Set(
+                      e.reviewer.split(",").map((p) => {
+                        return p.trim();
+                      })
+                    )
+                  : new Set();
 
-            table["semi"]["bugs"].forEach((e) => {
-              if (e.emp_id === userId) {
-                selfCount.loc_semi = selfCount.loc_semi + e.loc;
-              }
-              const reviewers = e.reviewer
-                ? new Set(
-                    e.reviewer.split(",").map((p) => {
-                      return p.trim();
-                    })
-                  )
-                : new Set();
+                if (reviewers.has(userId)) selfCount.pr_semi++;
+              });
 
-              if (reviewers.has(userId)) selfCount.pr_semi++;
-            });
+              table["custom"]["bugs"].forEach((e) => {
+                if (e.emp_id === userId) {
+                  selfCount.loc_custom = selfCount.loc_custom + e.loc;
+                }
+                const reviewers = e.reviewer
+                  ? new Set(
+                      e.reviewer.split(",").map((p) => {
+                        return p.trim();
+                      })
+                    )
+                  : new Set();
 
-            table["custom"]["bugs"].forEach((e) => {
-              if (e.emp_id === userId) {
-                selfCount.loc_custom = selfCount.loc_custom + e.loc;
-              }
-              const reviewers = e.reviewer
-                ? new Set(
-                    e.reviewer.split(",").map((p) => {
-                      return p.trim();
-                    })
-                  )
-                : new Set();
-
-              if (reviewers.has(userId)) selfCount.pr_custom++;
-            });
+                if (reviewers.has(userId)) selfCount.pr_custom++;
+              });
+            }
 
             if (
               selfCount.loc_month +
@@ -204,65 +207,68 @@ const LocViewPage = (props) => {
                 ? contextData.parentChildMap.get(curr)
                 : [];
 
-              table["month"]["bugs"].forEach((e) => {
-                if (e.emp_id === curr) {
-                  assigneeObj.loc_month = assigneeObj.loc_month + e.loc;
-                }
-                const reviewers = e.reviewer
-                  ? new Set(
-                      e.reviewer.split(",").map((p) => {
-                        return p.trim();
-                      })
-                    )
-                  : new Set();
+              if (table) {
+                table["month"]["bugs"].forEach((e) => {
+                  if (e.emp_id === curr) {
+                    assigneeObj.loc_month = assigneeObj.loc_month + e.loc;
+                  }
+                  const reviewers = e.reviewer
+                    ? new Set(
+                        e.reviewer.split(",").map((p) => {
+                          return p.trim();
+                        })
+                      )
+                    : new Set();
 
-                if (reviewers.has(curr)) assigneeObj.pr_month.add(e.cdet_id);
-              });
+                  if (reviewers.has(curr)) assigneeObj.pr_month.add(e.cdet_id);
+                });
 
-              table["quarter"]["bugs"].forEach((e) => {
-                if (e.emp_id === curr) {
-                  assigneeObj.loc_quarter = assigneeObj.loc_quarter + e.loc;
-                }
-                const reviewers = e.reviewer
-                  ? new Set(
-                      e.reviewer.split(",").map((p) => {
-                        return p.trim();
-                      })
-                    )
-                  : new Set();
+                table["quarter"]["bugs"].forEach((e) => {
+                  if (e.emp_id === curr) {
+                    assigneeObj.loc_quarter = assigneeObj.loc_quarter + e.loc;
+                  }
+                  const reviewers = e.reviewer
+                    ? new Set(
+                        e.reviewer.split(",").map((p) => {
+                          return p.trim();
+                        })
+                      )
+                    : new Set();
 
-                if (reviewers.has(curr)) assigneeObj.pr_quarter.add(e.cdet_id);
-              });
+                  if (reviewers.has(curr))
+                    assigneeObj.pr_quarter.add(e.cdet_id);
+                });
 
-              table["semi"]["bugs"].forEach((e) => {
-                if (e.emp_id === curr) {
-                  assigneeObj.loc_semi = assigneeObj.loc_semi + e.loc;
-                }
-                const reviewers = e.reviewer
-                  ? new Set(
-                      e.reviewer.split(",").map((p) => {
-                        return p.trim();
-                      })
-                    )
-                  : new Set();
+                table["semi"]["bugs"].forEach((e) => {
+                  if (e.emp_id === curr) {
+                    assigneeObj.loc_semi = assigneeObj.loc_semi + e.loc;
+                  }
+                  const reviewers = e.reviewer
+                    ? new Set(
+                        e.reviewer.split(",").map((p) => {
+                          return p.trim();
+                        })
+                      )
+                    : new Set();
 
-                if (reviewers.has(curr)) assigneeObj.pr_semi.add(e.cdet_id);
-              });
+                  if (reviewers.has(curr)) assigneeObj.pr_semi.add(e.cdet_id);
+                });
 
-              table["custom"]["bugs"].forEach((e) => {
-                if (e.emp_id === curr) {
-                  assigneeObj.loc_custom = assigneeObj.loc_custom + e.loc;
-                }
-                const reviewers = e.reviewer
-                  ? new Set(
-                      e.reviewer.split(",").map((p) => {
-                        return p.trim();
-                      })
-                    )
-                  : new Set();
+                table["custom"]["bugs"].forEach((e) => {
+                  if (e.emp_id === curr) {
+                    assigneeObj.loc_custom = assigneeObj.loc_custom + e.loc;
+                  }
+                  const reviewers = e.reviewer
+                    ? new Set(
+                        e.reviewer.split(",").map((p) => {
+                          return p.trim();
+                        })
+                      )
+                    : new Set();
 
-                if (reviewers.has(curr)) assigneeObj.pr_custom.add(e.cdet_id);
-              });
+                  if (reviewers.has(curr)) assigneeObj.pr_custom.add(e.cdet_id);
+                });
+              }
 
               childNodes.forEach((childNode) => {
                 dfs_search(childNode, assigneeObj);
@@ -626,8 +632,8 @@ const LocViewPage = (props) => {
     title: {
       text:
         diffLocAssignNumbers > 10 && !showAllLocAssignees
-          ? "LOC Distribution LOG Chart (Top 10)"
-          : "LOC Distribution <i>(log chart)</i>",
+          ? "LOC Distribution LOG CHART (Top 10)"
+          : "LOC Distribution LOG CHART",
     },
     // colors: ['#D789D7'],
     plotOptions: {
@@ -957,7 +963,7 @@ const LocViewPage = (props) => {
             <ProfileSearchBar
               selectUserId={selectUserId}
               table={
-                contextData.locTable
+                contextData.locTable.loc_data
                   ? contextData.locTable.loc_data["semi"]["bugs"]
                   : []
               }

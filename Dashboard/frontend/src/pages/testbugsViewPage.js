@@ -578,7 +578,6 @@ const TestbugsMetricsViewPage = (props) => {
         innerSize: "50%",
         events: {
           click: (e) => {
-            console.log(e.point.options.selected);
             selectBugType(e.point.name);
           },
         },
@@ -1172,7 +1171,7 @@ const TestbugsMetricsViewPage = (props) => {
                   <div className="px-4 bg-gray-50 pb-4 pt-6">
                     {/* table label with level 1 filter data */}
                     <Typography className="pl-4" variant="h3">
-                      <span className="font-medium font-mono text-base text-blue-500 text-md">
+                      <span className="font-large font-mono text-base text-blue-500 text-lg">
                         View For:{" "}
                         {userId !== "all"
                           ? contextData.userFullNameMap.get(userId)

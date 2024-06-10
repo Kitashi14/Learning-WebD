@@ -9,8 +9,8 @@ export default function DevMetricsTable(props) {
     "Bug ID",
     "Headline",
     "State",
-    "Engineer",
     "Manager",
+    "Engineer",
     "Found At",
     "Component",
     "Version",
@@ -164,7 +164,7 @@ export default function DevMetricsTable(props) {
                 <Typography
                   variant="small"
                   color="blue-gray"
-                  className="font-normal hover:cursor-pointer hover:text-blue-600"
+                  className="font-normal hover:cursor-pointer underline text-blue-600"
                   onClick={() => {
                     window.open(
                       `http://wwwin-metrics.cisco.com/protected-cgi-bin/ddtsdisp.cgi?id=${data.bug_id}`,
@@ -240,24 +240,6 @@ export default function DevMetricsTable(props) {
                   className="font-normal hover:cursor-pointer"
                   onClick={() => {
                     if (
-                      contextData.devMetrics_currentUser !== data.emp_id &&
-                      data.emp_id !== ""
-                    ) {
-                      contextData.setIsDevPageLoading(true);
-                      navigate(`/dev/view/${data.emp_id}`);
-                    }
-                  }}
-                >
-                  {data.emp_id}
-                </Typography>
-              </td>
-              <td className="p-4">
-                <Typography
-                  variant="small"
-                  color="blue-gray"
-                  className="font-normal hover:cursor-pointer"
-                  onClick={() => {
-                    if (
                       contextData.devMetrics_currentUser !== data.mgr_id &&
                       data.mgr_id !== ""
                     ) {
@@ -267,6 +249,24 @@ export default function DevMetricsTable(props) {
                   }}
                 >
                   {data.mgr_id}
+                </Typography>
+              </td>
+              <td className="p-4">
+                <Typography
+                  variant="small"
+                  color="blue-gray"
+                  className="font-normal hover:cursor-pointer"
+                  onClick={() => {
+                    if (
+                      contextData.devMetrics_currentUser !== data.emp_id &&
+                      data.emp_id !== ""
+                    ) {
+                      contextData.setIsDevPageLoading(true);
+                      navigate(`/dev/view/${data.emp_id}`);
+                    }
+                  }}
+                >
+                  {data.emp_id}
                 </Typography>
               </td>
               <td className="p-4">
@@ -302,9 +302,7 @@ export default function DevMetricsTable(props) {
       </table>
       {TABLE_ROWS.length === 0 ? (
         <>
-          <Typography className="text-center py-4">
-            No features found
-          </Typography>
+          <Typography className="text-center py-4">No bugs found</Typography>
         </>
       ) : (
         <></>

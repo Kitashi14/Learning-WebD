@@ -156,6 +156,29 @@ const Navbar = (props) => {
               >
                 Teacats
               </Nav.Item>
+              <Nav.Item
+                eventKey="6-2"
+                icon={<TableColumnIcon />}
+                style={
+                  props.currentTab === "precommits"
+                    ? { background: "#FAFAFA", color: "#2589F4" }
+                    : { background: "#3498FE" }
+                }
+                onClick={() => {
+                  if (
+                    !location.pathname.includes(
+                      `/precommits/view/${contextData.precommits_currentUser}`
+                    )
+                  ) {
+                    contextData.setIsTeacatsPageLoading(true);
+                    navigate(
+                      `/precommits/view/${contextData.precommits_currentUser}`
+                    );
+                  }
+                }}
+              >
+                Precommits
+              </Nav.Item>
             </Nav.Menu>
             <Nav.Item
               eventKey="5"

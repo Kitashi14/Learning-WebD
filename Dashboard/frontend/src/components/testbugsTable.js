@@ -9,8 +9,8 @@ export default function TestbugsMetricsTable(props) {
     "Bug ID",
     "Headline",
     "State",
-    "Engineer",
     "Manager",
+    "Engineer",
     "Component",
     "Version",
   ];
@@ -160,7 +160,7 @@ export default function TestbugsMetricsTable(props) {
                 <Typography
                   variant="small"
                   color="blue-gray"
-                  className="font-normal hover:cursor-pointer hover:text-blue-600"
+                  className="font-normal hover:cursor-pointer underline text-blue-600"
                   onClick={() => {
                     window.open(
                       `http://wwwin-metrics.cisco.com/protected-cgi-bin/ddtsdisp.cgi?id=${data.bug_id}`,
@@ -236,24 +236,6 @@ export default function TestbugsMetricsTable(props) {
                   className="font-normal hover:cursor-pointer"
                   onClick={() => {
                     if (
-                      contextData.testbugs_currentUser !== data.emp_id &&
-                      data.emp_id !== ""
-                    ) {
-                      contextData.setIsTestbugsPageLoading(true);
-                      navigate(`/testbugs/view/${data.emp_id}`);
-                    }
-                  }}
-                >
-                  {data.emp_id}
-                </Typography>
-              </td>
-              <td className="p-4">
-                <Typography
-                  variant="small"
-                  color="blue-gray"
-                  className="font-normal hover:cursor-pointer"
-                  onClick={() => {
-                    if (
                       contextData.testbugs_currentUser !== data.mgr_id &&
                       data.mgr_id !== ""
                     ) {
@@ -263,6 +245,24 @@ export default function TestbugsMetricsTable(props) {
                   }}
                 >
                   {data.mgr_id}
+                </Typography>
+              </td>
+              <td className="p-4">
+                <Typography
+                  variant="small"
+                  color="blue-gray"
+                  className="font-normal hover:cursor-pointer"
+                  onClick={() => {
+                    if (
+                      contextData.testbugs_currentUser !== data.emp_id &&
+                      data.emp_id !== ""
+                    ) {
+                      contextData.setIsTestbugsPageLoading(true);
+                      navigate(`/testbugs/view/${data.emp_id}`);
+                    }
+                  }}
+                >
+                  {data.emp_id}
                 </Typography>
               </td>
               <td className="p-4">
@@ -290,7 +290,7 @@ export default function TestbugsMetricsTable(props) {
       {TABLE_ROWS.length === 0 ? (
         <>
           <Typography className="text-center py-4">
-            No features found
+            No bugs found
           </Typography>
         </>
       ) : (

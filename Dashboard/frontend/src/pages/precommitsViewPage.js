@@ -12,29 +12,23 @@ import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import { useNavigate, useParams } from "react-router-dom";
 import DataContext from "../context/dataContext";
-import DevMetricsTypeRadio from "../components/devMetricsTypeRadio";
-import DevMetricsSegmentTypeRadio from "../components/devMetricsSegmentTypeRadio";
-import DevMetricsTable from "../components/devMetricsTable";
 import { Loader, SelectPicker } from "rsuite";
-import DevAssigneeTable from "../components/devAssigneeTable";
-import DevMetricsCategoryRadio from "../components/devMetricsCategoryRadio";
 import SearchBar from "../components/SearchBar";
+import PrecommitsMetricsStateRadio from "../components/precommitsStateRadio";
+import PrecommitsAssigneeTable from "../components/precommitsAssigneeTable";
+import PrecommitsMetricsTable from "../components/precommitsTable";
 
 // dashboard view page for any user
-const DevMetricsViewPage = (props) => {
+const PrecommitsMetricsViewPage = (props) => {
   //extracting context global data
   const contextData = useContext(DataContext);
-
   // useState containing all filter's states
   // level 1 filters
-  const bugSegment = contextData.dev_states.bugSegment;
-  const bugType = contextData.dev_states.bugType;
-  const bugCategory = contextData.dev_states.bugCategory;
-  const tableOpen = contextData.dev_states.tableOpen;
-  const customDates = contextData.dev_states.customDates;
+  const bugSegment = contextData.precommits_states.bugSegment;
+  const bugState = contextData.precommits_states.bugState;
+  const tableOpen = contextData.precommits_states.tableOpen;
 
   // level 2 filters
-  const [featureFoundAt, setFeatureFoundAt] = useState("all");
   const [featureComponent, setFeatureComponent] = useState("all");
 
   const [viewData, setViewData] = useState([]); //it will contain all elements after applying level 1 filter, used for showing lvl 1 charts
@@ -47,69 +41,104 @@ const DevMetricsViewPage = (props) => {
   //for invalid userId
   const [isUserValid, SetIsUserValid] = useState(true);
 
-  //custom date state
-  const [selectedCustomDate, setSelectedCustomDate] = useState(null);
-
   // getting the bugs details that was sorted
   const sortedFeature = {
-    feature: contextData.dev_states.sortedFeature.feature,
-    order: contextData.dev_states.sortedFeature.order,
+    feature: contextData.precommits_states.sortedFeature.feature,
+    order: contextData.precommits_states.sortedFeature.order,
   };
 
   //pagenation
   const [currentPage, setCurrentPage] = useState(1);
 
-  const segmentFullNameMap = new Map([
-    ["week-0", "Current Week"],
-    ["week-1", "Week 1"],
-    ["week-2", "Week 2"],
-    ["week-3", "Week 3"],
-    ["week-4", "Week 4"],
-    ["quarter", "Quarterly"],
-    ["semi", "Semi Annually"],
-    ["annual", "Annually"],
-    ["custom", "Custom Segment"],
-  ]);
-  const weekBarValidityMap = new Map([
-    ["week-0", new Set(["week-0", "quarter", "semi", "annual"])],
-    ["week-1", new Set(["week-1", "quarter", "semi", "annual"])],
-    ["week-2", new Set(["week-2", "quarter", "semi", "annual"])],
-    ["week-3", new Set(["week-3", "quarter", "semi", "annual"])],
-    ["week-4", new Set(["week-4", "quarter", "semi", "annual"])],
-    ["quarter", new Set(["quarter", "semi", "annual"])],
-    ["semi", new Set(["semi", "annual"])],
-    ["annual", new Set(["annual"])],
-  ]);
-  const reverseSegmentMap = new Map();
-  segmentFullNameMap.forEach((v, k) => {
-    reverseSegmentMap.set(v, k);
-  });
+  const customSegmentDates = [];
 
-  const typeFullNameMap = new Map([
-    ["O", "Opened"],
-    ["A", "Assigned"],
-    ["I", "Info required"],
-    ["R", "Resolved"],
-    ["M", "More"],
-    ["V", "Verified"],
-    ["J", "Junked"],
-    ["D", "Duplicate"],
-    ["U", "Unproducible"],
-    ["C", "Closed"],
-    ["N", "New"],
-  ]);
+  var currMonth;
 
-  const typeColors = ["#4ade80", "#16a34a", "#166534", "#052e16"];
-  const stateOrder = ["N", "OAI", "RMV", "JDCU"];
+  const setCustomSegmentDates = () => {
+    const Months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "June",
+      "July",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+    const currDate = new Date();
+    var y = currDate.getFullYear();
+    var m = currDate.getMonth() + 1;
+    var d = currDate.getDate();
+
+    customSegmentDates.push({
+      label: Months[m - 1] + " (" + y + ")",
+      value: {
+        name: Months[m - 1] + " (" + y + ")",
+        upper_limit:
+          y.toString() +
+          "-" +
+          (m > 9 ? m.toString() : "0" + m.toString()) +
+          "-" +
+          d.toString(),
+        lower_limit:
+          y.toString() +
+          "-" +
+          (m > 9 ? m.toString() : "0" + m.toString()) +
+          "-" +
+          "01",
+      },
+    });
+    currMonth = Months[m - 1] + " (" + y + ")";
+    m--;
+    for (var i = 0; i < 11; i++) {
+      var date = new Date(y, m, 0);
+      y = date.getFullYear();
+      m = date.getMonth() + 1;
+      d = date.getDate();
+      customSegmentDates.push({
+        label: Months[m - 1] + " (" + y + ")",
+        value: {
+          name: Months[m - 1] + " (" + y + ")",
+          upper_limit:
+            y.toString() +
+            "-" +
+            (m > 9 ? m.toString() : "0" + m.toString()) +
+            "-" +
+            d.toString(),
+          lower_limit:
+            y.toString() +
+            "-" +
+            (m > 9 ? m.toString() : "0" + m.toString()) +
+            "-" +
+            "01",
+        },
+      });
+      m--;
+    }
+
+    customSegmentDates.unshift({
+      label: "Combined",
+      value: {
+        name: "Combined",
+        upper_limit: customSegmentDates[0].value.upper_limit,
+        lower_limit: customSegmentDates[11].value.lower_limit,
+      },
+    });
+  };
+
+  setCustomSegmentDates();
 
   const [prevUser, setPrevUser] = useState(null);
   const [prevType, setPrevType] = useState(null);
-  const [prevCategory, setPrevCategory] = useState(null);
   const [segmentCount, setSegmentCount] = useState(new Map());
 
   const navigate = useNavigate(); //for navigating to different routes
   const userId = useParams().uid; //extracting user id from the route/url
-  contextData.setDevMetricsUser(userId);
+  contextData.setPrecommitsUser(userId);
 
   // for finding all parents nodes of the current user
   const previous_parents = [userId];
@@ -134,36 +163,27 @@ const DevMetricsViewPage = (props) => {
     }
     setViewTableData(copyViewTableData);
     setCurrentPage(1);
-    const currentDevStatus = contextData.dev_states;
+    const currentPrecommitsStatus = contextData.precommits_states;
     if (
-      currentDevStatus.sortedFeature.feature !== feature ||
-      currentDevStatus.sortedFeature.order !== order
+      currentPrecommitsStatus.sortedFeature.feature !== feature ||
+      currentPrecommitsStatus.sortedFeature.order !== order
     ) {
-      contextData.setDevMetricsStates({
-        bugSegment: currentDevStatus.bugSegment,
-        bugType: currentDevStatus.bugType,
-        bugCategory: currentDevStatus.bugCategory,
+      contextData.setPrecommitsStates({
+        bugSegment: currentPrecommitsStatus.bugSegment,
+        bugState: currentPrecommitsStatus.bugState,
         sortedFeature: {
           feature,
           order,
         },
-        tableOpen: currentDevStatus.tableOpen,
-        customDates: {
-          name: currentDevStatus.customDates.name,
-          upper_limit: currentDevStatus.customDates.upper_limit,
-          lower_limit: currentDevStatus.customDates.lower_limit,
-        },
+        tableOpen: currentPrecommitsStatus.tableOpen,
       });
     }
   };
 
   //function for filtering and loading view table according to level 2 filters
-  const loadTableData = (table, foundAt, component) => {
+  const loadTableData = (table, component) => {
     const data = table.filter((elem) => {
-      return (
-        (foundAt === "all" || foundAt === elem.found_at) &&
-        (component === "all" || component === elem.component)
-      );
+      return component === "all" || component === elem.component;
     });
     // sorting the data if a feature are previously selected for sorting
     if (sortedFeature.feature !== null) {
@@ -174,16 +194,10 @@ const DevMetricsViewPage = (props) => {
     }
   };
 
-  //filtering the data accoring to status (lvl 2 filter)
-  const selectFeatureFoundAt = (foundAt) => {
-    setFeatureFoundAt(foundAt);
-    loadTableData(viewData, foundAt, featureComponent);
-  };
-
   //filtering the data accoring to pin (lvl 2 filter)
   const selectFeatureComponent = (component) => {
     setFeatureComponent(component);
-    loadTableData(viewData, featureFoundAt, component);
+    loadTableData(viewData, component);
   };
 
   // for rending the whole page when a variable from dependency array changes its value
@@ -193,13 +207,6 @@ const DevMetricsViewPage = (props) => {
         const segmentMap = new Map();
         const loadData = async (table, segment) => {
           let data = [];
-
-          table = table.filter(
-            (e) =>
-              bugCategory === "all" ||
-              (bugCategory === "IFD" && e.found_at.trim() !== "customer-use") ||
-              (bugCategory === "CFD" && e.found_at.trim() === "customer-use")
-          );
 
           //condition check is a valid is selected
           if (userId === "all") {
@@ -212,29 +219,17 @@ const DevMetricsViewPage = (props) => {
 
             // filtering bugs assigned directly to user
             const assigneeCountMap = [];
-            const selfCount = {
-              N: 0,
-              R: 0,
-              M: 0,
-              V: 0,
-              O: 0,
-              A: 0,
-              I: 0,
-              J: 0,
-              D: 0,
-              U: 0,
-              C: 0,
-              Total: 0,
-            };
+            const selfCount = {};
             table.forEach((elem) => {
               if (
-                (elem.emp_id === userId ||
-                  ((elem.emp_id === "" ||
-                    !contextData.userFullNameMap.has(elem.emp_id)) &&
-                    elem.mgr_id === userId)) &&
-                "OAIRMVJDCUN".includes(elem.state)
+                elem.emp_id === userId ||
+                ((elem.emp_id === "" ||
+                  !contextData.userFullNameMap.has(elem.emp_id)) &&
+                  elem.mgr_id === userId)
               ) {
                 data.push({ ...elem, assigned_under: "self" });
+                if (!selfCount[elem.state]) selfCount[elem.state] = 0;
+                if (!selfCount.Total) selfCount.Total = 0;
                 selfCount[elem.state]++;
                 selfCount.Total++;
               }
@@ -252,13 +247,14 @@ const DevMetricsViewPage = (props) => {
                 : [];
               table.forEach((elem) => {
                 if (
-                  (elem.emp_id === curr ||
-                    ((elem.emp_id === "" ||
-                      !contextData.userFullNameMap.has(elem.emp_id)) &&
-                      elem.mgr_id === curr)) &&
-                  "OAIRMVJDCUN".includes(elem.state)
+                  elem.emp_id === curr ||
+                  ((elem.emp_id === "" ||
+                    !contextData.userFullNameMap.has(elem.emp_id)) &&
+                    elem.mgr_id === curr)
                 ) {
                   data.push({ ...elem, assigned_under: ultimate_parent });
+                  if (!assigneeObj[elem.state]) assigneeObj[elem.state] = 0;
+                  if (!assigneeObj.Total) assigneeObj.Total = 0;
                   assigneeObj[elem.state]++;
                   assigneeObj.Total++;
                 }
@@ -271,22 +267,8 @@ const DevMetricsViewPage = (props) => {
 
             // itterating to all nodes under a direct children one by one using dfs
             childrens.forEach((child) => {
-              const assigneeCount = {
-                N: 0,
-                R: 0,
-                M: 0,
-                V: 0,
-                O: 0,
-                A: 0,
-                I: 0,
-                J: 0,
-                D: 0,
-                U: 0,
-                C: 0,
-                Total: 0,
-              };
+              const assigneeCount = {};
               dfs_search(child, child, assigneeCount);
-
               if (assigneeCount.Total > 0)
                 assigneeCountMap.push({
                   assignee: child,
@@ -298,114 +280,91 @@ const DevMetricsViewPage = (props) => {
             );
             if (segment === bugSegment) setAssigneeTableData(assigneeCountMap);
           }
-
           //filtering data according to lvl 1 filters
           data = data.filter((elem) => {
-            return (
-              "OAIRMVJDCUN".includes(elem.state) &&
-              (bugType.includes(elem.state) || bugType === "all")
-            );
+            return bugState === elem.state || bugState === "all";
           });
+
           segmentMap.set(segment, data.length);
           if (segment === bugSegment) {
-            setFeatureFoundAt("all");
             setFeatureComponent("all");
             setViewData(data);
-            loadTableData(data, "all", "all");
+            loadTableData(data, "all");
           }
         };
         //api call
         const fetchData = async () => {
           try {
             const response = await fetch(
-              `${process.env.REACT_APP_BACKEND_URL}/dev/details`
+              `${process.env.REACT_APP_BACKEND_URL}/test/precommits`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-type": "application/json",
+                },
+                body: JSON.stringify(customSegmentDates),
+              }
             );
             const responseData = await response.json();
-            contextData.setDevTable(responseData.data);
+            contextData.setPrecommitsTable(responseData.data);
           } catch (err) {
             console.log(err);
-            alert("Can't fetch dev metrics bug details at the moment");
+            alert("Can't fetch test metrics bug details at the moment");
           }
         };
         //fetch table
-        if (!contextData.isDevTableLoaded) {
+        if (!contextData.isPrecommitsTableLoaded) {
           await fetchData();
-          contextData.setIsDevTableLoaded(true);
+          contextData.setIsPrecommitsTableLoaded(true);
         }
         var tableToUse;
         //segment will be selected
-        if (
-          userId === prevUser &&
-          prevType === bugType &&
-          prevCategory === bugCategory
-        ) {
-          tableToUse = contextData.devMetricsTable[bugSegment]
-            ? contextData.devMetricsTable[bugSegment].bugs
+        if (userId === prevUser && prevType === bugState) {
+          tableToUse = contextData.precommitsTable[bugSegment]
+            ? contextData.precommitsTable[bugSegment].bugs
             : [];
           loadData(tableToUse, bugSegment);
         } else {
-          segmentFullNameMap.forEach((v, k) => {
-            tableToUse = contextData.devMetricsTable[k]
-              ? contextData.devMetricsTable[k].bugs
+          customSegmentDates.forEach((k) => {
+            k = k.label;
+            tableToUse = contextData.precommitsTable[k]
+              ? contextData.precommitsTable[k].bugs
               : [];
             loadData(tableToUse, k);
           });
           setSegmentCount(segmentMap);
         }
-
-        // segmentFullNameMap.forEach((v, k) => {
-        //   tableToUse = contextData.devMetricsTable[k]
-        //     ? contextData.devMetricsTable[k].bugs
-        //     : [];
-        //   loadData(tableToUse, k);
-        // });
-        // setSegmentCount(segmentMap);
       };
       try {
         mainFunction();
       } catch (err) {
         console.log(err);
       }
-      if (contextData.isDevTableLoaded) {
+      if (contextData.isPrecommitsTableLoaded) {
         setPrevUser(userId);
-        setPrevType(bugType);
-        setPrevCategory(bugCategory);
-        contextData.setIsDevPageLoading(false);
+        setPrevType(bugState);
+        contextData.setIsPrecommitsPageLoading(false);
       }
     },
     // eslint-disable-next-line
-    [
-      userId,
-      bugSegment,
-      contextData.isDevTableLoaded,
-      bugType,
-      bugCategory,
-      customDates,
-    ] // dependency array
+    [userId, bugSegment, contextData.isPrecommitsTableLoaded, bugState] // dependency array
   );
 
   //segment chart parameters
-  const diffSegment = [
-    "week-0",
-    "week-1",
-    "week-2",
-    "week-3",
-    "week-4",
-    "quarter",
-    "semi",
-    "annual",
-  ];
+  const diffSegment = customSegmentDates.map((e) => e.label);
   diffSegment.reverse();
+  diffSegment.pop();
   const diffSegmentCount = diffSegment.map((segment) => {
     const count = segmentCount.get(segment);
     return {
-      name: segmentFullNameMap.get(segment),
+      name: segment,
       y: count,
       selected: segment === bugSegment ? true : false,
       dataLabels:
         segment === bugSegment
           ? {
               enabled: true,
+              color: "#16803C",
             }
           : {
               enabled: true,
@@ -415,14 +374,14 @@ const DevMetricsViewPage = (props) => {
   const segmentChartOptions = {
     chart: {
       type: "column",
-      height: userId === "all" ? 435 : 355,
+      height: userId === "all" ? 550 : 470,
       width: 1300,
     },
     title: {
       text: "Segment Chart",
     },
     // colors: ["#FFC300", "#EC610A", "#A40A3C", "#6B0848"],
-    colors: ["#a21caf", "#41AEA9", "#213E3B", "#E8FFFF"],
+    colors: ["#16803C", "#41AEA9", "#213E3B", "#E8FFFF"],
     plotOptions: {
       series: {
         allowPointSelect: true,
@@ -434,9 +393,10 @@ const DevMetricsViewPage = (props) => {
         },
         states: {
           select: {
-            color: "#e879f9",
+            colorIndex: "#D789D7",
+            color: "#6CE890",
             borderWidth: 0,
-            borderColor: "#e879f9",
+            borderColor: "#6CE890",
           },
         },
       },
@@ -444,7 +404,7 @@ const DevMetricsViewPage = (props) => {
     credits: {
       enabled: true,
       href: "#",
-      text: `For: State (${bugType}), Category (${bugCategory})`,
+      text: `For: State (${bugState})`,
       style: {
         fontSize: "15px",
       },
@@ -457,12 +417,12 @@ const DevMetricsViewPage = (props) => {
       categories: diffSegment.map(
         (e) =>
           `${
-            contextData.devMetricsTable[e]
-              ? contextData.devMetricsTable[e]["lower limit df"]
+            contextData.precommitsTable[e]
+              ? contextData.precommitsTable[e]["lower limit df"]
               : ""
           } <br> - ${
-            contextData.devMetricsTable[e]
-              ? contextData.devMetricsTable[e]["upper limit df"]
+            contextData.precommitsTable[e]
+              ? contextData.precommitsTable[e]["upper limit df"]
               : ""
           }`
       ),
@@ -473,7 +433,7 @@ const DevMetricsViewPage = (props) => {
         data: diffSegmentCount,
         events: {
           click: (e) => {
-            selectBugSegment(reverseSegmentMap.get(e.point.name));
+            selectBugSegment(e.point.name);
           },
         },
       },
@@ -523,7 +483,6 @@ const DevMetricsViewPage = (props) => {
     chart: {
       type: "bar",
       height: 300,
-      width: bugCategory === "all" ? 400 : 600,
     },
     title: {
       text:
@@ -546,9 +505,7 @@ const DevMetricsViewPage = (props) => {
     credits: {
       enabled: true,
       href: "#",
-      text: `For: ${segmentFullNameMap.get(
-        bugSegment
-      )}, State (${bugType}), Category (${bugCategory})`,
+      text: `For: ${bugSegment}, State (${bugState})`,
       style: {
         fontSize: "15px",
       },
@@ -565,8 +522,8 @@ const DevMetricsViewPage = (props) => {
         events: {
           click: (e) => {
             if (e.point.category !== userId) {
-              contextData.setIsDevPageLoading(true);
-              navigate(`/dev/view/${e.point.category}`);
+              contextData.setIsPrecommitsPageLoading(true);
+              navigate(`/precommits/view/${e.point.category}`);
             }
           },
         },
@@ -575,10 +532,12 @@ const DevMetricsViewPage = (props) => {
   };
 
   //type chart parameters
-  const diffTypes =
-    bugType === "all" ? ["N", "OAI", "RMV", "JDCU"] : bugType.split("");
-
-  const diffTypeCount = diffTypes.map((type) => {
+  var diffStates = contextData.precommitsTable[bugSegment]
+    ? contextData.precommitsTable[bugSegment].bugs
+        .map((elem) => elem.state)
+        .filter((x, i, a) => a.indexOf(x) === i).sort()
+    : [];
+  const diffStateCount = diffStates.map((type) => {
     let count = 0;
     viewData.forEach((elem) => {
       if (type.includes(elem.state)) count++;
@@ -586,16 +545,26 @@ const DevMetricsViewPage = (props) => {
     return { name: type, y: count, selected: false };
   });
 
-  const typeChartOptions = {
+  const stateChartOptions = {
     chart: {
       type: "pie",
       height: 300,
-      width: bugCategory === "all" ? 400 : 600,
     },
     title: {
       text: "State Chart",
     },
-    colors: ["#4ade80", "#16a34a", "#166534", "#052e16"],
+    colors: [
+      "#D789D7",
+      "#9D65C9",
+      "#5D54A4",
+      "#2A3D66",
+      "#A21CAF",
+      "#d946ef",
+      "#e879f9",
+      "#f0abfc",
+      "#d8b4fe",
+      "#6366f1",
+    ],
     plotOptions: {
       series: {
         allowPointSelect: true,
@@ -610,89 +579,23 @@ const DevMetricsViewPage = (props) => {
     credits: {
       enabled: true,
       href: "#",
-      text: `For: ${segmentFullNameMap.get(
-        bugSegment
-      )}, State (${bugType}), Category (${bugCategory})`,
+      text: `For: ${bugSegment}, State (${bugState})`,
       style: {
         fontSize: "15px",
       },
     },
 
     xAxis: {
-      categories: diffTypes,
+      categories: diffStates,
     },
     series: [
       {
         name: "No. of bugs",
-        data: diffTypeCount,
+        data: diffStateCount,
         innerSize: "50%",
         events: {
           click: (e) => {
-            selectBugType(e.point.name);
-          },
-        },
-      },
-    ],
-  };
-
-  //category chart parameters
-  const diffCategory = ["IFD", "CFD"];
-
-  const diffCategoryCount = diffCategory.map((category) => {
-    let count = 0;
-    viewData.forEach((elem) => {
-      if (
-        (elem.found_at.trim() !== "customer-use" && category === "IFD") ||
-        (elem.found_at.trim() === "customer-use" && category === "CFD")
-      )
-        count++;
-    });
-    return { name: category, y: count };
-  });
-  const categoryChartOptions = {
-    chart: {
-      type: "pie",
-      height: 300,
-      width: 400,
-    },
-    title: {
-      text: "IFD-CFD Chart",
-    },
-    colors: ["#A40A3C", "#FFC300"],
-    // colors: ["#6366f1", "#41AEA9", "#213E3B", "#E8FFFF"],
-    plotOptions: {
-      series: {
-        allowPointSelect: false,
-        cursor: "pointer",
-        dataLabels: {
-          enabled: true,
-          format: "<b>{point.name}</b><br>{point.percentage:.1f}",
-          distance: 20,
-        },
-        colorByPoint: true,
-      },
-    },
-    credits: {
-      enabled: true,
-      href: "#",
-      text: `For: ${segmentFullNameMap.get(
-        bugSegment
-      )}, State (${bugType}), Category (${bugCategory})`,
-      style: {
-        fontSize: "15px",
-      },
-    },
-
-    xAxis: {
-      categories: diffCategory,
-    },
-    series: [
-      {
-        name: "No. of bugs",
-        data: diffCategoryCount,
-        events: {
-          click: (e) => {
-            selectBugCategory(e.point.name);
+            selectBugState(e.point.name);
           },
         },
       },
@@ -743,9 +646,7 @@ const DevMetricsViewPage = (props) => {
     credits: {
       enabled: true,
       href: "#",
-      text: `For: ${segmentFullNameMap.get(
-        bugSegment
-      )}, State (${bugType}), Category (${bugCategory})`,
+      text: `For: ${bugSegment}, State (${bugState})`,
       style: {
         fontSize: "15px",
       },
@@ -765,76 +666,41 @@ const DevMetricsViewPage = (props) => {
   // wrappers function for selecting user from the user search bar
   const selectUserId = (user) => {
     if (user !== userId) {
-      contextData.setIsDevPageLoading(true);
-      navigate(`/dev/view/${user}`);
+      contextData.setIsPrecommitsPageLoading(true);
+      navigate(`/precommits/view/${user}`);
     }
   };
 
-  // filtering data according to type (lvl 1 filter)
-  const selectBugType = (type) => {
-    const currentDevStatus = contextData.dev_states;
-    contextData.setDevMetricsStates({
-      bugSegment: currentDevStatus.bugSegment,
-      bugType: type,
-      bugCategory: currentDevStatus.bugCategory,
-      sortedFeature: currentDevStatus.sortedFeature,
-      tableOpen: currentDevStatus.tableOpen,
-      customDates: {
-        name: currentDevStatus.customDates.name,
-        upper_limit: currentDevStatus.customDates.upper_limit,
-        lower_limit: currentDevStatus.customDates.lower_limit,
-      },
-    });
-  };
-
-  // filtering data according to category (lvl 1 filter)
-  const selectBugCategory = (category) => {
-    const currentDevStatus = contextData.dev_states;
-    contextData.setDevMetricsStates({
-      bugSegment: currentDevStatus.bugSegment,
-      bugType: currentDevStatus.bugType,
-      bugCategory: category,
-      sortedFeature: currentDevStatus.sortedFeature,
-      tableOpen: currentDevStatus.tableOpen,
-      customDates: {
-        name: currentDevStatus.customDates.name,
-        upper_limit: currentDevStatus.customDates.upper_limit,
-        lower_limit: currentDevStatus.customDates.lower_limit,
-      },
+  // filtering data according to release (lvl 1 filter)
+  const selectBugState = (type) => {
+    const currentPrecommitsStatus = contextData.precommits_states;
+    contextData.setPrecommitsStates({
+      bugSegment: currentPrecommitsStatus.bugSegment,
+      bugState: type,
+      sortedFeature: currentPrecommitsStatus.sortedFeature,
+      tableOpen: currentPrecommitsStatus.tableOpen,
     });
   };
 
   //for change assignee table states
   const setTableOpen = (value) => {
-    const currentDevStatus = contextData.dev_states;
-    contextData.setDevMetricsStates({
-      bugSegment: currentDevStatus.bugSegment,
-      bugType: currentDevStatus.bugType,
-      bugCategory: currentDevStatus.bugCategory,
-      sortedFeature: currentDevStatus.sortedFeature,
+    const currentPrecommitsStatus = contextData.precommits_states;
+    contextData.setPrecommitsStates({
+      bugSegment: currentPrecommitsStatus.bugSegment,
+      bugState: currentPrecommitsStatus.bugState,
+      sortedFeature: currentPrecommitsStatus.sortedFeature,
       tableOpen: value,
-      customDates: {
-        name: currentDevStatus.customDates.name,
-        upper_limit: currentDevStatus.customDates.upper_limit,
-        lower_limit: currentDevStatus.customDates.lower_limit,
-      },
     });
   };
 
   // filtering data according to status (lvl 1 filter)
   const selectBugSegment = (segment) => {
-    const currentDevStatus = contextData.dev_states;
-    contextData.setDevMetricsStates({
+    const currentPrecommitsStatus = contextData.precommits_states;
+    contextData.setPrecommitsStates({
       bugSegment: segment,
-      bugType: currentDevStatus.bugType,
-      bugCategory: currentDevStatus.bugCategory,
-      sortedFeature: currentDevStatus.sortedFeature,
-      tableOpen: currentDevStatus.tableOpen,
-      customDates: {
-        name: currentDevStatus.customDates.name,
-        upper_limit: currentDevStatus.customDates.upper_limit,
-        lower_limit: currentDevStatus.customDates.lower_limit,
-      },
+      bugState: currentPrecommitsStatus.bugState,
+      sortedFeature: currentPrecommitsStatus.sortedFeature,
+      tableOpen: currentPrecommitsStatus.tableOpen,
     });
   };
   const pageNumbers = [];
@@ -849,13 +715,6 @@ const DevMetricsViewPage = (props) => {
     SetIsUserValid(value);
   };
 
-  // finding different unique status for status filter bar
-  const foundAtSelectorData = viewData
-    .map((data) => data.found_at)
-    .filter((x, i, a) => a.indexOf(x) === i)
-    .map((item) => ({ label: item, value: item }));
-  foundAtSelectorData.unshift({ label: "All", value: "all" });
-
   // finding different unique pin for pin filter bar
   const componentSelectorData = viewData
     .map((data) => data.component)
@@ -863,125 +722,10 @@ const DevMetricsViewPage = (props) => {
     .map((item) => ({ label: item, value: item }));
   componentSelectorData.unshift({ label: "All", value: "all" });
 
-  const setCustomDates = async () => {
-    const name = selectedCustomDate.name;
-    const upper_limit = selectedCustomDate.upper_limit;
-    const lower_limit = selectedCustomDate.lower_limit;
-
-    const data = {
-      upper_limit,
-      lower_limit,
-    };
-    try {
-      contextData.setIsDevPageLoading(true);
-      const response = await fetch(
-        `${process.env.REACT_APP_BACKEND_URL}/dev/details_customDate`,
-        {
-          method: "POST",
-          headers: {
-            "Content-type": "application/json",
-          },
-          body: JSON.stringify(data),
-        }
-      );
-      const responseData = await response.json();
-
-      const currDevMeticsTable = JSON.parse(
-        JSON.stringify(contextData.devMetricsTable)
-      );
-      currDevMeticsTable["custom"] = responseData.data["custom"];
-      contextData.setDevTable(currDevMeticsTable);
-      const currentDevStatus = contextData.dev_states;
-      contextData.setDevMetricsStates({
-        bugSegment: "custom",
-        bugType: currentDevStatus.bugType,
-        bugCategory: currentDevStatus.bugCategory,
-        sortedFeature: currentDevStatus.sortedFeature,
-        tableOpen: currentDevStatus.tableOpen,
-        customDates: {
-          name,
-          upper_limit,
-          lower_limit,
-        },
-      });
-    } catch (err) {
-      console.log(err);
-      alert("Something went wrong, can't find data for custom selected dates");
-    }
-  };
-
-  const customSegmentDates = [];
-
-  const setCustomSegmentDates = () => {
-    const Months = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "June",
-      "July",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
-    ];
-    const currDate = new Date();
-    var y = currDate.getFullYear();
-    var m = currDate.getMonth() + 1;
-    var d = currDate.getDate();
-
-    customSegmentDates.push({
-      label: Months[m - 1] + " (" + y + ")",
-      value: {
-        name: Months[m - 1] + " (" + y + ")",
-        upper_limit:
-          y.toString() +
-          "-" +
-          (m > 9 ? m.toString() : "0" + m.toString()) +
-          "-" +
-          d.toString(),
-        lower_limit:
-          y.toString() +
-          "-" +
-          (m > 9 ? m.toString() : "0" + m.toString()) +
-          "-" +
-          "01",
-      },
-    });
-    m--;
-    for (var i = 0; i < 11; i++) {
-      var date = new Date(y, m, 0);
-      y = date.getFullYear();
-      m = date.getMonth() + 1;
-      d = date.getDate();
-      customSegmentDates.push({
-        label: Months[m - 1] + " (" + y + ")",
-        value: {
-          name: Months[m - 1] + " (" + y + ")",
-          upper_limit:
-            y.toString() +
-            "-" +
-            (m > 9 ? m.toString() : "0" + m.toString()) +
-            "-" +
-            d.toString(),
-          lower_limit:
-            y.toString() +
-            "-" +
-            (m > 9 ? m.toString() : "0" + m.toString()) +
-            "-" +
-            "01",
-        },
-      });
-      m--;
-    }
-  };
-
-  setCustomSegmentDates();
   return (
     <>
-      {contextData.isDevPageLoading || !contextData.isDevTableLoaded ? (
+      {contextData.isPrecommitsPageLoading ||
+      !contextData.isPrecommitsTableLoaded ? (
         <>
           <div className="h-full w-full flex flex-row justify-center items-center">
             <Loader size="lg" />
@@ -994,18 +738,18 @@ const DevMetricsViewPage = (props) => {
             <div className="flex flex-row justify-center mb-[-20px]">
               {" "}
               <span className=" bg-blue-600 py-2 px-3 rounded-lg text-white font-bold text-lg">
-                Dev Metrics
+                Test Metrics: Bugs
               </span>
             </div>
             <ProfileSearchBar
               selectUserId={selectUserId}
               table={
-                contextData.devMetricsTable.annual
-                  ? contextData.devMetricsTable.annual.bugs
+                contextData.precommitsTable.Combined
+                  ? contextData.precommitsTable.Combined.bugs
                   : []
               }
               userId={userId}
-              type={"dev"}
+              type={"precommits"}
               setInvalidUserSelected={setInvalidUserSelected}
             />
 
@@ -1013,7 +757,6 @@ const DevMetricsViewPage = (props) => {
               <>
                 {/* level 1 filter block */}
                 <div className=" flex flex-row justify-stretch">
-                  <div className="w-1/5"> </div>
                   <div className="flex flex-col items-center px-3 rounded-lg space-y-3 bg-gray-50 drop-shadow-md border-blue-200 border-none border-[1px] border-solid py-2 w-fit m-auto ">
                     <Card className="w-fit flex flex-row items-center px-3 py-3 ml-4">
                       View For :
@@ -1025,22 +768,10 @@ const DevMetricsViewPage = (props) => {
                     </Card>
 
                     <div className="flex flex-col items-center space-y-3">
-                      <DevMetricsSegmentTypeRadio
-                        value={bugSegment}
-                        selectSegment={selectBugSegment}
-                        data={segmentFullNameMap}
-                        type={"dev"}
-                      />
                       <div className="flex flex-row space-x-4 items-center">
-                        <Typography
-                          className={`text-sm font-semi ${
-                            bugSegment === "custom"
-                              ? "text-blue-500 font-bold"
-                              : ""
-                          }`}
-                        >
+                        <Typography className={`text-sm font-semi `}>
                           {" "}
-                          Custom Segment:{" "}
+                          Segment:{" "}
                         </Typography>
                         <SelectPicker
                           data={customSegmentDates}
@@ -1048,87 +779,21 @@ const DevMetricsViewPage = (props) => {
                           style={{ width: 124 }}
                           placement="rightStart"
                           onChange={(e) => {
-                            setSelectedCustomDate(e);
+                            selectBugSegment(e == null ? currMonth : e.name);
                           }}
-                          placeholder={
-                            bugSegment === "custom"
-                              ? customDates.name
-                              : "Select"
-                          }
-                        />
-                        <div
-                          className="rounded-md p-2 bg-blue-400 hover:bg-blue-500"
-                          onClick={setCustomDates}
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 512 512"
-                            className="w-4 h-4 hover:cursor-pointer hover:text-blue-800 fill-white"
-                          >
-                            <path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z" />
-                          </svg>
-                        </div>
-                      </div>
-                      <div className="flex flex-row space-x-8">
-                        <DevMetricsTypeRadio
-                          value={bugType}
-                          selectBugType={selectBugType}
-                        />
-                        <DevMetricsCategoryRadio
-                          value={bugCategory}
-                          selectBugCategory={selectBugCategory}
+                          placeholder={bugSegment}
                         />
                       </div>
+                      <PrecommitsMetricsStateRadio
+                        value={bugState}
+                        states={diffStates}
+                        selectBugState={selectBugState}
+                      />
                     </div>
                     <Typography variant="h5" className="pl-4 text-center">
                       {" "}
                       Total no. of Bugs : <span>{viewData.length}</span>{" "}
                     </Typography>
-                  </div>
-                  <div className="  w-1/5 flex flex-col justify-evenly items-center">
-                    {bugType !== "all" ? (
-                      <>
-                        <div className="  bg-gray-100 border-gray-300 border-solid border-[2px] rounded-lg   w-4/5 h-full flex flex-col justify-evenly items-center">
-                          {stateOrder[
-                            stateOrder.findIndex((v, i, a) => {
-                              return v.includes(bugType);
-                            })
-                          ]
-                            .split("")
-                            .map((char) => (
-                              <>
-                                <div
-                                  style={{
-                                    color:
-                                      typeColors[
-                                        stateOrder[
-                                          stateOrder.findIndex((v, i, a) => {
-                                            return v.includes(char);
-                                          })
-                                        ].indexOf(char)
-                                      ],
-                                  }}
-                                  className={
-                                    bugType !== char
-                                      ? "underline hover:cursor-pointer"
-                                      : "font-bold"
-                                  }
-                                  onClick={() => {
-                                    if (bugType !== char) selectBugType(char);
-                                  }}
-                                >
-                                  {" "}
-                                  {char}
-                                  {" : "}
-                                  {typeFullNameMap.get(char)}
-                                </div>
-                              </>
-                            ))}
-                        </div>
-                      </>
-                    ) : (
-                      <></>
-                    )}
                   </div>
                 </div>
 
@@ -1144,8 +809,8 @@ const DevMetricsViewPage = (props) => {
                             className="px-2 cursor-pointer text-blue-500"
                             onClick={() => {
                               if (elem !== userId) {
-                                contextData.setIsDevPageLoading(true);
-                                navigate(`/dev/view/${elem}`);
+                                contextData.setIsPrecommitsPageLoading(true);
+                                navigate(`/precommits/view/${elem}`);
                               }
                             }}
                           >
@@ -1159,105 +824,18 @@ const DevMetricsViewPage = (props) => {
                   <></>
                 )}
 
-                <div className="w-full px-8 py-[1px] ">
-                  <div className="w-full flex flex-row bg-gray-50 border-solid border-[1px] border-gray-300 rounded-md h-[22px]">
-                    <div
-                      style={{
-                        background: weekBarValidityMap
-                          .get("annual")
-                          .has(bugSegment)
-                          ? "#a21caf"
-                          : "",
-                      }}
-                      className="rounded-l-md border-solid border-r-[1px] border-gray-300 w-[50%]"
-                    ></div>
-                    <div
-                      style={{
-                        background: weekBarValidityMap
-                          .get("semi")
-                          .has(bugSegment)
-                          ? "#a21caf"
-                          : "",
-                      }}
-                      className="border-solid border-r-[1px] border-gray-300 w-[25%]"
-                    ></div>
-                    <div
-                      style={{
-                        background: weekBarValidityMap
-                          .get("quarter")
-                          .has(bugSegment)
-                          ? "#a21caf"
-                          : "",
-                      }}
-                      className="border-solid border-r-[1px] border-gray-300 w-[7%]"
-                    ></div>
-                    <div
-                      style={{
-                        background: weekBarValidityMap
-                          .get("week-4")
-                          .has(bugSegment)
-                          ? "#a21caf"
-                          : "",
-                      }}
-                      className="border-solid border-r-[1px] border-gray-300 w-[4%]"
-                    ></div>
-                    <div
-                      style={{
-                        background: weekBarValidityMap
-                          .get("week-3")
-                          .has(bugSegment)
-                          ? "#a21caf"
-                          : "",
-                      }}
-                      className="border-solid border-r-[1px] border-gray-300 w-[4%]"
-                    ></div>
-                    <div
-                      style={{
-                        background: weekBarValidityMap
-                          .get("week-2")
-                          .has(bugSegment)
-                          ? "#a21caf"
-                          : "",
-                      }}
-                      className="border-solid border-r-[1px] border-gray-300 w-[4%]"
-                    ></div>
-                    <div
-                      style={{
-                        background: weekBarValidityMap
-                          .get("week-1")
-                          .has(bugSegment)
-                          ? "#a21caf"
-                          : "",
-                      }}
-                      className="border-solid border-r-[1px] border-gray-300 w-[4%]"
-                    ></div>
-                    <div
-                      style={{
-                        background: weekBarValidityMap
-                          .get("week-0")
-                          .has(bugSegment)
-                          ? "#a21caf"
-                          : "",
-                      }}
-                      className=" rounded-r-md  w-[2%]"
-                    ></div>
-                  </div>
-                </div>
-
                 {/* data block, contains charts and table */}
                 <div className="w-full flex flex-col space-y-4 px-0">
                   {/* level 1 charts */}
                   <div className="flex flex-col space-y-3 pt-3 items-center pt-1 pb-2 px-8 bg-blue-gray-200">
-                    <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-full font-bold text-lg text-[#a21caf] ">
+                    <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-full font-bold text-lg text-green-800 ">
                       {" "}
-                      {segmentFullNameMap.get(bugSegment)}
-                      {" : "}
-                      {contextData.devMetricsTable[bugSegment]
-                        ? contextData.devMetricsTable[bugSegment]["lower limit"]
+                      {contextData.precommitsTable[bugSegment]
+                        ? contextData.precommitsTable[bugSegment]["lower limit"]
                         : ""}
                       {" - "}
-                      {contextData.devMetricsTable[bugSegment]
-                        ? contextData.devMetricsTable[bugSegment]["upper limit"]
+                      {contextData.precommitsTable[bugSegment]
+                        ? contextData.precommitsTable[bugSegment]["upper limit"]
                         : ""}{" "}
                     </Card>
                     <Card className="pb-3 pt-1 px-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
@@ -1298,11 +876,12 @@ const DevMetricsViewPage = (props) => {
 
                       {tableOpen && userId !== "all" ? (
                         <>
-                          <DevAssigneeTable
-                            bugType={bugType}
+                          <PrecommitsAssigneeTable
+                            bugState={bugState}
                             tableData={assigneeTableData}
                             userId={userId}
-                            bugSegment={segmentFullNameMap.get(bugSegment)}
+                            bugSegment={bugSegment}
+                            states={diffStates}
                           />
                         </>
                       ) : (
@@ -1317,17 +896,11 @@ const DevMetricsViewPage = (props) => {
                     {tableOpen && userId !== "all" ? (
                       <>
                         <div className="flex bg-gray-100 p-4 rounded-lg flex-col items-center space-y-3">
-                          <div className="flex flex-row space-x-8">
-                            <DevMetricsTypeRadio
-                              value={bugType}
-                              selectBugType={selectBugType}
-                            />
-                            <DevMetricsCategoryRadio
-                              value={bugCategory}
-                              selectBugCategory={selectBugCategory}
-                            />
-                          </div>
-
+                          <PrecommitsMetricsStateRadio
+                            value={bugState}
+                            states={diffStates}
+                            selectBugState={selectBugState}
+                          />
                           <Typography
                             variant="medium"
                             className="pl-4 text-center"
@@ -1341,7 +914,7 @@ const DevMetricsViewPage = (props) => {
                       <></>
                     )}
 
-                    <div className="w-full flex flex-row space-x-3 justify-evenly items-center pt-1">
+                    <div className="w-full flex flex-row space-x-3 justify-evenly items-center pt-1 ">
                       {userId !== "all" ? (
                         <>
                           <Card className=" p-4  flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
@@ -1384,72 +957,14 @@ const DevMetricsViewPage = (props) => {
                       ) : (
                         <></>
                       )}
-                      {bugType.length > 1 ? (
+                      {bugState === "all" ? (
                         <>
                           <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit">
                             <HighchartsReact
                               highcharts={Highcharts}
-                              options={typeChartOptions}
+                              options={stateChartOptions}
                             />
                           </Card>
-                        </>
-                      ) : (
-                        <></>
-                      )}
-                      {bugCategory === "all" ? (
-                        <>
-                          <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit">
-                            <HighchartsReact
-                              highcharts={Highcharts}
-                              options={categoryChartOptions}
-                            />
-                          </Card>
-                        </>
-                      ) : (
-                        <></>
-                      )}
-                      {bugType.length === 1 &&
-                      bugType !== "N" &&
-                      userId !== "all" &&
-                      tableOpen ? (
-                        <>
-                          <div className="  bg-gray-100 border-gray-300 border-solid border-[2px] rounded-lg   w-1/5 h-fit flex flex-col justify-evenly space-y-4 py-16 items-center">
-                            {stateOrder[
-                              stateOrder.findIndex((v, i, a) => {
-                                return v.includes(bugType);
-                              })
-                            ]
-                              .split("")
-                              .map((char) => (
-                                <>
-                                  <div
-                                    style={{
-                                      color:
-                                        typeColors[
-                                          stateOrder[
-                                            stateOrder.findIndex((v, i, a) => {
-                                              return v.includes(char);
-                                            })
-                                          ].indexOf(char)
-                                        ],
-                                    }}
-                                    className={
-                                      bugType !== char
-                                        ? "underline hover:cursor-pointer "
-                                        : "font-bold"
-                                    }
-                                    onClick={() => {
-                                      if (bugType !== char) selectBugType(char);
-                                    }}
-                                  >
-                                    {" "}
-                                    {char}
-                                    {" : "}
-                                    {typeFullNameMap.get(char)}
-                                  </div>
-                                </>
-                              ))}
-                          </div>
                         </>
                       ) : (
                         <></>
@@ -1491,16 +1006,14 @@ const DevMetricsViewPage = (props) => {
                       />
                     </Card>
 
-                    <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-full font-bold text-lg text-[#a21caf] ">
+                    <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-full font-bold text-lg text-green-800 ">
                       {" "}
-                      {segmentFullNameMap.get(bugSegment)}
-                      {" : "}
-                      {contextData.devMetricsTable[bugSegment]
-                        ? contextData.devMetricsTable[bugSegment]["lower limit"]
+                      {contextData.precommitsTable[bugSegment]
+                        ? contextData.precommitsTable[bugSegment]["lower limit"]
                         : ""}
                       {" - "}
-                      {contextData.devMetricsTable[bugSegment]
-                        ? contextData.devMetricsTable[bugSegment]["upper limit"]
+                      {contextData.precommitsTable[bugSegment]
+                        ? contextData.precommitsTable[bugSegment]["upper limit"]
                         : ""}{" "}
                     </Card>
                   </div>
@@ -1516,20 +1029,18 @@ const DevMetricsViewPage = (props) => {
                           : "All"}
                       </span>
                       <br />
-                      {bugSegment !== "annual" ||
-                      bugType !== "all" ||
-                      bugCategory !== "all" ? (
+                      {bugSegment !== "Combined" || bugState !== "all" ? (
                         <>
                           {" "}
-                          {bugSegment !== "annual" ? (
+                          {bugSegment !== "Combined" ? (
                             <>
                               <span className=" bg-gray-100 py-2 pl-3 rounded-md drop-shadow-md text-blue-500 font-medium font-mono text-base">
-                                {segmentFullNameMap.get(bugSegment)}{" "}
+                                {bugSegment}{" "}
                                 <CloseIcon
                                   style={{ marginRight: 10, fontSize: "0.8em" }}
                                   className="fill-gray-500 hover:fill-red-500 hover:cursor-pointer"
                                   onClick={() => {
-                                    selectBugSegment("annual");
+                                    selectBugSegment("Combined");
                                   }}
                                 />
                               </span>
@@ -1537,31 +1048,15 @@ const DevMetricsViewPage = (props) => {
                           ) : (
                             <></>
                           )}
-                          {bugType !== "all" ? (
+                          {bugState !== "all" ? (
                             <>
                               <span className=" bg-gray-100 py-2 pl-3 ml-3 rounded-md drop-shadow-md text-blue-500 font-medium font-mono text-base">
-                                {bugType}{" "}
+                                {bugState}{" "}
                                 <CloseIcon
                                   style={{ marginRight: 10, fontSize: "0.8em" }}
                                   className="fill-gray-500 hover:fill-red-500 hover:cursor-pointer"
                                   onClick={() => {
-                                    selectBugType("all");
-                                  }}
-                                />
-                              </span>
-                            </>
-                          ) : (
-                            <></>
-                          )}
-                          {bugCategory !== "all" ? (
-                            <>
-                              <span className=" bg-gray-100 py-2 pl-3 ml-3 rounded-md drop-shadow-md text-blue-500 font-medium font-mono text-base">
-                                {bugCategory}{" "}
-                                <CloseIcon
-                                  style={{ marginRight: 10, fontSize: "0.8em" }}
-                                  className="fill-gray-500 hover:fill-red-500 hover:cursor-pointer"
-                                  onClick={() => {
-                                    selectBugCategory("all");
+                                    selectBugState("all");
                                   }}
                                 />
                               </span>
@@ -1583,12 +1078,6 @@ const DevMetricsViewPage = (props) => {
                     </Typography>
                     {/* level 2 filter block */}
                     <div className="py-2">
-                      <SearchBar
-                        label={"Feature Found At"}
-                        data={foundAtSelectorData}
-                        value={featureFoundAt}
-                        selectOption={selectFeatureFoundAt}
-                      />
                       <SearchBar
                         label={"Feature Component"}
                         data={componentSelectorData}
@@ -1657,12 +1146,13 @@ const DevMetricsViewPage = (props) => {
                         </span>
                       </div>
                     </div>
-                    <DevMetricsTable
+                    <PrecommitsMetricsTable
                       userId={userId}
                       data={viewTableData}
                       sortViewTableAscending={sortViewTableAscending}
                       sortedFeature={sortedFeature}
-                      bugType={bugType}
+                      bugState={bugState}
+                      states={diffStates}
                       lowerIndex={(currentPage - 1) * 1000}
                       upperIndex={
                         currentPage * 1000 < viewTableData.length
@@ -1737,4 +1227,4 @@ const DevMetricsViewPage = (props) => {
   );
 };
 
-export default DevMetricsViewPage;
+export default PrecommitsMetricsViewPage;

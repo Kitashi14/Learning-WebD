@@ -1,4 +1,5 @@
 // demo feature table
+// not in use anymore
 const table = [
   {
     feature_reference: "IOSXE-2756",
