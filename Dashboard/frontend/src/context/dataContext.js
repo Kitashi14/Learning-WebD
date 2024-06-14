@@ -196,6 +196,7 @@ export const DataContextProvider = (props) => {
   const [precommits_states, setPrecommitsStates] = useState({
     bugSegment: "Combined",
     bugState: "all",
+    run_analysis: "all",
     sortedFeature: {
       feature: null,
       order: null,

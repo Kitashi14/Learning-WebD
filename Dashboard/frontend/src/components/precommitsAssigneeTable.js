@@ -13,7 +13,7 @@ const PrecommitsAssigneeTable = (props) => {
     <>
       <table className="w-fit  table-auto items-center text-center ">
         <caption className="caption-top font-bold pb-3">
-          Table for : {props.bugSegment}
+          Table for : {props.bugSegment}, Run Analysis ({props.bugRunAnalysis})
         </caption>
         <thead className="bg-blue-gray-50 ">
           <tr>
@@ -36,7 +36,7 @@ const PrecommitsAssigneeTable = (props) => {
                     key={e}
                     style={{
                       background:
-                        bugState === "all" || bugState === e ? "#B8F4D1" : "",
+                        bugState === "all" || bugState === e ? "#f5d0fe" : "",
                     }}
                     className="border-b border-r border-blue-gray-100 p-4"
                   >
@@ -54,7 +54,7 @@ const PrecommitsAssigneeTable = (props) => {
             <th
               key="Total"
               style={{
-                background: bugState === "all" ? "#B8F4D1" : "",
+                background: bugState === "all" ? "#f5d0fe" : "",
               }}
               className="border-b rounded-tr-lg border-blue-gray-100 p-4"
             >
@@ -97,7 +97,7 @@ const PrecommitsAssigneeTable = (props) => {
                   <td
                     style={{
                       background:
-                        bugState === "all" || bugState === c ? "#E3F7F6" : "",
+                        bugState === "all" || bugState === c ? "#fae8ff" : "",
                     }}
                     className="py-4 w-[200px] border-b border-r border-blue-gray-100"
                   >
@@ -116,7 +116,7 @@ const PrecommitsAssigneeTable = (props) => {
               ))}
               <td
                 style={{
-                  background: bugState === "all" ? "#E3F7F6" : "",
+                  background: bugState === "all" ? "#fae8ff" : "",
                 }}
                 className="py-4 w-[200px] border-b border-r border-blue-gray-100"
               >
@@ -150,7 +150,7 @@ const PrecommitsAssigneeTable = (props) => {
                   <td
                     style={{
                       background:
-                        bugState === "all" || bugState === c ? "#E3F7F6" : "",
+                        bugState === "all" || bugState === c ? "#fae8ff" : "",
                     }}
                     className="py-4 w-[200px] border-b border-r border-blue-gray-100"
                   >
@@ -166,7 +166,7 @@ const PrecommitsAssigneeTable = (props) => {
             })}
             <td
               style={{
-                background: bugState === "all" ? "#E3F7F6" : "",
+                background: bugState === "all" ? "#fae8ff" : "",
               }}
               className="py-4 w-[200px] border-b  border-r border-blue-gray-100"
             >
@@ -179,7 +179,7 @@ const PrecommitsAssigneeTable = (props) => {
           </tr>
         </tbody>
         <caption className="caption-bottom font-bold pt-3">
-          Table for : {props.bugSegment}
+          Table for : {props.bugSegment}, Run Analysis ({props.bugRunAnalysis})
         </caption>
       </table>
     </>

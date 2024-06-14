@@ -59,27 +59,59 @@ const Navbar = (props) => {
             >
               Active Releases
             </Nav.Item> */}
-            <Nav.Item
+            <Nav.Menu
               eventKey="4"
-              icon={<PeopleBranchIcon />}
-              style={
-                props.currentTab === "dev"
-                  ? { background: "#FAFAFA", color: "#2589F4" }
-                  : { background: "#3498FE" }
-              }
-              onClick={() => {
-                if (
-                  !location.pathname.includes(
-                    `/dev/view/${contextData.devMetrics_currentUser}`
-                  )
-                ) {
-                  contextData.setIsDevPageLoading(true);
-                  navigate(`/dev/view/${contextData.devMetrics_currentUser}`);
-                }
+              title="Dev Metrics"
+              style={{
+                background: "#FFFFFF",
               }}
+              icon={<PeopleBranchIcon />}
             >
-              Dev Metrics
-            </Nav.Item>
+              <Nav.Item
+                eventKey="4-1"
+                icon={<TableColumnIcon />}
+                style={
+                  props.currentTab === "dev"
+                    ? { background: "#FAFAFA", color: "#2589F4" }
+                    : { background: "#3498FE" }
+                }
+                onClick={() => {
+                  if (
+                    !location.pathname.includes(
+                      `/dev/view/${contextData.devMetrics_currentUser}`
+                    )
+                  ) {
+                    contextData.setIsDevPageLoading(true);
+                    navigate(`/dev/view/${contextData.devMetrics_currentUser}`);
+                  }
+                }}
+              >
+                Bugs
+              </Nav.Item>
+              <Nav.Item
+                eventKey="4-2"
+                icon={<TableColumnIcon />}
+                style={
+                  props.currentTab === "precommits"
+                    ? { background: "#FAFAFA", color: "#2589F4" }
+                    : { background: "#3498FE" }
+                }
+                onClick={() => {
+                  if (
+                    !location.pathname.includes(
+                      `/precommits/view/${contextData.precommits_currentUser}`
+                    )
+                  ) {
+                    contextData.setIsTeacatsPageLoading(true);
+                    navigate(
+                      `/precommits/view/${contextData.precommits_currentUser}`
+                    );
+                  }
+                }}
+              >
+                Precommits
+              </Nav.Item>
+            </Nav.Menu>
 
             <Nav.Menu
               eventKey="6"
@@ -90,7 +122,7 @@ const Navbar = (props) => {
               icon={<GearCircleIcon />}
             >
               <Nav.Item
-                eventKey="6-3"
+                eventKey="6-1"
                 icon={<TableColumnIcon />}
                 style={
                   props.currentTab === "testbugs"
@@ -113,7 +145,7 @@ const Navbar = (props) => {
                 Bugs
               </Nav.Item>
               <Nav.Item
-                eventKey="6-1"
+                eventKey="6-2"
                 icon={<TableColumnIcon />}
                 style={
                   props.currentTab === "autons"
@@ -134,7 +166,7 @@ const Navbar = (props) => {
                 Autons
               </Nav.Item>
               <Nav.Item
-                eventKey="6-2"
+                eventKey="6-3"
                 icon={<TableColumnIcon />}
                 style={
                   props.currentTab === "teacats"
@@ -155,29 +187,6 @@ const Navbar = (props) => {
                 }}
               >
                 Teacats
-              </Nav.Item>
-              <Nav.Item
-                eventKey="6-2"
-                icon={<TableColumnIcon />}
-                style={
-                  props.currentTab === "precommits"
-                    ? { background: "#FAFAFA", color: "#2589F4" }
-                    : { background: "#3498FE" }
-                }
-                onClick={() => {
-                  if (
-                    !location.pathname.includes(
-                      `/precommits/view/${contextData.precommits_currentUser}`
-                    )
-                  ) {
-                    contextData.setIsTeacatsPageLoading(true);
-                    navigate(
-                      `/precommits/view/${contextData.precommits_currentUser}`
-                    );
-                  }
-                }}
-              >
-                Precommits
               </Nav.Item>
             </Nav.Menu>
             <Nav.Item

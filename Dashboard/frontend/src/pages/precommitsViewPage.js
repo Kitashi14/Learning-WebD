@@ -17,6 +17,7 @@ import SearchBar from "../components/SearchBar";
 import PrecommitsMetricsStateRadio from "../components/precommitsStateRadio";
 import PrecommitsAssigneeTable from "../components/precommitsAssigneeTable";
 import PrecommitsMetricsTable from "../components/precommitsTable";
+import PrecommitsMetricsTypeRadio from "../components/precommitsTypeRadio";
 
 // dashboard view page for any user
 const PrecommitsMetricsViewPage = (props) => {
@@ -26,6 +27,7 @@ const PrecommitsMetricsViewPage = (props) => {
   // level 1 filters
   const bugSegment = contextData.precommits_states.bugSegment;
   const bugState = contextData.precommits_states.bugState;
+  const bugRunAnalysis = contextData.precommits_states.run_analysis;
   const tableOpen = contextData.precommits_states.tableOpen;
 
   // level 2 filters
@@ -50,9 +52,35 @@ const PrecommitsMetricsViewPage = (props) => {
   //pagenation
   const [currentPage, setCurrentPage] = useState(1);
 
-  const customSegmentDates = [];
+  const [diffStates, setDiffStates] = useState([]);
 
-  var currMonth;
+  const run_analysisTypes = [
+    "Xpresso",
+    "CRFT",
+    "Testbed",
+    "Script",
+    "DE-Image",
+    "Product-bug",
+    "Environment",
+    "Not Analysed",
+    "Not Needed"
+  ];
+
+  const stateColorMap = new Map([
+    ["FAILED", "#dc2626"],
+    ["PASSED", "#16a34a"],
+    ["ABORTED", "#E8FFFF"],
+    ["RUNNING", "#41AEA9"],
+    ["ERRORED", "#CF3A64"],
+    ["STOPPED", "#dc2626"],
+    ["NA", "#41AEA9"],
+    ["QUEUING", "#213E3B"],
+    ["QUEUED", "#d946ef"],
+    ["PREPARING", "#e879f9"],
+    ["AWAITING RESOURCES", "#f0abfc"],
+  ]);
+
+  const customSegmentDates = [];
 
   const setCustomSegmentDates = () => {
     const Months = [
@@ -92,7 +120,6 @@ const PrecommitsMetricsViewPage = (props) => {
           "01",
       },
     });
-    currMonth = Months[m - 1] + " (" + y + ")";
     m--;
     for (var i = 0; i < 11; i++) {
       var date = new Date(y, m, 0);
@@ -133,7 +160,8 @@ const PrecommitsMetricsViewPage = (props) => {
   setCustomSegmentDates();
 
   const [prevUser, setPrevUser] = useState(null);
-  const [prevType, setPrevType] = useState(null);
+  const [prevState, setPrevState] = useState(null);
+  const [prevRunAnalysis, setPrevRunAnalysis] = useState(null);
   const [segmentCount, setSegmentCount] = useState(new Map());
 
   const navigate = useNavigate(); //for navigating to different routes
@@ -171,6 +199,7 @@ const PrecommitsMetricsViewPage = (props) => {
       contextData.setPrecommitsStates({
         bugSegment: currentPrecommitsStatus.bugSegment,
         bugState: currentPrecommitsStatus.bugState,
+        run_analysis: currentPrecommitsStatus.run_analysis,
         sortedFeature: {
           feature,
           order,
@@ -207,7 +236,9 @@ const PrecommitsMetricsViewPage = (props) => {
         const segmentMap = new Map();
         const loadData = async (table, segment) => {
           let data = [];
-
+          table = table.filter(
+            (e) => bugRunAnalysis === e.run_analysis || bugRunAnalysis === "all"
+          );
           //condition check is a valid is selected
           if (userId === "all") {
             data = table;
@@ -280,6 +311,14 @@ const PrecommitsMetricsViewPage = (props) => {
             );
             if (segment === bugSegment) setAssigneeTableData(assigneeCountMap);
           }
+          if (segment === bugSegment) {
+            setDiffStates(
+              data
+                .map((elem) => elem.state)
+                .filter((x, i, a) => a.indexOf(x) === i)
+                .sort()
+            );
+          }
           //filtering data according to lvl 1 filters
           data = data.filter((elem) => {
             return bugState === elem.state || bugState === "all";
@@ -309,7 +348,7 @@ const PrecommitsMetricsViewPage = (props) => {
             contextData.setPrecommitsTable(responseData.data);
           } catch (err) {
             console.log(err);
-            alert("Can't fetch test metrics bug details at the moment");
+            alert("Can't fetch precommits bug details at the moment");
           }
         };
         //fetch table
@@ -319,7 +358,11 @@ const PrecommitsMetricsViewPage = (props) => {
         }
         var tableToUse;
         //segment will be selected
-        if (userId === prevUser && prevType === bugState) {
+        if (
+          userId === prevUser &&
+          prevState === bugState &&
+          prevRunAnalysis === bugRunAnalysis
+        ) {
           tableToUse = contextData.precommitsTable[bugSegment]
             ? contextData.precommitsTable[bugSegment].bugs
             : [];
@@ -342,12 +385,20 @@ const PrecommitsMetricsViewPage = (props) => {
       }
       if (contextData.isPrecommitsTableLoaded) {
         setPrevUser(userId);
-        setPrevType(bugState);
+        setPrevState(bugState);
+        setPrevRunAnalysis(bugRunAnalysis);
         contextData.setIsPrecommitsPageLoading(false);
       }
     },
     // eslint-disable-next-line
-    [userId, bugSegment, contextData.isPrecommitsTableLoaded, bugState] // dependency array
+    [
+      userId,
+      bugSegment,
+      contextData.isPrecommitsTableLoaded,
+      bugState,
+      bugRunAnalysis,
+      contextData.precommitsTable
+    ] // dependency array
   );
 
   //segment chart parameters
@@ -364,7 +415,6 @@ const PrecommitsMetricsViewPage = (props) => {
         segment === bugSegment
           ? {
               enabled: true,
-              color: "#16803C",
             }
           : {
               enabled: true,
@@ -374,14 +424,14 @@ const PrecommitsMetricsViewPage = (props) => {
   const segmentChartOptions = {
     chart: {
       type: "column",
-      height: userId === "all" ? 550 : 470,
+      height: userId === "all" ? 500 : 420,
       width: 1300,
     },
     title: {
       text: "Segment Chart",
     },
     // colors: ["#FFC300", "#EC610A", "#A40A3C", "#6B0848"],
-    colors: ["#16803C", "#41AEA9", "#213E3B", "#E8FFFF"],
+    colors: ["#a21caf", "#41AEA9", "#213E3B", "#E8FFFF"],
     plotOptions: {
       series: {
         allowPointSelect: true,
@@ -393,10 +443,9 @@ const PrecommitsMetricsViewPage = (props) => {
         },
         states: {
           select: {
-            colorIndex: "#D789D7",
-            color: "#6CE890",
+            color: "#e879f9",
             borderWidth: 0,
-            borderColor: "#6CE890",
+            borderColor: "#e879f9",
           },
         },
       },
@@ -404,7 +453,7 @@ const PrecommitsMetricsViewPage = (props) => {
     credits: {
       enabled: true,
       href: "#",
-      text: `For: State (${bugState})`,
+      text: `For: State (${bugState}), Run Analysis (${bugRunAnalysis})`,
       style: {
         fontSize: "15px",
       },
@@ -483,6 +532,7 @@ const PrecommitsMetricsViewPage = (props) => {
     chart: {
       type: "bar",
       height: 300,
+      width: bugState !== "all" || bugRunAnalysis !== "all" ? 600 : 400,
     },
     title: {
       text:
@@ -505,7 +555,7 @@ const PrecommitsMetricsViewPage = (props) => {
     credits: {
       enabled: true,
       href: "#",
-      text: `For: ${bugSegment}, State (${bugState})`,
+      text: `For: ${bugSegment}, State (${bugState}), Run Analysis (${bugRunAnalysis})`,
       style: {
         fontSize: "15px",
       },
@@ -532,11 +582,6 @@ const PrecommitsMetricsViewPage = (props) => {
   };
 
   //type chart parameters
-  var diffStates = contextData.precommitsTable[bugSegment]
-    ? contextData.precommitsTable[bugSegment].bugs
-        .map((elem) => elem.state)
-        .filter((x, i, a) => a.indexOf(x) === i).sort()
-    : [];
   const diffStateCount = diffStates.map((type) => {
     let count = 0;
     viewData.forEach((elem) => {
@@ -544,27 +589,17 @@ const PrecommitsMetricsViewPage = (props) => {
     });
     return { name: type, y: count, selected: false };
   });
-
+  diffStateCount.sort((a, b) => b.y - a.y);
   const stateChartOptions = {
     chart: {
       type: "pie",
       height: 300,
+      width: bugRunAnalysis !== "all" ? 600 : 400,
     },
     title: {
       text: "State Chart",
     },
-    colors: [
-      "#D789D7",
-      "#9D65C9",
-      "#5D54A4",
-      "#2A3D66",
-      "#A21CAF",
-      "#d946ef",
-      "#e879f9",
-      "#f0abfc",
-      "#d8b4fe",
-      "#6366f1",
-    ],
+    colors: diffStateCount.map((e) => stateColorMap.get(e.name)),
     plotOptions: {
       series: {
         allowPointSelect: true,
@@ -579,7 +614,7 @@ const PrecommitsMetricsViewPage = (props) => {
     credits: {
       enabled: true,
       href: "#",
-      text: `For: ${bugSegment}, State (${bugState})`,
+      text: `For: ${bugSegment}, State (${bugState}), Run Analysis (${bugRunAnalysis})`,
       style: {
         fontSize: "15px",
       },
@@ -646,7 +681,7 @@ const PrecommitsMetricsViewPage = (props) => {
     credits: {
       enabled: true,
       href: "#",
-      text: `For: ${bugSegment}, State (${bugState})`,
+      text: `For: ${bugSegment}, State (${bugState}), Run Analysis (${bugRunAnalysis})`,
       style: {
         fontSize: "15px",
       },
@@ -659,6 +694,66 @@ const PrecommitsMetricsViewPage = (props) => {
       {
         name: "No. of bugs",
         data: diffComponentCount,
+      },
+    ],
+  };
+  //run analysis chart parameters
+  const diffRunAnalysis = run_analysisTypes;
+
+  var diffRunAnalysisCount = diffRunAnalysis.map((run_analysis) => {
+    let count = 0;
+    viewData.forEach((elem) => {
+      if (elem.run_analysis === run_analysis) count++;
+    });
+    return { name: run_analysis, y: count };
+  });
+  diffRunAnalysisCount.sort((a, b) => b.y - a.y);
+  const runAnalysisChartOptions = {
+    chart: {
+      type: "pie",
+      height: 300,
+      width: bugState !== "all" ? 600 : 400,
+    },
+    title: {
+      text: "Run Analysis Chart",
+    },
+    colors:  ["#bbf7d0", "#86efac", "#4ade80", "#22c55e", "#16a34a",  "#84cc16","#065f46","#14b8a6", "#052e16"].reverse(),
+    // colors: ["#EC610A", "#A40A3C", "#6B0848", "#FFC300"],
+    // colors: ["#6366f1", "#41AEA9", "#213E3B", "#E8FFFF","#14b8a6"],
+    plotOptions: {
+      series: {
+        allowPointSelect: true,
+        cursor: "pointer",
+        dataLabels: {
+          enabled: true,
+          format: "<b>{point.name}</b><br>{point.percentage:.1f}",
+          distance: 20,
+        },
+        colorByPoint: true,
+      },
+    },
+    credits: {
+      enabled: true,
+      href: "#",
+      text: `For: ${bugSegment}, State (${bugState}), Run Analysis (${bugRunAnalysis})`,
+      style: {
+        fontSize: "15px",
+      },
+    },
+
+    xAxis: {
+      categories: diffRunAnalysis.map((elem) => ""),
+    },
+    series: [
+      {
+        name: "No. of bugs",
+        data: diffRunAnalysisCount,
+        innerSize: "50%",
+        events: {
+          click: (e) => {
+            selectRunAnalysis(e.point.name);
+          },
+        },
       },
     ],
   };
@@ -677,6 +772,7 @@ const PrecommitsMetricsViewPage = (props) => {
     contextData.setPrecommitsStates({
       bugSegment: currentPrecommitsStatus.bugSegment,
       bugState: type,
+      run_analysis: currentPrecommitsStatus.run_analysis,
       sortedFeature: currentPrecommitsStatus.sortedFeature,
       tableOpen: currentPrecommitsStatus.tableOpen,
     });
@@ -688,6 +784,7 @@ const PrecommitsMetricsViewPage = (props) => {
     contextData.setPrecommitsStates({
       bugSegment: currentPrecommitsStatus.bugSegment,
       bugState: currentPrecommitsStatus.bugState,
+      run_analysis: currentPrecommitsStatus.run_analysis,
       sortedFeature: currentPrecommitsStatus.sortedFeature,
       tableOpen: value,
     });
@@ -699,6 +796,19 @@ const PrecommitsMetricsViewPage = (props) => {
     contextData.setPrecommitsStates({
       bugSegment: segment,
       bugState: currentPrecommitsStatus.bugState,
+      run_analysis: currentPrecommitsStatus.run_analysis,
+      sortedFeature: currentPrecommitsStatus.sortedFeature,
+      tableOpen: currentPrecommitsStatus.tableOpen,
+    });
+  };
+
+  // filtering data according to run analysis type (lvl 1 filter)
+  const selectRunAnalysis = (type) => {
+    const currentPrecommitsStatus = contextData.precommits_states;
+    contextData.setPrecommitsStates({
+      bugSegment: currentPrecommitsStatus.bugSegment,
+      bugState: currentPrecommitsStatus.bugState,
+      run_analysis: type,
       sortedFeature: currentPrecommitsStatus.sortedFeature,
       tableOpen: currentPrecommitsStatus.tableOpen,
     });
@@ -738,7 +848,7 @@ const PrecommitsMetricsViewPage = (props) => {
             <div className="flex flex-row justify-center mb-[-20px]">
               {" "}
               <span className=" bg-blue-600 py-2 px-3 rounded-lg text-white font-bold text-lg">
-                Test Metrics: Bugs
+                Dev Metrics: Precommits
               </span>
             </div>
             <ProfileSearchBar
@@ -756,8 +866,8 @@ const PrecommitsMetricsViewPage = (props) => {
             {isUserValid ? (
               <>
                 {/* level 1 filter block */}
-                <div className=" flex flex-row justify-stretch">
-                  <div className="flex flex-col items-center px-3 rounded-lg space-y-3 bg-gray-50 drop-shadow-md border-blue-200 border-none border-[1px] border-solid py-2 w-fit m-auto ">
+                <div className=" flex flex-row justify-stretch ">
+                  <div className="flex flex-col min-w-[500px] items-center px-3 rounded-lg space-y-3 bg-gray-50 drop-shadow-md border-blue-200 border-none border-[1px] border-solid py-2 w-fit m-auto ">
                     <Card className="w-fit flex flex-row items-center px-3 py-3 ml-4">
                       View For :
                       <span className="text-base text-blue-500 font-bold pl-2">
@@ -779,15 +889,21 @@ const PrecommitsMetricsViewPage = (props) => {
                           style={{ width: 124 }}
                           placement="rightStart"
                           onChange={(e) => {
-                            selectBugSegment(e == null ? currMonth : e.name);
+                            selectBugSegment(e == null ? "Combined" : e.name);
                           }}
                           placeholder={bugSegment}
+                          value={bugSegment}
                         />
                       </div>
                       <PrecommitsMetricsStateRadio
                         value={bugState}
                         states={diffStates}
                         selectBugState={selectBugState}
+                      />
+                      <PrecommitsMetricsTypeRadio
+                        value={bugRunAnalysis}
+                        states={run_analysisTypes}
+                        selectBugState={selectRunAnalysis}
                       />
                     </div>
                     <Typography variant="h5" className="pl-4 text-center">
@@ -828,7 +944,7 @@ const PrecommitsMetricsViewPage = (props) => {
                 <div className="w-full flex flex-col space-y-4 px-0">
                   {/* level 1 charts */}
                   <div className="flex flex-col space-y-3 pt-3 items-center pt-1 pb-2 px-8 bg-blue-gray-200">
-                    <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-full font-bold text-lg text-green-800 ">
+                    <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-full font-bold text-lg text-[#a21caf] ">
                       {" "}
                       {contextData.precommitsTable[bugSegment]
                         ? contextData.precommitsTable[bugSegment]["lower limit"]
@@ -878,6 +994,7 @@ const PrecommitsMetricsViewPage = (props) => {
                         <>
                           <PrecommitsAssigneeTable
                             bugState={bugState}
+                            bugRunAnalysis={bugRunAnalysis}
                             tableData={assigneeTableData}
                             userId={userId}
                             bugSegment={bugSegment}
@@ -901,6 +1018,11 @@ const PrecommitsMetricsViewPage = (props) => {
                             states={diffStates}
                             selectBugState={selectBugState}
                           />
+                          <PrecommitsMetricsTypeRadio
+                            value={bugRunAnalysis}
+                            states={run_analysisTypes}
+                            selectBugState={selectRunAnalysis}
+                          />
                           <Typography
                             variant="medium"
                             className="pl-4 text-center"
@@ -915,6 +1037,18 @@ const PrecommitsMetricsViewPage = (props) => {
                     )}
 
                     <div className="w-full flex flex-row space-x-3 justify-evenly items-center pt-1 ">
+                      {bugState === "all" ? (
+                        <>
+                          <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit">
+                            <HighchartsReact
+                              highcharts={Highcharts}
+                              options={stateChartOptions}
+                            />
+                          </Card>
+                        </>
+                      ) : (
+                        <></>
+                      )}
                       {userId !== "all" ? (
                         <>
                           <Card className=" p-4  flex flex-col justify-center items-center hover:drop-shadow-xl w-fit ">
@@ -957,12 +1091,12 @@ const PrecommitsMetricsViewPage = (props) => {
                       ) : (
                         <></>
                       )}
-                      {bugState === "all" ? (
+                      {bugRunAnalysis === "all" ? (
                         <>
                           <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-fit">
                             <HighchartsReact
                               highcharts={Highcharts}
-                              options={stateChartOptions}
+                              options={runAnalysisChartOptions}
                             />
                           </Card>
                         </>
@@ -1006,7 +1140,7 @@ const PrecommitsMetricsViewPage = (props) => {
                       />
                     </Card>
 
-                    <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-full font-bold text-lg text-green-800 ">
+                    <Card className="p-4 flex flex-col justify-center items-center hover:drop-shadow-xl w-full font-bold text-lg text-[#a21caf] ">
                       {" "}
                       {contextData.precommitsTable[bugSegment]
                         ? contextData.precommitsTable[bugSegment]["lower limit"]
@@ -1029,7 +1163,9 @@ const PrecommitsMetricsViewPage = (props) => {
                           : "All"}
                       </span>
                       <br />
-                      {bugSegment !== "Combined" || bugState !== "all" ? (
+                      {bugSegment !== "Combined" ||
+                      bugState !== "all" ||
+                      bugRunAnalysis !== "all" ? (
                         <>
                           {" "}
                           {bugSegment !== "Combined" ? (
@@ -1057,6 +1193,22 @@ const PrecommitsMetricsViewPage = (props) => {
                                   className="fill-gray-500 hover:fill-red-500 hover:cursor-pointer"
                                   onClick={() => {
                                     selectBugState("all");
+                                  }}
+                                />
+                              </span>
+                            </>
+                          ) : (
+                            <></>
+                          )}
+                          {bugRunAnalysis !== "all" ? (
+                            <>
+                              <span className=" bg-gray-100 py-2 pl-3 ml-3 rounded-md drop-shadow-md text-blue-500 font-medium font-mono text-base">
+                                {bugRunAnalysis}{" "}
+                                <CloseIcon
+                                  style={{ marginRight: 10, fontSize: "0.8em" }}
+                                  className="fill-gray-500 hover:fill-red-500 hover:cursor-pointer"
+                                  onClick={() => {
+                                    selectRunAnalysis("all");
                                   }}
                                 />
                               </span>
@@ -1152,6 +1304,9 @@ const PrecommitsMetricsViewPage = (props) => {
                       sortViewTableAscending={sortViewTableAscending}
                       sortedFeature={sortedFeature}
                       bugState={bugState}
+                      run_analysisTypes={diffRunAnalysisCount.map(
+                        (e) => e.name
+                      )}
                       states={diffStates}
                       lowerIndex={(currentPage - 1) * 1000}
                       upperIndex={

@@ -7,14 +7,16 @@ import DataContext from "../context/dataContext";
 export default function PrecommitsMetricsTable(props) {
   const TABLE_HEAD = [
     "Bug ID",
+    "Script Name",
     "State",
     "Run On",
     "Request Link",
     "Manager",
     "Engineer",
-    "Component",
     "PR Link",
     "Analysis",
+    "Run Analysis",
+    "Component",
   ];
 
   const navigate = useNavigate();
@@ -25,39 +27,39 @@ export default function PrecommitsMetricsTable(props) {
   //table rows passed through props (viewTableData)
   const TABLE_ROWS = props.data;
   const typeColors = [
-    "#D789D7",
-    "#9D65C9",
-    "#5D54A4",
-    "#2A3D66",
-    "#A21CAF",
-    "#d946ef",
-    "#e879f9",
-    "#f0abfc",
-    "#d8b4fe",
-    "#6366f1",
+    "#bbf7d0",
+    "#86efac",
+    "#4ade80",
+    "#22c55e",
+    "#16a34a",
+    "#84cc16",
+    "#065f46",
+    "#14b8a6",
+    "#052e16",
+    "#bbf7d0",
+    "#86efac",
+    "#4ade80",
+    "#22c55e",
+    "#16a34a",
+    "#84cc16",
+    "#065f46",
+    "#14b8a6",
+    "#052e16",
   ];
-  const stateOrder = props.states;
-
-  const setAnalysisText = async (id, value) => {
-    try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/test/precommits`, {
-        method: "PATCH",
-        headers: {
-          "Content-type": "application/json",
-        },
-        body: JSON.stringify({
-          id,
-          value,
-        }),
-      });
-      if (response.status === 200)
-        contextData.setIsPrecommitsTableLoaded(false);
-      else throw Error("something went wrong");
-    } catch (err) {
-      console.log(err);
-      alert("Analysis update failed. Please try again later.");
-    }
-  };
+  typeColors.reverse();
+  const stateColorMap = new Map([
+    ["FAILED", "#dc2626"],
+    ["PASSED", "#16a34a"],
+    ["ABORTED", "#E8FFFF"],
+    ["RUNNING", "#41AEA9"],
+    ["ERRORED", "#CF3A64"],
+    ["STOPPED", "#dc2626"],
+    ["NA", "#41AEA9"],
+    ["QUEUING", "#213E3B"],
+    ["QUEUED", "#d946ef"],
+    ["PREPARING", "#e879f9"],
+    ["AWAITING RESOURCES", "#f0abfc"],
+  ]);
 
   //features with sorting option
   const featuresToSort = new Map([
@@ -68,11 +70,15 @@ export default function PrecommitsMetricsTable(props) {
     ["Engineer", "emp_id"],
     ["Manager", "mgr_id"],
     ["Component", "component"],
+    ["Run Analysis", "run_analysis"],
+    ["Script Name", "script_name"],
   ]);
 
-  //for navigating to different routes
+  const run_analysisTypes = props.run_analysisTypes;
+
+  //for adding assignee column
   if (props.userId !== "all") {
-    TABLE_HEAD.splice(4, 0, "Bug under");
+    TABLE_HEAD.splice(5, 0, "Bug under");
   }
 
   const Months = [
@@ -97,6 +103,47 @@ export default function PrecommitsMetricsTable(props) {
     const d = dt.getDate();
     return Months[m] + " " + d + ", " + y;
   };
+
+  const setAnalysisText = async (id, value, type, date) => {
+    const dt = new Date(date);
+    const month = Months[dt.getMonth()];
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_BACKEND_URL}/test/precommits`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-type": "application/json",
+          },
+          body: JSON.stringify({
+            id,
+            value,
+            type,
+          }),
+        }
+      );
+      if (response.status === 200) {
+        const currentPrecommitTable = JSON.parse(
+          JSON.stringify(contextData.precommitsTable)
+        );
+        currentPrecommitTable.Combined.bugs.forEach((e) => {
+          if (e.request_id === id) e[type] = value;
+        });
+        Object.keys(currentPrecommitTable).forEach((k) => {
+          if (k.includes(month)) {
+            currentPrecommitTable[k].bugs.forEach((e) => {
+              if (e.request_id === id) e[type] = value;
+            });
+          }
+        });
+        contextData.setPrecommitsTable(currentPrecommitTable);
+      } else throw Error("something went wrong");
+    } catch (err) {
+      console.log(err);
+      alert("Analysis update failed. Please try again later.");
+      contextData.setIsPrecommitsTableLoaded(false);
+    }
+  };
   return (
     <Card className=" w-full overflow-scroll">
       <table className="w-full min-w-max table-auto items-center text-center">
@@ -106,14 +153,23 @@ export default function PrecommitsMetricsTable(props) {
             {TABLE_HEAD.map((head) => (
               <th
                 key={head}
-                className="border-b border-blue-gray-100 bg-blue-gray-50 p-4"
+                className="border-b border-blue-gray-100 bg-blue-gray-50 p-3"
               >
                 <Typography
                   variant="small"
                   color="blue-gray"
                   className="font-normal flex flex-row justify-center items-center space-x-2 leading-none opacity-70"
                 >
-                  <span>{head}</span>
+                  <span className="flex flex-col">
+                    {head}
+                    {head === "Run Analysis" ? (
+                      <>
+                        <span className="mt-2">(click to edit)</span>
+                      </>
+                    ) : (
+                      <></>
+                    )}
+                  </span>
                   {/* adding sorting options to the elements present in featuresToSort map */}
                   {featuresToSort.has(head) ? (
                     props.sortedFeature.feature === featuresToSort.get(head) ? (
@@ -208,9 +264,12 @@ export default function PrecommitsMetricsTable(props) {
 
         <tbody>
           {/* table data rows */}
+          {/* {props.data.map(e=>{
+            return <>herer</>
+          })} */}
           {TABLE_ROWS.slice(props.lowerIndex, props.upperIndex).map((data) => (
             <tr
-              key={data.bug_id}
+              key={data.request_id}
               className="even:bg-blue-gray-100 hover:bg-blue-100"
             >
               <td className="p-4">
@@ -231,9 +290,18 @@ export default function PrecommitsMetricsTable(props) {
               <td className="p-4">
                 <Typography
                   variant="small"
+                  color="blue-gray"
+                  className="font-normal"
+                >
+                  {data.script_name}
+                </Typography>
+              </td>
+              <td className="p-4">
+                <Typography
+                  variant="small"
                   color="white"
                   style={{
-                    background: typeColors[stateOrder.indexOf(data.state)],
+                    background: stateColorMap.get(data.state),
                   }}
                   className={`font-normal rounded py-1 px-3`}
                 >
@@ -325,15 +393,6 @@ export default function PrecommitsMetricsTable(props) {
                 <Typography
                   variant="small"
                   color="blue-gray"
-                  className="font-normal"
-                >
-                  {data.component}
-                </Typography>
-              </td>
-              <td className="p-4">
-                <Typography
-                  variant="small"
-                  color="blue-gray"
                   className="font-normal hover:cursor-pointer underline text-blue-600"
                   onClick={() => {
                     window.open(data.pr_url, "blank");
@@ -342,27 +401,41 @@ export default function PrecommitsMetricsTable(props) {
                   <span title="open in jira">{data.pr_id}</span>
                 </Typography>
               </td>
-              <td
-                className="p-4 w-[250px] flex justify-center"
-                key={data.bug_id}
-              >
+              <td className="py-4 px-6 w-[450px]  justify-center">
                 {data.analysis &&
                 data.analysis.trim() !== "" &&
-                editId !== data.bug_id ? (
+                !(
+                  editId !== null &&
+                  editId.id === data.request_id &&
+                  editId.type === "analysis"
+                ) ? (
                   <>
                     <div className="flex flex-row space-x-2 items-center justify-center">
                       {" "}
                       <Typography
                         variant="small"
                         color="blue-gray"
-                        className="font-normal w-[150px]"
+                        className="font-normal w-[350px] break-words text-center"
                       >
                         {data.analysis}
                       </Typography>
                       <div
-                        className="bg-gradient-to-b from-orange-300 to-orange-700 rounded py-1 w-fit px-3 text-white hover:cursor-pointer shadow-md active:shadow-none select-none "
+                        className="bg-gradient-to-b from-blue-300 to-blue-400 rounded py-1 w-fit px-3 text-white hover:cursor-pointer shadow-md active:shadow-none select-none w-[50px]"
                         onClick={(e) => {
-                          setEditId(data.bug_id);
+                          if(editId && editId.type==="analysis"){
+                            const id = "input_"+ editId.id;
+                            const input = document.getElementById(id);
+
+                            TABLE_ROWS.forEach(e=>{
+                              if(e.request_id==editId.id){
+                                input.value = e.analysis && e.analysis.trim() !== ""
+                            ? e.analysis
+                            : "";
+                              }
+                            })
+                            
+                          }
+                          setEditId({ id: data.request_id, type: "analysis" });
                         }}
                       >
                         Edit
@@ -372,23 +445,26 @@ export default function PrecommitsMetricsTable(props) {
                 ) : (
                   <>
                     <form
-                      className="flex flex-row space-x-2"
+                      className="flex flex-row space-x-2 items-center justify-center"
                       onSubmit={(e) => {
                         e.preventDefault();
-                        const id = data.bug_id;
+                        const id = data.request_id;
                         const value = e.target[0].value.trim();
                         setEditId(null);
-                        if (value === "") return;
+
                         if (data.analysis && data.analysis.trim() !== "") {
                           if (data.analysis.trim() === value) return;
+                        } else {
+                          if (value === "") return;
                         }
-                        setAnalysisText(id, value);
+                        setAnalysisText(id, value, "analysis", data.run_on);
                       }}
                     >
                       {" "}
                       <input
-                        className="p-1 rounded border-blue-gray-300 text-center drop-shadow-md hover:drop-shadow-xl w-[150px]"
+                        className="p-1 rounded border-blue-gray-300 text-center drop-shadow-md hover:drop-shadow-xl w-[350px]"
                         type="text"
+                        id={"input_"+data.request_id}
                         defaultValue={
                           data.analysis && data.analysis.trim() !== ""
                             ? data.analysis
@@ -399,15 +475,119 @@ export default function PrecommitsMetricsTable(props) {
                             ? data.analysis
                             : "Enter text"
                         }
+                        onClick={() => {
+                          if(editId && editId.type==="analysis" && editId.id!==data.request_id){
+                            const id = "input_"+ editId.id;
+                            const input = document.getElementById(id);
+                            TABLE_ROWS.forEach(e=>{
+                              if(e.request_id==editId.id){
+                                input.value = e.analysis && e.analysis.trim() !== ""
+                            ? e.analysis
+                            : "";
+                              }
+                            })
+                          }
+                          setEditId({
+                            id: data.request_id,
+                            type: "analysis",
+                          });
+                        }}
                       />
                       <input
                         type="submit"
-                        className="bg-gradient-to-b from-green-300 to-green-600 rounded py-1 px-2 text-white hover:cursor-pointer shadow-md active:shadow-none select-none "
+                        className="bg-gradient-to-b from-blue-600 to-blue-800 rounded py-1 px-2 text-white hover:cursor-pointer shadow-md active:shadow-none select-none w-[50px]"
                         value="Save"
                       />
                     </form>
                   </>
                 )}
+              </td>
+              <td className="p-4 justify-center">
+                {!(
+                  editId !== null &&
+                  editId.id === data.request_id &&
+                  editId.type === "run_analysis"
+                ) ? (
+                  <>
+                    <div className="flex flex-row space-x-2 items-center justify-center">
+                      {" "}
+                      <Typography
+                        variant="small"
+                        color="white"
+                        style={{
+                          background:
+                            typeColors[
+                              run_analysisTypes.indexOf(data.run_analysis)
+                            ],
+                        }}
+                        onClick={(e) => {
+                          if(editId && editId.type==="analysis"){
+                            const id = "input_"+ editId.id;
+                            const input = document.getElementById(id);
+                            TABLE_ROWS.forEach(e=>{
+                              if(e.request_id==editId.id){
+                                input.value = e.analysis && e.analysis.trim() !== ""
+                            ? e.analysis
+                            : "";
+                              }
+                            })
+                          }
+                          setEditId({
+                            id: data.request_id,
+                            type: "run_analysis",
+                          });
+                        }}
+                        className={`font-normal w-[120px] hover:cursor-pointer rounded py-1 px-3`}
+                      >
+                        {data.run_analysis}
+                      </Typography>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <form
+                      className="flex flex-row space-x-2 items-center justify-center"
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        const id = data.request_id;
+                        const value = e.target[0].value;
+                        setEditId(null);
+
+                        if (data.run_analysis === value) return;
+                        setAnalysisText(id, value, "run_analysis", data.run_on);
+                      }}
+                    >
+                      {" "}
+                      <select
+                        defaultValue={data.run_analysis}
+                        className="w-[120px] text-center py-1 rounded border-[1px] border-blue-gray-600"
+                        
+                      >
+                        {run_analysisTypes.map((e) => {
+                          return (
+                            <>
+                              <option value={e}>{e}</option>
+                            </>
+                          );
+                        })}
+                      </select>
+                      <input
+                        type="submit"
+                        className="bg-gradient-to-b from-blue-600 to-blue-800 rounded py-1 px-2 text-white hover:cursor-pointer shadow-md active:shadow-none select-none w-[50px]"
+                        value="Save"
+                      />
+                    </form>
+                  </>
+                )}
+              </td>
+              <td className="p-4">
+                <Typography
+                  variant="small"
+                  color="blue-gray"
+                  className="font-normal"
+                >
+                  {data.component}
+                </Typography>
               </td>
             </tr>
           ))}
